@@ -82,8 +82,9 @@ production:
   adapter: postgresql
   database: <%= ENV['DB_DATABASE'] %>
   port: 5432
-  pool: 5
+  pool: 10
   timeout: 5000
   encoding: unicode
+  prepared_statements: false
 
 
