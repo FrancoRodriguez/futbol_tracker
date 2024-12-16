@@ -1,0 +1,27 @@
+<h2>Iniciar sesión</h2>
+
+<%= form_for(resource_name, url: session_path(resource_name)) do |f| %>
+  <% if @user && @user.errors.any? %>  <!-- Usa @user o el nombre de la instancia que usas -->
+    <div class="alert alert-danger">
+      <ul>
+        <% @user.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="form-group">
+    <%= f.label :email %>
+    <%= f.email_field :email, autofocus: true, class: 'form-control' %>
+  </div>
+
+  <div class="form-group">
+    <%= f.label :password %>
+    <%= f.password_field :password, class: 'form-control' %>
+  </div>
+
+  <div class="form-group">
+    <%= f.submit 'Iniciar sesión', class: 'btn btn-primary' %>
+  </div>
+<% end %>

@@ -1,0 +1,22 @@
+<h1>Editar Participación</h1>
+
+<%= form_for [@match, @participation] do |f| %>
+  <div class="form-group">
+    <%= f.label :goals, 'Goles' %>
+    <%= f.number_field :goals, class: 'form-control' %>
+  </div>
+
+  <div class="form-group">
+    <%= f.label :assists, 'Asistencias' %>
+    <%= f.number_field :assists, class: 'form-control' %>
+  </div>
+
+  <div class="form-group">
+    <%= f.label :player_id, "Equipo" %>
+    <%= f.collection_select :team_id, Team.all, { prompt: "Selecciona un equipo" }, { class: "form-control" } %>
+  </div>
+
+  <%= f.submit 'Guardar cambios', class: 'btn btn-primary' %>
+<% end %>
+
+<%= link_to 'Volver', match_path(@match), class: 'btn btn-secondary' %>

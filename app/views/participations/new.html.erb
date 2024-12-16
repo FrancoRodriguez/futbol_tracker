@@ -1,0 +1,34 @@
+<h1>Agregar Jugadores al Partido</h1>
+
+<%= form_with(model: @participation, url: match_participations_path(@match), local: true) do |f| %>
+  <% if @participation.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@participation.errors.count, "error") %> impidió agregar la participación:</h2>
+      <ul>
+        <% @participation.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="form-group">
+    <%= f.label :match_id, "Partido" %>
+    <p><%= @match.location %> - <%= @match.date.strftime("%d/%m/%Y %H:%M") %></p>
+    <%= f.hidden_field :match_id, value: @match.id %>
+  </div>
+
+  <div class="form-group">
+    <%= f.label :player_id, "Jugador" %>
+    <%= f.collection_select :player_id, Player.all, :id, :name, { prompt: "Selecciona un jugador" }, { class: "form-control" } %>
+  </div>
+
+  <div class="form-group">
+    <%= f.label :player_id, "Equipo" %>
+    <%= f.collection_select :team_id, Team.all, :id, :name, { prompt: "Selecciona un equipo" }, { class: "form-control" } %>
+  </div>
+
+  <div class="actions">
+    <%= f.submit "Agregar Participación", class: "btn btn-primary" %>
+  </div>
+<% end %>

@@ -1,0 +1,49 @@
+<h1>Jugadores</h1>
+
+<% if user_signed_in? %>
+  <%= link_to 'Nuevo Jugador', new_player_path, class: "btn btn-primary" %>
+<% end %>
+
+<table class="table">
+  <thead>
+  <tr>
+    <th>Nombre</th>
+    <th>Apodo</th>
+    <th>Contacto</th>
+    <th>WhatsApp</th>
+    <th>Partidos jugados</th>
+    <th>Goles</th>
+    <th>Asistencias</th>
+    <th>Rating total</th>
+    <th>Acciones</th>
+  </tr>
+  </thead>
+  <tbody>
+  <% @players.each do |player| %>
+    <tr>
+      <%= link_to player_path(player) do %>
+        <td><%= player.name %></td>
+        <td><%= player.nickname %></td>
+        <td><%= player.contact_info %></td>
+        <td>
+          <% if player.contact_info.present? %>
+            <%= link_to 'WhatsApp', "https://wa.me/#{player.contact_info.gsub(/\D/, '')}", target: "_blank", class: "btn btn-success" %>
+          <% else %>
+            <span>No disponible</span>
+          <% end %>
+        </td>
+        <td><%= player.participations.count %></td>
+        <td><%= player.participations.sum(:goals) %></td>
+        <td><%= player.participations.sum(:assists) %></td>
+        <td><%= player.rating %></td>
+      <% end %>
+      <td>
+        <% if user_signed_in? %>
+          <%= link_to 'Editar', edit_player_path(player), class: "btn btn-warning" %>
+          <%= button_to 'Eliminar', player_path(player), method: :delete, class: "btn btn-danger" %>
+        <% end %>
+      </td>
+    </tr>
+  <% end %>
+  </tbody>
+</table>

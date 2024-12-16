@@ -1,0 +1,44 @@
+<h1><%= @player.full_name %></h1>
+
+<p><strong>Información de contacto:</strong> <%= @player.contact_info %></p>
+<p><strong>Partidos jugados:</strong> <%= @player.participations.count %></p>
+<p><strong>Total de goles:</strong> <%= @player.participations.sum(:goals)%></p>
+
+<hr>
+
+<h2>Historial de Participaciones</h2>
+
+<% if @player.participations.any? %>
+  <table class="table">
+    <thead>
+    <tr>
+      <th>Partido</th>
+      <th>Fecha</th>
+      <th>Ubicación</th>
+      <th>Goles</th>
+      <th>Asistencias</th>
+      <th>Calificación</th>
+    </tr>
+    </thead>
+    <tbody>
+    <% @player.participations.includes(:match).each do |participation| %>
+      <tr>
+        <td><%= link_to "Partido ##{participation.match.id}", match_path(participation.match) %></td>
+        <td><%= participation.match.date %></td>
+        <td><%= participation.match.location %></td>
+        <td><%= participation.goals %></td>
+        <td><%= participation.assists %></td>
+        <td><%= participation.rating %></td>
+      </tr>
+    <% end %>
+    </tbody>
+  </table>
+<% else %>
+  <p>Este jugador aún no ha participado en ningún partido.</p>
+<% end %>
+
+<hr>
+
+<%= link_to 'Editar Jugador', edit_player_path(@player), class: 'btn btn-primary' %> |
+<%= link_to 'Eliminar Jugador', player_path(@player), method: :delete, data: { confirm: '¿Estás seguro de que deseas eliminar este jugador?' }, class: 'btn btn-danger' %> |
+<%= link_to 'Volver a la lista de jugadores', players_path, class: 'btn btn-secondary' %>

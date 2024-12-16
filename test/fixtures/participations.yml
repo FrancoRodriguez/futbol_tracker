@@ -1,0 +1,15 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  player: one
+  match: one
+  goals: 1
+  assists: 1
+  rating: 9.99
+
+two:
+  player: two
+  match: two
+  goals: 1
+  assists: 1
+  rating: 9.99
