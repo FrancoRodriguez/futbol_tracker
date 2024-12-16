@@ -6,11 +6,9 @@ Rails.application.routes.draw do
   end
 
   resources :players
-  resources :participations, only: [:destroy]
-  resources :matches do
-    resources :participations, only: [:new, :create, :edit, :update]
-  end
   resources :teams, only: [:index]
+
+  resources :participations, only: [:destroy]
 
   root 'matches#index'
 end
