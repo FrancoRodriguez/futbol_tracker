@@ -1,8 +1,6 @@
 <h1>Jugadores</h1>
 
-<% if user_signed_in? %>
-  <%= link_to 'Nuevo Jugador', new_player_path, class: "btn btn-primary" %>
-<% end %>
+<%= link_to 'Nuevo Jugador', new_player_path, class: "btn btn-primary" %>
 
 <table class="table">
   <thead>
@@ -15,7 +13,9 @@
     <th>Goles</th>
     <th>Asistencias</th>
     <th>Rating total</th>
-    <th>Acciones</th>
+    <% if user_signed_in? %>
+      <th>Acciones</th>
+    <% end %>
   </tr>
   </thead>
   <tbody>
