@@ -80,12 +80,10 @@ test:
 #
 production:
   adapter: postgresql
-  host: <%= ENV['DB_HOST'] %>
-  username: <%= ENV['DB_USERNAME'] %>
-  password: <%= ENV['DB_PASSWORD'] %>
   database: <%= ENV['DB_DATABASE'] %>
   port: 5432
   pool: 5
   timeout: 5000
+  encoding: unicode
 
 
