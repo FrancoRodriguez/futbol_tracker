@@ -12,8 +12,9 @@
     <thead>
     <tr>
       <th><i class="fas fa-signal"></i> Partidos Jugados</th>
-      <th><i class="fas fa-futbol"></i> Total de Goles</th>
-      <th><i class="fas fa-shoe-prints"></i> Total de Asistencias</th>
+      <th><i class="fas fa-futbol"></i> Goles</th>
+      <th><i class="fas fa-shoe-prints"></i> Asistencias</th>
+      <th><i class="fas fa-star"></i> Calificación</th>
     </tr>
     </thead>
     <tbody>
@@ -21,6 +22,7 @@
       <td><%= @player.participations.count %></td>
       <td><%= @player.participations.sum(:goals) %></td>
       <td><%= @player.participations.sum(:assists) %></td>
+      <td><%= @player.rating %></td>
     </tr>
     </tbody>
   </table>
