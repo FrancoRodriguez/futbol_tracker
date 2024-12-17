@@ -1,6 +1,7 @@
 class ParticipationsController < ApplicationController
   before_action :set_match
   before_action :set_participation, only: [:edit, :update, :destroy]
+  before_action :available_players, only: [:new]
 
   def new
     @participation = Participation.new
@@ -39,6 +40,11 @@ class ParticipationsController < ApplicationController
 
   def set_participation
     @participation = Participation.find(params[:id])
+  end
+
+  def available_players
+    @available_players = Player.where.not(id: Participation.where(match_id: @match.id)
+                                                           .select(:player_id))
   end
 
   def participation_params

@@ -14,18 +14,21 @@
 
   <div class="form-group">
     <%= f.label :match_id, "Partido" %>
-    <p><%= @match.location %> - <%= @match.date.strftime("%d/%m/%Y %H:%M") %></p>
+    <p><%= @match.location %> - <%= date_in_spanish(@match.date) %></p>
     <%= f.hidden_field :match_id, value: @match.id %>
   </div>
 
-  <div class="form-group">
-    <%= f.label :player_id, "Jugador" %>
-    <%= f.collection_select :player_id, Player.all, :id, :name, { prompt: "Selecciona un jugador" }, { class: "form-control" } %>
-  </div>
+  <div class="row">
+    <div class="col-md-6 mb-3">
+      <%= f.label :player_id, "Jugador" %>
+      <%= f.collection_select :player_id, @available_players, :id, :name, { prompt: "Selecciona un jugador" }, { class: "form-control" } %>
+      <div id="emailHelp" class="form-text">Si el jugador no se encuentra en la lista debe ser porque ya está inscripto en el partido.</div>
+    </div>
 
-  <div class="form-group">
-    <%= f.label :player_id, "Equipo" %>
-    <%= f.collection_select :team_id, Team.all, :id, :name, { prompt: "Selecciona un equipo" }, { class: "form-control" } %>
+    <div class="col-md-6 mb-3">
+      <%= f.label :team_id, "Equipo" %>
+      <%= f.collection_select :team_id, Team.all, :id, :name, { prompt: "Selecciona un equipo" }, { class: "form-control" } %>
+    </div>
   </div>
 
   <div class="actions">

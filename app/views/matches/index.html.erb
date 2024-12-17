@@ -15,7 +15,7 @@
   <tbody>
   <% @matches.each do |match| %>
     <tr>
-      <td><%= match.date %></td>
+      <td><%= date_in_spanish(match.date) %></td>
       <td><%= match.location %></td>
       <% if match.result.present? %>
         <td><%= match.result %></td>
