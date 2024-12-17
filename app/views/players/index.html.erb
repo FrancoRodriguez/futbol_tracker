@@ -21,8 +21,7 @@
   <tbody>
   <% @players.each do |player| %>
     <tr>
-      <%= link_to player_path(player) do %>
-        <td><%= player.name %></td>
+        <td><%= link_to player_path(player) do %><%= player.name %><% end %></td>
         <td><%= player.nickname %></td>
         <td><%= player.contact_info %></td>
         <td>
@@ -36,7 +35,6 @@
         <td><%= player.participations.sum(:goals) %></td>
         <td><%= player.participations.sum(:assists) %></td>
         <td><%= player.rating %></td>
-      <% end %>
       <td>
         <% if user_signed_in? %>
           <%= link_to 'Editar', edit_player_path(player), class: "btn btn-warning" %>

@@ -38,7 +38,7 @@
 <% end %>
 
 <hr>
-
-<%= link_to 'Editar Jugador', edit_player_path(@player), class: 'btn btn-primary' %> |
-<%= link_to 'Eliminar Jugador', player_path(@player), method: :delete, data: { confirm: '¿Estás seguro de que deseas eliminar este jugador?' }, class: 'btn btn-danger' %> |
-<%= link_to 'Volver a la lista de jugadores', players_path, class: 'btn btn-secondary' %>
+<% if user_signed_in? %>
+  <%= link_to 'Editar Jugador', edit_player_path(@player), class: 'btn btn-primary' %> |
+  <%= link_to 'Eliminar Jugador', player_path(@player), method: :delete, data: { confirm: '¿Estás seguro de que deseas eliminar este jugador?' }, class: 'btn btn-danger' %> |
+<% end %>
