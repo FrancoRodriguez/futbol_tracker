@@ -13,7 +13,7 @@
 
   <div class="form-group">
     <%= f.label :player_id, "Equipo" %>
-    <%= f.collection_select :team_id, Team.all, { prompt: "Selecciona un equipo" }, { class: "form-control" } %>
+    <%= f.collection_select :team_id, Team.all, :id, :name, { prompt: "Selecciona un equipo" }, { class: "form-control" } %>
   </div>
 
   <%= f.submit 'Guardar cambios', class: 'btn btn-primary' %>

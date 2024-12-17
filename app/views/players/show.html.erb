@@ -1,4 +1,7 @@
 <h1><%= @player.full_name %></h1>
+<% if user_signed_in? %>
+  <%= link_to 'Editar Jugador', edit_player_path(@player), class: 'btn btn-primary' %>
+<% end %>
 
 <p><strong>Información de contacto:</strong> <%= @player.contact_info %></p>
 <p><strong>Partidos jugados:</strong> <%= @player.participations.count %></p>
@@ -35,10 +38,4 @@
   </table>
 <% else %>
   <p>Este jugador aún no ha participado en ningún partido.</p>
-<% end %>
-
-<hr>
-<% if user_signed_in? %>
-  <%= link_to 'Editar Jugador', edit_player_path(@player), class: 'btn btn-primary' %> |
-  <%= link_to 'Eliminar Jugador', player_path(@player), method: :delete, data: { confirm: '¿Estás seguro de que deseas eliminar este jugador?' }, class: 'btn btn-danger' %> |
 <% end %>
