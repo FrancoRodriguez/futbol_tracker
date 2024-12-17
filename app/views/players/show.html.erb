@@ -16,18 +16,16 @@
     <thead>
     <tr>
       <th>Partido</th>
-      <th>Fecha</th>
       <th>Ubicación</th>
-      <th>Goles</th>
-      <th>Asistencias</th>
-      <th>Calificación</th>
+      <th><i class="fas fa-futbol"></i></th>
+      <th><i class="fas fa-shoe-prints"></i></th>
+      <th><i class="fas fa-star"></i></th>
     </tr>
     </thead>
     <tbody>
     <% @player.participations.includes(:match).each do |participation| %>
       <tr>
-        <td><%= link_to "Partido ##{participation.match.id}", match_path(participation.match) %></td>
-        <td><%= participation.match.date %></td>
+        <td><%= link_to "Partido #{participation.match.date}", match_path(participation.match) %></td>
         <td><%= participation.match.location %></td>
         <td><%= participation.goals %></td>
         <td><%= participation.assists %></td>
