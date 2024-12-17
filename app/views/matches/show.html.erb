@@ -11,7 +11,7 @@
           Agregar resultado
         </button>
       <% else %>
-        Resultaldo no subido
+        Resultado no subido
       <% end %>
     </td>
   <% end %>
@@ -41,39 +41,41 @@
 </div>
 
 <h2>Participaciones</h2>
-<%= link_to 'Añadir Participación', new_match_participation_path(@match) %>
-<table class="table">
-  <thead>
-  <tr>
-    <th>Imagen</th>
-    <th>Jugador</th>
-    <th>Goles</th>
-    <th>Asistencias</th>
-    <th>Calificación</th>
-    <th>Equipo</th>
-    <% if user_signed_in? %>
-      <th>Acciones</th>
-    <% end %>
-  </tr>
-  </thead>
-  <tbody>
-  <% @participations.each do |participation| %>
-    <tr>
-      <td>
-        <%= image_tag('default-profile.png', alt: 'Imagen de perfil', class: 'img-fluid', width: 50, height: 50) %>
-      </td>
-      <td><%= link_to player_path(participation.player) do %><%= participation.player.full_name %><% end %></td>
-      <td><%= participation.goals %></td>
-      <td><%= participation.assists %></td>
-      <td><%= participation.rating %></td>
-      <td><%= participation.team.name %></td>
-      <td>
-        <% if user_signed_in? %>
-          <%= link_to 'Editar', edit_match_participation_path(@match, participation), class: 'btn btn-warning' %>
-          <%= button_to 'Eliminar', match_participation_path(@match, participation), method: :delete, data: { confirm: '¿Estás seguro?' }, class: 'btn btn-danger' %>
+<%= link_to 'Añadir Participación', new_match_participation_path(@match), class: 'btn btn-primary mb-3' %>
+
+<div class="row">
+  <% @teams.each do |team| %>
+    <div class="col-lg-6 col-12 mb-4">
+      <h3>Equipo: <%= team.name %> ( <%= @participations.where(team: team).count %> )</h3>
+      <table class="table">
+        <thead>
+        <tr>
+          <th>Jugador</th>
+          <th>Goles</th>
+          <th>Asistencias</th>
+          <th>Calificación</th>
+          <% if user_signed_in? %>
+            <th>Acciones</th>
+          <% end %>
+        </tr>
+        </thead>
+        <tbody>
+        <% @participations.where(team: team).each do |participation| %>
+          <tr>
+            <td><%= link_to player_path(participation.player) do %><%= participation.player.full_name %><% end %></td>
+            <td><%= participation.goals %></td>
+            <td><%= participation.assists %></td>
+            <td><%= participation.rating %></td>
+            <% if user_signed_in? %>
+              <td>
+                <%= link_to 'Editar', edit_match_participation_path(@match, participation), class: 'btn btn-warning' %>
+                <%= button_to 'Eliminar', match_participation_path(@match, participation), method: :delete, data: { confirm: '¿Estás seguro?' }, class: 'btn btn-danger' %>
+              </td>
+            <% end %>
+          </tr>
         <% end %>
-      </td>
-    </tr>
+        </tbody>
+      </table>
+    </div>
   <% end %>
-  </tbody>
-</table>
+</div>

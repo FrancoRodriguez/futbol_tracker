@@ -1,5 +1,6 @@
 class MatchesController < ApplicationController
   before_action :set_match, only: [:show, :edit, :update, :destroy]
+  before_action :set_teams, only: [:show]
 
   def index
     @matches = Match.all
@@ -42,6 +43,10 @@ class MatchesController < ApplicationController
 
   def set_match
     @match = Match.find(params[:id])
+  end
+
+  def set_teams
+    @teams = @match.participations.includes(:player).map(&:team).uniq
   end
 
   def match_params
