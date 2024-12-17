@@ -1,5 +1,7 @@
 <h1>Partidos</h1>
-<%= link_to 'Nuevo Partido', new_match_path, class: "btn btn-primary" %>
+<% if user_signed_in? %>
+  <%= link_to 'Nuevo Partido', new_match_path, class: "btn btn-primary" %>
+<%end %>
 
 <table class="table">
   <thead>
