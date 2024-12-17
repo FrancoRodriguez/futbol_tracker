@@ -3,16 +3,36 @@
   <%= link_to 'Editar Jugador', edit_player_path(@player), class: 'btn btn-primary' %>
 <% end %>
 
+<hr>
+
 <p><strong>Información de contacto:</strong> <%= @player.contact_info %></p>
-<p><strong>Partidos jugados:</strong> <%= @player.participations.count %></p>
-<p><strong>Total de goles:</strong> <%= @player.participations.sum(:goals)%></p>
+
+<div class="table-responsive">
+  <table class="table table-bordered text-center">
+    <thead>
+    <tr>
+      <th><i class="fas fa-signal"></i> Partidos Jugados</th>
+      <th><i class="fas fa-futbol"></i> Total de Goles</th>
+      <th><i class="fas fa-shoe-prints"></i> Total de Asistencias</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+      <td><%= @player.participations.count %></td>
+      <td><%= @player.participations.sum(:goals) %></td>
+      <td><%= @player.participations.sum(:assists) %></td>
+    </tr>
+    </tbody>
+  </table>
+</div>
 
 <hr>
 
 <h2>Historial de Participaciones</h2>
 
 <% if @player.participations.any? %>
-  <table class="table">
+  <div class="table-responsive">
+    <table class="table">
     <thead>
     <tr>
       <th>Partido</th>
@@ -34,6 +54,7 @@
     <% end %>
     </tbody>
   </table>
+  </div>
 <% else %>
   <p>Este jugador aún no ha participado en ningún partido.</p>
 <% end %>

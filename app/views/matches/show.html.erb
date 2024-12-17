@@ -47,7 +47,8 @@
   <% @teams.each do |team| %>
     <div class="col-lg-6 col-12 mb-4">
       <h3>Equipo: <%= team.name %> ( <%= @participations.where(team: team).count %> )</h3>
-      <table class="table">
+      <div class="table-responsive">
+        <table class="table">
         <thead>
         <tr>
           <th><i class="fas fa-user"></i> Jugador</th>
@@ -76,6 +77,7 @@
         <% end %>
         </tbody>
       </table>
+      </div>
     </div>
   <% end %>
 </div>
