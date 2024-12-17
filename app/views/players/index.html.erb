@@ -9,7 +9,6 @@
     <th>Nombre</th>
     <th class="text-center">Apodo</th>
     <th class="text-center">Contacto</th>
-    <th class="text-center">WhatsApp</th>
     <th class="text-center">Partidos jugados</th>
     <th><i class="fas fa-futbol"></i></th>
     <th><i class="fas fa-shoe-prints"></i></th>
@@ -24,7 +23,6 @@
     <tr>
         <td><%= link_to player_path(player) do %><%= player.name %><% end %></td>
         <td class="text-center"><%= player.nickname %></td>
-        <td class="text-center"><%= player.contact_info %></td>
         <td class="text-center">
           <% if player.contact_info.present? %>
             <%= link_to 'WhatsApp', "https://wa.me/#{player.contact_info.gsub(/\D/, '')}", target: "_blank", class: "btn btn-success" %>
