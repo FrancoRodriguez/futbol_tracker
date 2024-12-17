@@ -38,6 +38,22 @@ class PlayersController < ApplicationController
     redirect_to players_path, notice: "Jugador #{full_name} eliminado exitosamente."
   end
 
+  def goal_scorers
+    @goal_scorers = Participation
+                      .select('players.id AS player_id, players.name, SUM(participations.goals) AS total_goals')
+                      .joins(:player)
+                      .group('players.id, players.name')
+                      .order('total_goals DESC')
+  end
+
+  def assist_scorers
+    @assist_scorers = Participation
+                        .select('players.id AS player_id, players.name, SUM(participations.assists) AS total_assists')
+                        .joins(:player)
+                        .group('players.id')
+                        .order('total_assists DESC')
+  end
+
   private
 
   def set_player

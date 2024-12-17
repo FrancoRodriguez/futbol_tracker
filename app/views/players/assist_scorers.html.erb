@@ -1,0 +1,19 @@
+<h1>Tabla de Asistencias</h1>
+<div class="table-responsive">
+  <table class="table table-striped">
+    <thead>
+    <tr>
+      <th>Jugador</th>
+      <th>Asistencias</th>
+    </tr>
+    </thead>
+    <tbody>
+    <% @assist_scorers.each do |assist_scorer| %>
+      <tr>
+        <td><%= link_to assist_scorer.player.name, player_path(assist_scorer.player) %></td>
+        <td><%= assist_scorer.total_assists %></td>
+      </tr>
+    <% end %>
+    </tbody>
+  </table>
+</div>

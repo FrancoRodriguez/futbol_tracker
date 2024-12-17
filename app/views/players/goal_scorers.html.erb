@@ -1,0 +1,19 @@
+<h1>Tabla de Goleadores</h1>
+<div class="table-responsive">
+  <table class="table table-striped">
+    <thead>
+    <tr>
+      <th>Jugador</th>
+      <th>Goles</th>
+    </tr>
+    </thead>
+    <tbody>
+    <% @goal_scorers.each do |goal_scorer| %>
+      <tr>
+        <td><%= link_to goal_scorer.player.name, player_path(goal_scorer.player) %></td>
+        <td><%= goal_scorer.total_goals %></td>
+      </tr>
+    <% end %>
+    </tbody>
+  </table>
+</div>
