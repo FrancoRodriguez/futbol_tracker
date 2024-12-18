@@ -47,12 +47,10 @@
   </div>
 </div>
 
-<hr>
-
-<!-- Historial de Participaciones -->
-<h2 class="mb-4">Historial de Participaciones</h2>
-
 <% if @player.participations.any? %>
+  <div class="card shadow-sm mb-4">
+    <div class="card-body">
+      <h5 class="card-title">Historial de Participaciones</h5>
   <div class="table-responsive">
     <table class="table table-hover">
       <thead class="table-dark">
@@ -82,3 +80,5 @@
     Este jugador aún no ha participado en ningún partido.
   </div>
 <% end %>
+</div>
+</div>
