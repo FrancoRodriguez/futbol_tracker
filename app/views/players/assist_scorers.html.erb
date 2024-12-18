@@ -10,7 +10,7 @@
     </thead>
     <tbody>
     <% @assist_scorers.each_with_index do |assist_scorer, index| %>
-      <tr class="<%= 'top-assister' if index < 3 %>">
+      <tr class="<%= 'top-scorer' if index < 3 %>">
         <td class="text-center">
           <% if index == 0 %>
             <span class="badge bg-gold text-dark p-2"><%= index + 1 %></span>
