@@ -13,13 +13,12 @@
 
   <%= yield :head %>
 
-  <link rel="manifest" href="/manifest.json">
   <link rel="icon" href="/icon.png" type="image/png">
   <link rel="icon" href="/icon.svg" type="image/svg+xml">
-  <link rel="apple-touch-icon" href="/icon.png">
+  <meta name="mobile-web-app-capable" content="yes">
 
+  <%= stylesheet_link_tag "application", media: "all" %>
   <%= stylesheet_link_tag "futbol", "data-turbo-track": "reload" %>
-  <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
 
   <%= javascript_importmap_tags %>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -28,12 +27,116 @@
 
 <body>
   <%= render 'layouts/navbar' %>
-  <div class="container">
+  <div class="container mt-4">
     <%= render 'layouts/errors' %>
     <%= yield %>
   </div>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>
+
+<style>
+    /* Colores de fondo */
+    .bg-primary {
+        background-color: #5c92d1 !important;
+    }
+    .bg-success {
+        background-color: #28a745 !important;
+    }
+    .bg-warning {
+        background-color: #ffc107 !important;
+    }
+    .bg-danger {
+        background-color: #dc3545 !important;
+    }
+
+    /* Colores de texto */
+    .text-primary {
+        color: #5c92d1 !important;
+    }
+    .text-success {
+        color: #28a745 !important;
+    }
+    .text-warning {
+        color: #ffc107 !important;
+    }
+    .text-danger {
+        color: #dc3545 !important;
+    }
+
+    /* Colores de bordes */
+    .border-primary {
+        border-color: #5c92d1 !important;
+    }
+    .border-success {
+        border-color: #28a745 !important;
+    }
+
+    /* Botones */
+    .btn-primary {
+        background-color: #5c92d1;
+        border-color: #5c92d1;
+    }
+    .btn-success {
+        background-color: #28a745;
+        border-color: #28a745;
+    }
+    .btn-warning {
+        background-color: #ffc107;
+        border-color: #ffc107;
+    }
+    .btn-danger {
+        background-color: #dc3545;
+        border-color: #dc3545;
+    }
+
+    /* Estilo para la columna de índices */
+    .index-column {
+        width: 60px;
+        text-align: center;
+    }
+
+    /* Colores de las medallas */
+    .bg-gold {
+        background-color: #ffd700;
+    }
+    .bg-silver {
+        background-color: #c0c0c0;
+    }
+    .bg-bronze {
+        background-color: #cd7f32;
+    }
+
+    /* Resaltar a los goleadores en el top 3 */
+    .top-scorer {
+        background-color: #f8f9fa;
+        font-weight: bold;
+    }
+
+    /* Diseño general de la tabla */
+    .table {
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: #f1f1f1;
+    }
+
+    .shadow-lg {
+        box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Encabezado oscuro */
+    .table-dark {
+        background-color: #343a40;
+        color: #fff;
+    }
+    .team-name:hover {
+        color: #17a2b8; /* Color al pasar el ratón */
+        text-decoration: underline;
+    }
+
+</style>
 </body>
 </html>

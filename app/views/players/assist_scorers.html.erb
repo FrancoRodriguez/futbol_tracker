@@ -1,17 +1,31 @@
-<h1>Tabla de Asistencias</h1>
-<div class="table-responsive">
-  <table class="table table-striped">
-    <thead>
+<h1 class="text-center mb-4">🎯 Tabla de Asistencias 🎯</h1>
+<div class="table-responsive shadow-lg p-4 rounded bg-light"> <!-- Cambié "shadow" por "shadow-lg" -->
+  <table class="table table-hover align-middle">
+    <thead class="table-dark text-center">
     <tr>
+      <th class="index-column">#</th>
       <th>Jugador</th>
       <th>Asistencias</th>
     </tr>
     </thead>
     <tbody>
-    <% @assist_scorers.each do |assist_scorer| %>
-      <tr>
-        <td><%= link_to assist_scorer.player.name, player_path(assist_scorer.player) %></td>
-        <td><%= assist_scorer.total_assists %></td>
+    <% @assist_scorers.each_with_index do |assist_scorer, index| %>
+      <tr class="<%= 'top-assister' if index < 3 %>">
+        <td class="text-center">
+          <% if index == 0 %>
+            <span class="badge bg-gold text-dark p-2"><%= index + 1 %></span>
+          <% elsif index == 1 %>
+            <span class="badge bg-silver text-dark p-2"><%= index + 1 %></span>
+          <% elsif index == 2 %>
+            <span class="badge bg-bronze text-dark p-2"><%= index + 1 %></span>
+          <% else %>
+            <span class="badge bg-secondary p-2"><%= index + 1 %></span>
+          <% end %>
+        </td>
+        <td class="text-center">
+          <%= link_to assist_scorer.player.name, player_path(assist_scorer.player), class: "text-decoration-none text-dark" %>
+        </td>
+        <td class="text-center text-primary fw-bold"><%= assist_scorer.total_assists %></td>
       </tr>
     <% end %>
     </tbody>

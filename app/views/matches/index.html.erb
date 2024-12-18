@@ -1,68 +1,73 @@
-<h1>Partidos</h1>
+<h1 class="text-center mb-4">⚽ Partidos ⚽</h1>
+
 <% if user_signed_in? %>
-  <%= link_to 'Nuevo Partido', new_match_path, class: "btn btn-primary" %>
-<%end %>
+  <%= link_to 'Nuevo Partido', new_match_path, class: "btn btn-primary mb-3" %>
+<% end %>
 
 <div class="table-responsive">
-  <table class="table">
-  <thead>
-  <tr>
-    <th>Fecha</th>
-    <th>Ubicación</th>
-    <th>Resultado</th>
-    <th>Acciones</th>
-  </tr>
-  </thead>
-  <tbody>
-  <% @matches.each do |match| %>
+  <table class="table table-hover align-middle">
+    <thead class="table-dark text-center">
     <tr>
-      <td><%= date_in_spanish(match.date) %></td>
-      <td><%= match.location %></td>
-      <% if match.result.present? %>
-        <td><%= match.result %></td>
-      <% else %>
-        <td>
+      <th>Fecha</th>
+      <th>Ubicación</th>
+      <th>Resultado</th>
+      <th>Acciones</th>
+    </tr>
+    </thead>
+    <tbody>
+    <% @matches.each do |match| %>
+      <tr>
+        <td class="text-center"><%= date_in_spanish(match.date) %></td>
+        <td><%= match.location %></td>
+
+        <% if match.result.present? %>
+          <td class="text-center"><%= match.result %></td>
+        <% else %>
+          <td class="text-center">
+            <% if user_signed_in? %>
+              <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addResultModal-<%= match.id %>">
+                <i class="fas fa-pen"></i> Agregar resultado
+              </button>
+            <% else %>
+              <span class="text-muted">Resultado no subido</span>
+            <% end %>
+          </td>
+        <% end %>
+
+        <td class="text-center">
+          <%= link_to '👀 Ver', match_path(match), class: 'btn btn-primary btn-sm' %>
+
           <% if user_signed_in? %>
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addResultModal-<%= match.id %>">
-              Agregar resultado
-            </button>
-          <% else %>
-            Resultaldo no subido
+            <%= link_to 'Editar', edit_match_path(match), class: 'btn btn-warning btn-sm' %>
+            <%= button_to 'Eliminar', match_path(match), method: :delete, data: { confirm: '¿Estás seguro?' }, class: 'btn btn-danger btn-sm' %>
           <% end %>
         </td>
-      <% end %>
-      <td>
-        <%= link_to 'Ver', match_path(match), class: 'btn btn-primary' %>
-        <% if user_signed_in? %>
-          <%= link_to 'Editar', edit_match_path(match), class: 'btn btn-warning' %>
-          <%= button_to 'Eliminar', match_path(match), method: :delete, data: { confirm: '¿Estás seguro?' }, class: 'btn btn-danger' %>
-        <% end %>
-      </td>
-    </tr>
+      </tr>
 
-    <div class="modal fade" id="addResultModal-<%= match.id %>" tabindex="-1" aria-labelledby="addResultModalLabel-<%= match.id %>" aria-hidden="true">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="addResultModalLabel-<%= match.id %>">Agregar Resultado</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body">
-            <%= form_with(model: match, url: match_path(match), method: :patch, local: true) do |f| %>
-              <div class="mb-3">
-                <%= f.label :result, "Resultado" %>
-                <%= f.text_field :result, class: "form-control", placeholder: "Ejemplo: 3-1" %>
-              </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <%= f.submit "Guardar", class: "btn btn-primary" %>
-              </div>
-            <% end %>
+      <!-- Modal para agregar resultado -->
+      <div class="modal fade" id="addResultModal-<%= match.id %>" tabindex="-1" aria-labelledby="addResultModalLabel-<%= match.id %>" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="addResultModalLabel-<%= match.id %>">Agregar Resultado</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <%= form_with(model: match, url: match_path(match), method: :patch, local: true) do |f| %>
+                <div class="mb-3">
+                  <%= f.label :result, "Resultado" %>
+                  <%= f.text_field :result, class: "form-control", placeholder: "Ejemplo: 3-1" %>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                  <%= f.submit "Guardar", class: "btn btn-primary" %>
+                </div>
+              <% end %>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  <% end %>
-  </tbody>
-</table>
+    <% end %>
+    </tbody>
+  </table>
 </div>

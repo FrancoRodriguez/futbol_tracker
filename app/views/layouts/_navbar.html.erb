@@ -1,33 +1,44 @@
-<nav class="navbar navbar-expand-lg bg-body-tertiary">
+<nav class="navbar navbar-expand-lg bg-primary">
   <div class="container-fluid">
-    <a class="navbar-brand" aria-current="page" href="<%= matches_path %>">Futbol del bueno</a>
+    <a class="navbar-brand text-white" aria-current="page" href="<%= matches_path %>">
+      Fulbito Jueves Papis Buenos
+    </a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
+      <span class="navbar-toggler-icon" style="color: white;"></span>
     </button>
+
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
       <ul class="navbar-nav me-auto mb-2 mb-lg-0">
         <li class="nav-item">
-          <a class="nav-link active" aria-current="page" href="<%= matches_path %>">Partidos</a>
+          <a class="nav-link text-white active" aria-current="page" href="<%= matches_path %>">
+            <i class="fas fa-calendar-alt"></i> Partidos
+          </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="<%= players_path %>">Jugadores</a>
+          <a class="nav-link text-white" href="<%= players_path %>">
+            <i class="fas fa-users"></i> Jugadores
+          </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="<%= goal_scorers_players_path %>">Goleadores</a>
+          <a class="nav-link text-white" href="<%= goal_scorers_players_path %>">
+            <i class="fas fa-trophy"></i> Goleadores
+          </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="<%= assist_scorers_players_path %>">Asistencias</a>
+          <a class="nav-link text-white" href="<%= assist_scorers_players_path %>">
+            <i class="fas fa-handshake"></i> Asistencias
+          </a>
         </li>
       </ul>
 
-      <ul class="navbar-nav ml-auto">
+      <ul class="navbar-nav ms-auto">
         <% if user_signed_in? %>
           <li class="nav-item">
-            <%= button_to 'Cerrar sesión', destroy_user_session_path, method: :delete, class: "btn btn-outline-danger" %>
+            <%= button_to 'Cerrar sesión', destroy_user_session_path, method: :delete, class: "btn btn-light text-dark" %>
           </li>
         <% else %>
           <li class="nav-item">
-            <%= link_to 'Iniciar sesión', new_user_session_path, class: "btn btn-outline-success" %>
+            <%= link_to 'Iniciar sesión', new_user_session_path, class: "btn btn-light text-dark" %>
           </li>
         <% end %>
       </ul>

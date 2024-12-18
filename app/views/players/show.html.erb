@@ -1,62 +1,84 @@
-<h1><%= @player.full_name %></h1>
+<h1 class="text-center mb-4"><%= @player.full_name %></h1>
+
 <% if user_signed_in? %>
-  <%= link_to 'Editar Jugador', edit_player_path(@player), class: 'btn btn-primary' %>
+  <div class="text-center mb-4">
+    <%= link_to 'Editar Jugador', edit_player_path(@player), class: 'btn btn-primary btn-lg' %>
+  </div>
 <% end %>
 
 <hr>
 
-<p><strong>Información de contacto:</strong> <%= @player.contact_info %></p>
+<!-- Información de contacto -->
+<div class="card shadow-sm mb-4">
+  <div class="card-body">
+    <h5 class="card-title">Información de Contacto</h5>
+    <% if @player.contact_info.present? %>
+      <%= link_to 'WhatsApp', "https://wa.me/#{@player.contact_info.gsub(/\D/, '')}", target: "_blank", class: "btn btn-success" %>
+    <% else %>
+      <span>No disponible</span>
+    <% end %>
+  </div>
+</div>
 
-<div class="table-responsive">
-  <table class="table table-bordered text-center">
-    <thead>
-    <tr>
-      <th><i class="fas fa-signal"></i> Partidos Jugados</th>
-      <th><i class="fas fa-futbol"></i> Goles</th>
-      <th><i class="fas fa-shoe-prints"></i> Asistencias</th>
-      <th><i class="fas fa-star"></i> Calificación</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr>
-      <td><%= @player.participations.count %></td>
-      <td><%= @player.participations.sum(:goals) %></td>
-      <td><%= @player.participations.sum(:assists) %></td>
-      <td><%= @player.rating %></td>
-    </tr>
-    </tbody>
-  </table>
+<!-- Estadísticas del Jugador -->
+<div class="card shadow-sm mb-4">
+  <div class="card-body">
+    <h5 class="card-title">Estadísticas del Jugador</h5>
+    <div class="table-responsive">
+      <table class="table table-bordered text-center">
+        <thead class="table-dark">
+        <tr>
+          <th><i class="fas fa-signal"></i> Partidos Jugados</th>
+          <th><i class="fas fa-futbol"></i> Goles</th>
+          <th><i class="fas fa-shoe-prints"></i> Asistencias</th>
+          <th><i class="fas fa-star"></i> Calificación</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+          <td><%= @player.participations.count %></td>
+          <td><%= @player.participations.sum(:goals) %></td>
+          <td><%= @player.participations.sum(:assists) %></td>
+          <td><%= @player.rating %></td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
 </div>
 
 <hr>
 
-<h2>Historial de Participaciones</h2>
+<!-- Historial de Participaciones -->
+<h2 class="mb-4">Historial de Participaciones</h2>
 
 <% if @player.participations.any? %>
   <div class="table-responsive">
-    <table class="table">
-    <thead>
-    <tr>
-      <th>Partido</th>
-      <th>Ubicación</th>
-      <th><i class="fas fa-futbol"></i></th>
-      <th><i class="fas fa-shoe-prints"></i></th>
-      <th><i class="fas fa-star"></i></th>
-    </tr>
-    </thead>
-    <tbody>
-    <% @player.participations.includes(:match).each do |participation| %>
+    <table class="table table-hover">
+      <thead class="table-dark">
       <tr>
-        <td><%= link_to "Partido #{participation.match.date}", match_path(participation.match) %></td>
-        <td><%= participation.match.location %></td>
-        <td><%= participation.goals %></td>
-        <td><%= participation.assists %></td>
-        <td><%= participation.rating %></td>
+        <th>Partido</th>
+        <th>Ubicación</th>
+        <th><i class="fas fa-futbol"></i> Goles</th>
+        <th><i class="fas fa-shoe-prints"></i> Asistencias</th>
+        <th><i class="fas fa-star"></i> Calificación</th>
       </tr>
-    <% end %>
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+      <% @player.participations.includes(:match).each do |participation| %>
+        <tr>
+          <td><%= link_to "Partido #{participation.match.date}", match_path(participation.match) %></td>
+          <td><%= participation.match.location %></td>
+          <td><%= participation.goals %></td>
+          <td><%= participation.assists %></td>
+          <td><%= participation.rating %></td>
+        </tr>
+      <% end %>
+      </tbody>
+    </table>
   </div>
 <% else %>
-  <p>Este jugador aún no ha participado en ningún partido.</p>
+  <div class="alert alert-warning" role="alert">
+    Este jugador aún no ha participado en ningún partido.
+  </div>
 <% end %>

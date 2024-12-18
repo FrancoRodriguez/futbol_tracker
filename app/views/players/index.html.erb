@@ -1,26 +1,28 @@
-<h1>Jugadores</h1>
+<h1 class="text-center mb-4"><i class="fas fa-users"></i> Jugadores <i class="fas fa-users"></i></h1>
 
-<%= link_to 'Nuevo Jugador', new_player_path, class: "btn btn-primary" %>
+<%= link_to 'Nuevo Jugador', new_player_path, class: "btn btn-primary mb-3" %>
 
-<div class="table-responsive">
-  <table class="table">
-  <thead>
-  <tr>
-    <th>Nombre</th>
-    <th class="text-center">Apodo</th>
-    <th class="text-center">Contacto</th>
-    <th class="text-center">Partidos jugados</th>
-    <th><i class="fas fa-futbol"></i></th>
-    <th><i class="fas fa-shoe-prints"></i></th>
-    <th><i class="fas fa-star"></i></th>
-    <% if user_signed_in? %>
-      <th>Acciones</th>
-    <% end %>
-  </tr>
-  </thead>
-  <tbody>
-  <% @players.each do |player| %>
+<div class="table-responsive shadow-lg p-4 rounded bg-white">
+  <table class="table table-hover align-middle">
+    <thead class="table-dark text-center">
     <tr>
+      <th>#</th>
+      <th>Nombre</th>
+      <th class="text-center">Apodo</th>
+      <th class="text-center">Contacto</th>
+      <th class="text-center">Partidos jugados</th>
+      <th><i class="fas fa-futbol"></i></th>
+      <th><i class="fas fa-shoe-prints"></i></th>
+      <th><i class="fas fa-star"></i></th>
+      <% if user_signed_in? %>
+        <th>Acciones</th>
+      <% end %>
+    </tr>
+    </thead>
+    <tbody>
+    <% @players.each_with_index do |player, index| %>
+      <tr>
+        <td><%= index + 1 %></td>
         <td><%= link_to player_path(player) do %><%= player.name %><% end %></td>
         <td class="text-center"><%= player.nickname %></td>
         <td class="text-center">
@@ -34,14 +36,14 @@
         <td><%= player.participations.sum(:goals) %></td>
         <td><%= player.participations.sum(:assists) %></td>
         <td><%= player.rating %></td>
-      <td>
-        <% if user_signed_in? %>
-          <%= link_to 'Editar', edit_player_path(player), class: "btn btn-warning" %>
-          <%= button_to 'Eliminar', player_path(player), method: :delete, class: "btn btn-danger" %>
-        <% end %>
-      </td>
-    </tr>
-  <% end %>
-  </tbody>
-</table>
+        <td>
+          <% if user_signed_in? %>
+            <%= link_to 'Editar', edit_player_path(player), class: "btn btn-warning" %>
+            <%= button_to 'Eliminar', player_path(player), method: :delete, class: "btn btn-danger" %>
+          <% end %>
+        </td>
+      </tr>
+    <% end %>
+    </tbody>
+  </table>
 </div>

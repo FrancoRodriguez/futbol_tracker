@@ -1,22 +1,39 @@
-<h1>Detalles del Partido</h1>
-<p><strong>Fecha:</strong> <%= @match.date %></p>
-<p><strong>Ubicación:</strong> <%= @match.location %></p>
-<p><strong>Resultado:</strong>
-  <% if @match.result.present? %>
-    <td><%= @match.result %></td>
-  <% else %>
-    <td>
-      <% if user_signed_in? %>
-        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addResultModal-<%= @match.id %>">
-          Agregar resultado
-        </button>
-      <% else %>
-        Resultado no subido
-      <% end %>
-    </td>
-  <% end %>
-</p>
+<h1 class="text-center mb-4">Detalles del Partido</h1>
 
+<div class="table-responsive">
+  <table class="table table-bordered align-middle">
+    <thead class="table-dark text-center">
+    <tr>
+      <th>Fecha</th>
+      <th>Ubicación</th>
+      <th>Resultado</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr class="text-center">
+      <td><%= @match.date %></td>
+      <td><%= @match.location %></td>
+      <td>
+        <% if @match.result.present? %>
+          <span class="badge bg-success text-light p-2"><%= @match.result %></span>
+        <% else %>
+            <span class="badge bg-warning text-dark p-2">
+              <% if user_signed_in? %>
+                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addResultModal-<%= @match.id %>">
+                  Agregar resultado
+                </button>
+              <% else %>
+                Resultado no subido
+              <% end %>
+            </span>
+        <% end %>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- Modal para agregar resultado -->
 <div class="modal fade" id="addResultModal-<%= @match.id %>" tabindex="-1" aria-labelledby="addResultModalLabel-<%= @match.id %>" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
@@ -40,43 +57,50 @@
   </div>
 </div>
 
-<h2>Participaciones</h2>
+<h2 class="mt-4">Participaciones</h2>
 <%= link_to 'Añadir Participación', new_match_participation_path(@match), class: 'btn btn-primary mb-3' %>
 
 <div class="row">
   <% @teams.each do |team| %>
     <div class="col-lg-6 col-12 mb-4">
-      <h3>Equipo: <%= team.name %> ( <%= @participations.where(team: team).count %> )</h3>
-      <div class="table-responsive">
-        <table class="table">
-        <thead>
-        <tr>
-          <th><i class="fas fa-user"></i> Jugador</th>
-          <th><i class="fas fa-futbol"></i></th>
-          <th><i class="fas fa-shoe-prints"></i></th>
-          <th><i class="fas fa-star"></i></th>
-          <% if user_signed_in? %>
-            <th>Acciones</th>
-          <% end %>
-        </tr>
-        </thead>
-        <tbody>
-        <% @participations.where(team: team).each do |participation| %>
-          <tr>
-            <td><%= link_to player_path(participation.player) do %><%= participation.player.full_name %><% end %></td>
-            <td><%= participation.goals %></td>
-            <td><%= participation.assists %></td>
-            <td><%= participation.rating %></td>
-            <% if user_signed_in? %>
-              <td>
-                <%= link_to 'Editar', edit_match_participation_path(@match, participation), class: 'btn btn-warning' %>
-                <%= button_to 'Eliminar', match_participation_path(@match, participation), method: :delete, data: { confirm: '¿Estás seguro?' }, class: 'btn btn-danger' %>
-              </td>
-            <% end %>
-          </tr>
+      <div class="shadow-lg p-4 rounded bg-white">
+        <h3 class="text-center mb-0">Equipo <%= team.name %> </h3>
+        <% if @participations.where(team: team).count == 1 %>
+          <p class="text-center fw-light"><%= @participations.where(team: team).count%> jugador inscripto</p>
+        <% else %>
+        <p class="text-center fw-light"><%= @participations.where(team: team).count%> jugadores inscriptos</p>
         <% end %>
-        </tbody>
-      </table>
+        <div class="table-responsive">
+          <table class="table table-hover align-middle">
+            <thead class="table-dark text-center">
+            <tr>
+              <th><i class="fas fa-user"></i> Jugador</th>
+              <th><i class="fas fa-futbol"></i> Goles</th>
+              <th><i class="fas fa-shoe-prints"></i> Asistencias</th>
+              <th><i class="fas fa-star"></i> Calificación</th>
+              <% if user_signed_in? %>
+                <th>Acciones</th>
+              <% end %>
+            </tr>
+            </thead>
+            <tbody>
+            <% @participations.where(team: team).each do |participation| %>
+              <tr>
+                <td><%= link_to player_path(participation.player) do %><%= participation.player.full_name %><% end %></td>
+                <td><%= participation.goals %></td>
+                <td><%= participation.assists %></td>
+                <td><%= participation.rating %></td>
+                <% if user_signed_in? %>
+                  <td>
+                    <%= link_to 'Editar', edit_match_participation_path(@match, participation), class: 'btn btn-warning btn-sm' %>
+                    <%= button_to 'Eliminar', match_participation_path(@match, participation), method: :delete, data: { confirm: '¿Estás seguro?' }, class: 'btn btn-danger btn-sm' %>
+                  </td>
+                <% end %>
+              </tr>
+            <% end %>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   <% end %>
