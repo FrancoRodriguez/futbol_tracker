@@ -57,10 +57,11 @@
   </div>
 </div>
 
-<h2 class="mt-4">Participaciones</h2>
-<%= link_to 'Añadir Participación', new_match_participation_path(@match), class: 'btn btn-primary mb-3' %>
+<% if user_signed_in? %>
+  <%= link_to 'Añadir Participación', new_match_participation_path(@match), class: 'btn btn-primary mb-3' %>
+<% end %>
 
-<div class="row">
+<div class="row mt-4">
   <% @teams.each do |team| %>
     <div class="col-lg-6 col-12 mb-4">
       <div class="shadow-lg p-4 rounded bg-white">
@@ -92,7 +93,7 @@
                 <td><%= participation.rating %></td>
                 <% if user_signed_in? %>
                   <td>
-                    <%= link_to 'Editar', edit_match_participation_path(@match, participation), class: 'btn btn-warning btn-sm' %>
+                    <%= link_to 'Agregar estadisticas', edit_match_participation_path(@match, participation), class: 'btn btn-warning btn-sm' %>
                     <%= button_to 'Eliminar', match_participation_path(@match, participation), method: :delete, data: { confirm: '¿Estás seguro?' }, class: 'btn btn-danger btn-sm' %>
                   </td>
                 <% end %>
