@@ -3,7 +3,9 @@ class MatchesController < ApplicationController
   before_action :set_teams, only: [:show]
 
   def index
-    @matches = Match.all
+    @matches = Match.order(:date)
+    @next_match = @matches.where("date >= ?", Time.zone.today).first
+    @past_matches = @matches.where("date < ?", Time.zone.today)
   end
 
   def show
