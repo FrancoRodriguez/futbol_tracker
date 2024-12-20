@@ -21,8 +21,9 @@
         <td class="text-center"><%= date_in_spanish(@next_match.date) %></td>
         <td><%= @next_match.location %></td>
         <td class="text-center">
-          <% if @next_match.result.present? %>
-            <%= @next_match.result %>
+          <% next_match_result = @match_results.find { |mr| mr[:match] == @next_match } %>
+          <% if next_match_result[:result_message].present? %>
+            <%= next_match_result[:result_message] %>
           <% else %>
             <% if user_signed_in? %>
               <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addResultModal-<%= @next_match.id %>">
@@ -56,16 +57,17 @@
     </tr>
     </thead>
     <tbody>
-    <% @past_matches.each do |match| %>
+    <% @match_results.each do |result| %>
+      <% next if result[:match] == @next_match %> <!-- Ignora el próximo partido en el historial -->
       <tr>
-        <td class="text-center"><%= date_in_spanish(match.date) %></td>
-        <td><%= match.location %></td>
+        <td class="text-center"><%= date_in_spanish(result[:match].date) %></td>
+        <td><%= result[:match].location %></td>
         <td class="text-center">
-          <% if match.result.present? %>
-            <%= match.result %>
+          <% if result[:result_message].present? %>
+            <%= result[:result_message] %>
           <% else %>
             <% if user_signed_in? %>
-              <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addResultModal-<%= match.id %>">
+              <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addResultModal-<%= result[:match].id %>">
                 <i class="fas fa-pen"></i> Agregar resultado
               </button>
             <% else %>
@@ -74,7 +76,7 @@
           <% end %>
         </td>
         <td class="text-center">
-          <%= link_to '👀 Ver', match_path(match), class: 'btn btn-primary btn-sm' %>
+          <%= link_to '👀 Ver', match_path(result[:match]), class: 'btn btn-primary btn-sm' %>
         </td>
       </tr>
     <% end %>

@@ -13,21 +13,7 @@
     <tr class="text-center">
       <td><%= @match.date %></td>
       <td><%= @match.location %></td>
-      <td>
-        <% if @match.result.present? %>
-          <span class="badge bg-success text-light p-2"><%= @match.result %></span>
-        <% else %>
-            <span class="badge bg-warning text-dark p-2">
-              <% if user_signed_in? %>
-                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addResultModal-<%= @match.id %>">
-                  Agregar resultado
-                </button>
-              <% else %>
-                Resultado no subido
-              <% end %>
-            </span>
-        <% end %>
-      </td>
+      <td><span class="badge bg-warning text-dark p-2"><%= @result_message %></span></td>
     </tr>
     </tbody>
   </table>

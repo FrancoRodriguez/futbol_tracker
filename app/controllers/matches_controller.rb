@@ -2,14 +2,25 @@ class MatchesController < ApplicationController
   before_action :set_match, only: [:show, :edit, :update, :destroy]
   before_action :set_teams, only: [:show]
 
+  include MatchesHelper
+
   def index
     @matches = Match.order(:date)
     @next_match = @matches.where("date >= ?", Time.zone.today).first
     @past_matches = @matches.where("date < ?", Time.zone.today)
+    @match_results = @matches.map do |match|
+      participations = match.participations.includes(:player)
+      teams = participations.map(&:team).uniq
+      {
+        match: match,
+        result_message: calculate_team_goals(teams, participations)
+      }
+    end
   end
 
   def show
     @participations = @match.participations.includes(:player)
+    @result_message = calculate_team_goals(@teams, @participations)
   end
 
   def new
