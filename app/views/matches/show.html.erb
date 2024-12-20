@@ -79,9 +79,7 @@
               <th><i class="fas fa-futbol"></i> Goles</th>
               <th><i class="fas fa-shoe-prints"></i> Asistencias</th>
               <th><i class="fas fa-star"></i> Calificación</th>
-              <% if user_signed_in? %>
-                <th>Acciones</th>
-              <% end %>
+              <th>Acciones</th>
             </tr>
             </thead>
             <tbody>
@@ -91,12 +89,12 @@
                 <td><%= participation.goals %></td>
                 <td><%= participation.assists %></td>
                 <td><%= participation.rating %></td>
-                <% if user_signed_in? %>
                   <td>
-                    <%= link_to 'Agregar estadisticas', edit_match_participation_path(@match, participation), class: 'btn btn-warning btn-sm' %>
+                  <%= link_to 'Editar', edit_match_participation_path(@match, participation), class: 'btn btn-warning btn-sm' %>
+                  <% if user_signed_in? %>
                     <%= button_to 'Eliminar', match_participation_path(@match, participation), method: :delete, data: { confirm: '¿Estás seguro?' }, class: 'btn btn-danger btn-sm' %>
+                  <% end %>
                   </td>
-                <% end %>
               </tr>
             <% end %>
             </tbody>
