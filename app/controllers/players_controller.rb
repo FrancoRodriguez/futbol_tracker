@@ -2,6 +2,31 @@ class PlayersController < ApplicationController
   before_action :set_player, only: [:show, :edit, :update, :destroy]
 
   def show
+    @player = Player.find(params[:id])
+
+    @wins = 0
+    @losses = 0
+
+    @results_count = {victories: 0, defeats: 0, draws: 0}
+
+    @player.participations.each do |participation|
+      match = participation.match
+      participations = match.participations.includes(:player)
+      opponent_participation = participations.reject { |p| p.team == participation.team }.first
+
+      if opponent_participation
+        opponent_team_goals = opponent_participation.goals
+        player_team_goals = participation.goals
+
+        if player_team_goals > opponent_team_goals
+          @results_count[:victories] += 1
+        elsif player_team_goals < opponent_team_goals
+          @results_count[:defeats] += 1
+        else
+          @results_count[:draws] += 1
+        end
+      end
+    end
   end
 
   def new
