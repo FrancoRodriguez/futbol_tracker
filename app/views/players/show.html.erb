@@ -69,8 +69,8 @@
           </tr>
           </thead>
           <tbody>
-          <% @player.participations.includes(:match).each do |participation| %>
-            <tr>
+          <% @player.participations.joins(:match).where('matches.date < ?', Date.today).each do |participation| %>
+          <tr>
               <td><%= link_to "Partido #{participation.match.date}", match_path(participation.match) %></td>
               <td><%= participation.match.location %></td>
               <td><%= participation.goals %></td>
