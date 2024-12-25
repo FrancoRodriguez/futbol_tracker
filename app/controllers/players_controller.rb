@@ -3,10 +3,6 @@ class PlayersController < ApplicationController
 
   def show
     @player = Player.find(params[:id])
-
-    @wins = 0
-    @losses = 0
-
     @results_count = {victories: 0, defeats: 0, draws: 0}
 
     @player.participations.each do |participation|

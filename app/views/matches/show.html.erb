@@ -76,7 +76,7 @@
                 <td><%= participation.assists %></td>
                 <td><%= participation.rating %></td>
                   <td>
-                    <% if @match.date > 3.days.ago %>
+                    <% if @match.date > 3.days.ago || user_signed_in? %>
                       <%= link_to 'Editar', edit_match_participation_path(@match, participation), class: 'btn btn-warning btn-sm' %>
                     <% else %>
                       <button class="btn btn-warning btn-sm" disabled>Editar</button>
