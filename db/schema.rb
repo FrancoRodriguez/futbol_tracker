@@ -10,9 +10,21 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2024_12_16_141935) do
+ActiveRecord::Schema[7.2].define(version: 2024_12_25_201359) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "goals", force: :cascade do |t|
+    t.bigint "player_id", null: false
+    t.bigint "match_id", null: false
+    t.string "youtube_url"
+    t.integer "minute"
+    t.string "score"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["match_id"], name: "index_goals_on_match_id"
+    t.index ["player_id"], name: "index_goals_on_player_id"
+  end
 
   create_table "matches", force: :cascade do |t|
     t.date "date"
@@ -67,6 +79,8 @@ ActiveRecord::Schema[7.2].define(version: 2024_12_16_141935) do
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
+  add_foreign_key "goals", "matches"
+  add_foreign_key "goals", "players"
   add_foreign_key "participations", "matches"
   add_foreign_key "participations", "players"
 end
