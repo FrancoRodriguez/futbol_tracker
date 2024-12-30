@@ -30,7 +30,6 @@
         <tr>
           <th><i class="fas fa-signal"></i> Partidos Jugados</th>
           <th><i class="fas fa-futbol"></i> Goles</th>
-          <th><i class="fas fa-shoe-prints"></i> Asistencias</th>
           <th><i class="fas fa-star"></i> Calificación</th>
           <th><i class="fas fa-trophy"></i> Victorias</th>
           <th><i class="fas fa-frown"></i> Derrotas</th>
@@ -41,7 +40,6 @@
         <tr>
           <td><%= @player.participations.count %></td>
           <td><%= @player.participations.sum(:goals) %></td>
-          <td><%= @player.participations.sum(:assists) %></td>
           <td><%= @player.rating %></td>
           <td><%= @results_count[:victories] %></td>
           <td><%= @results_count[:defeats] %></td>
@@ -64,7 +62,6 @@
             <th>Partido</th>
             <th>Ubicación</th>
             <th><i class="fas fa-futbol"></i> Goles</th>
-            <th><i class="fas fa-shoe-prints"></i> Asistencias</th>
             <th><i class="fas fa-star"></i> Calificación</th>
           </tr>
           </thead>
@@ -74,7 +71,6 @@
               <td><%= link_to "Partido #{participation.match.date}", match_path(participation.match) %></td>
               <td><%= participation.match.location %></td>
               <td><%= participation.goals %></td>
-              <td><%= participation.assists %></td>
               <td><%= participation.rating %></td>
             </tr>
           <% end %>

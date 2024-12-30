@@ -12,7 +12,6 @@
       <th class="text-center">Contacto</th>
       <th class="text-center">Partidos jugados</th>
       <th><i class="fas fa-futbol"></i></th>
-      <th><i class="fas fa-shoe-prints"></i></th>
       <th><i class="fas fa-star"></i></th>
       <% if user_signed_in? %>
         <th>Acciones</th>
@@ -36,7 +35,6 @@
         </td>
         <td class="text-center"><%= player.participations.count %></td>
         <td><%= player.participations.sum(:goals) %></td>
-        <td><%= player.participations.sum(:assists) %></td>
         <td><%= player.rating %></td>
         <td>
           <% if user_signed_in? %>

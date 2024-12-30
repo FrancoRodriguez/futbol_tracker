@@ -7,11 +7,6 @@
   </div>
 
   <div class="form-group">
-    <%= f.label :assists, 'Asistencias' %>
-    <%= f.number_field :assists, class: 'form-control' %>
-  </div>
-
-  <div class="form-group">
     <%= f.label :player_id, "Equipo" %>
     <%= f.collection_select :team_id, Team.all, :id, :name, { prompt: "Selecciona un equipo" }, { class: "form-control" } %>
   </div>
