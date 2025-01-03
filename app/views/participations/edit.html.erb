@@ -11,7 +11,7 @@
     <%= f.collection_select :team_id, Team.all, :id, :name, { prompt: "Selecciona un equipo" }, { class: "form-control" } %>
   </div>
 
-  <%= f.submit 'Guardar cambios', class: 'btn btn-primary' %>
+  <%= f.submit 'Guardar cambios', class: 'btn btn-primary', onclick: 'setTimeout(() => { location.reload(); }, 500);' %>
 <% end %>
 
 <%= link_to 'Volver', match_path(@match), class: 'btn btn-secondary' %>

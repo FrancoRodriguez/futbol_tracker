@@ -1,6 +1,7 @@
 class MatchesController < ApplicationController
   before_action :set_match, only: [:show, :edit, :update, :destroy]
   before_action :set_teams, only: [:show]
+  before_action :available_players, only: [:show]
 
   include MatchesHelper
 
@@ -62,7 +63,13 @@ class MatchesController < ApplicationController
     @teams = @match.participations.includes(:player).map(&:team).uniq
   end
 
+  def available_players
+    @available_players = Player.where.not(id: Participation.where(match_id: @match.id)
+                                                           .select(:player_id))
+  end
+
   def match_params
     params.require(:match).permit(:location, :date, :result, player_ids: [])
   end
+
 end
