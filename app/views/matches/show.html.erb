@@ -43,9 +43,8 @@
   </div>
 </div>
 
-<% if user_signed_in? %>
-  <%= link_to 'Añadir Participación', new_match_participation_path(@match), class: 'btn btn-primary mb-3' %>
-<% end %>
+
+<%= link_to 'Añadir Participación', new_match_participation_path(@match), class: 'btn btn-primary mb-3' %>
 
 <div class="row mt-4">
   <% @teams.each do |team| %>
