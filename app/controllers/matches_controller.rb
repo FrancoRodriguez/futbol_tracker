@@ -5,7 +5,7 @@ class MatchesController < ApplicationController
   include MatchesHelper
 
   def index
-    @matches = Match.order(:date)
+    @matches = Match.order(date: :desc)
     @next_match = @matches.where("date >= ?", Time.zone.today).first
     @past_matches = @matches.where("date < ?", Time.zone.today)
     @match_results = @matches.map do |match|
