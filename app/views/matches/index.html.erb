@@ -36,6 +36,9 @@
         </td>
         <td class="text-center">
           <%= link_to '👀 Ver', match_path(@next_match), class: 'btn btn-primary btn-sm' %>
+          <% if user_signed_in? && @next_match.date >= Date.today %>
+            <%= button_to 'Eliminar', match_path(@next_match), method: :delete, data: { confirm: '¿Estás seguro?' }, class: 'btn btn-danger btn-sm' %>
+          <% end %>
         </td>
       </tr>
       </tbody>
@@ -77,9 +80,6 @@
         </td>
         <td class="text-center">
           <%= link_to '👀 Ver', match_path(result[:match]), class: 'btn btn-primary btn-sm' %>
-          <% if user_signed_in? %>
-            <%= button_to 'Eliminar', match_path(result[:match]), method: :delete, data: { confirm: '¿Estás seguro?' }, class: 'btn btn-danger btn-sm' %>
-          <% end %>
         </td>
       </tr>
     <% end %>
