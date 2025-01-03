@@ -19,31 +19,6 @@
   </table>
 </div>
 
-<!-- Modal para agregar resultado -->
-<div class="modal fade" id="addResultModal-<%= @match.id %>" tabindex="-1" aria-labelledby="addResultModalLabel-<%= @match.id %>">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="addResultModalLabel-<%= @match.id %>">Agregar Resultado</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <%= form_with(model: @match, url: match_path(@match), method: :patch, local: true) do |f| %>
-          <div class="mb-3">
-            <%= f.label :result, "Resultado" %>
-            <%= f.text_field :result, class: "form-control", placeholder: "Ejemplo: 3-1" %>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-            <%= f.submit "Guardar", class: "btn btn-primary" %>
-          </div>
-        <% end %>
-      </div>
-    </div>
-  </div>
-</div>
-
-
 <!-- Botón para abrir el modal de agregar participación -->
 <div class="text-center mb-4 mt-4">
   <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addParticipationModal">
@@ -81,7 +56,7 @@
 
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-            <%= f.submit "Agregar Participación", class: "btn btn-primary" %>
+            <%= f.submit "Agregar Participación", class: "btn btn-primary", id: "submitParticipationButton", disabled: true %>
           </div>
         <% end %>
       </div>
@@ -133,7 +108,7 @@
                   <div class="modal-dialog modal-dialog-centered modal-lg">
                     <div class="modal-content">
                       <div class="modal-header">
-                        <h5 class="modal-title" id="editParticipationModalLabel-<%= participation.id %>">Editar Participación</h5>
+                        <h5 class="modal-title" id="editParticipationModalLabel-<%= participation.id %>">Editar Participación de <b><%= participation.player.full_name %></b></h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                       </div>
                       <div class="modal-body">
