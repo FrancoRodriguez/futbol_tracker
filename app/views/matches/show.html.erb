@@ -85,7 +85,7 @@
             </tr>
             </thead>
             <tbody>
-            <% @participations.where(team: team).each do |participation| %>
+            <% @participations.where(team: team).joins(:player).order('players.rating DESC').each do |participation| %>
               <tr>
                 <td><%= link_to player_path(participation.player) do %><%= participation.player.full_name %><% end %></td>
                 <td><%= participation.goals %></td>
