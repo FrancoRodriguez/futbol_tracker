@@ -38,7 +38,7 @@
         </thead>
         <tbody>
         <tr>
-          <td><%= @player.participations.count %></td>
+          <td><%= @player.participations.joins(:match).where('matches.date < ?', Date.today).count %></td>
           <td><%= @player.participations.sum(:goals) %></td>
           <td><%= @player.rating %></td>
           <td><%= @results_count[:victories] %></td>
