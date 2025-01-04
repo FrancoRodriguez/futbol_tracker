@@ -6,39 +6,29 @@ class Participation < ApplicationRecord
   validates :goals, numericality: { greater_than_or_equal_to: 0 }
   validates :assists, numericality: { greater_than_or_equal_to: 0 }
 
-  after_update :update_player_rating, :update_participation_rating
+  after_update :update_participation_rating, :update_player_rating
 
   private
 
   # Calcula la calificación de la participación y la limita a un máximo de 10
   def update_participation_rating
-    calification = self.goals * 2 + self.assists * 1
+    calification = goals * 2
     average_calification = [calification, 10].min
 
-    # Evitar actualizar si la calificación no ha cambiado
-    if self.rating != average_calification
-      self.update_column(:rating, average_calification.round(2)) # Utilizamos update_column para evitar callbacks adicionales
-    end
+    update_column(:rating, average_calification.round(2)) if rating != average_calification
   end
 
-  # Calcula la calificación promedio del jugador y la actualiza
+  # Recalcula la calificación promedio del jugador basada en las calificaciones de todas sus participaciones
   def update_player_rating
-    # Solo actualizamos la calificación si es un jugador con participaciones
     return if player.participations.empty?
 
-    # Sumar las calificaciones de todas las participaciones del jugador
-    total_calification = player.participations.sum do |participation|
-      participation.goals * 2 + participation.assists * 1
-    end
-
-    # Calcular el promedio de las calificaciones de las participaciones
-    average_calification = total_calification.to_f / player.participations.count
+    # Promedio de las calificaciones existentes de las participaciones
+    total_rating = player.participations.sum(:rating)
+    average_rating = total_rating.to_f / player.participations.count
 
     # Limitar el promedio a un máximo de 10
-    average_calification = [average_calification, 10].min
+    average_rating = [average_rating, 10].min
 
-    # Actualizar la calificación del jugador
-    player.update(rating: average_calification.round(2))
+    player.update_column(:rating, average_rating.round(2)) if player.rating != average_rating
   end
-
 end
