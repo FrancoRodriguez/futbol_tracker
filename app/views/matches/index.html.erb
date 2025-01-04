@@ -55,7 +55,7 @@
     <thead class="table-dark text-center">
     <tr>
       <th>Fecha</th>
-      <th>Ubicación</th>
+      <th>Video</th>
       <th>Resultado</th>
       <th>Acciones</th>
     </tr>
@@ -65,7 +65,15 @@
       <% next if result[:match] == @next_match %> <!-- Ignora el próximo partido en el historial -->
       <tr>
         <td class="text-center"><%= date_in_spanish(result[:match].date) %></td>
-        <td><%= result[:match].location %></td>
+        <td class="text-center">
+          <% if result[:match].video_url %>
+            <%= link_to result[:match].video_url, target: "_blank", rel: "noopener noreferrer", class: "text-decoration-none" do %>
+              <i class="fas fa-video text-danger"></i>
+            <% end %>
+          <% else %>
+            No hay video adjunto
+          <% end %>
+        </td>
         <td class="text-center">
           <% if result[:result_message].present? %>
             <%= result[:result_message] %>
