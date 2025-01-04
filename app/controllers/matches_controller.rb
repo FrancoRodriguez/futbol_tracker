@@ -69,7 +69,7 @@ class MatchesController < ApplicationController
   end
 
   def match_params
-    params.require(:match).permit(:location, :date, :result, player_ids: [])
+    params.require(:match).permit(:location, :date, :result, :video_url, player_ids: [])
   end
 
 end

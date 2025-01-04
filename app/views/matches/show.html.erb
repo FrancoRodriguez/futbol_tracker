@@ -5,14 +5,18 @@
     <thead class="table-dark text-center">
     <tr>
       <th>Fecha</th>
-      <th>Ubicación</th>
+      <th>Video</th>
       <th>Resultado</th>
     </tr>
     </thead>
     <tbody>
     <tr class="text-center">
       <td><%= @match.date %></td>
-      <td><%= @match.location %></td>
+      <td>
+        <%= link_to @match.video_url, target: "_blank", rel: "noopener noreferrer", class: "text-decoration-none" do %>
+          <i class="fas fa-video text-danger"></i>
+        <% end %>
+      </td>
       <td><span class="badge bg-warning text-dark p-2"><%= @result_message %></span></td>
     </tr>
     </tbody>

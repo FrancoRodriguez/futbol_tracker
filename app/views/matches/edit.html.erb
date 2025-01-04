@@ -1,2 +1,30 @@
-<h1>Matches#edit</h1>
-<p>Find me in app/views/matches/edit.html.erb</p>
+<h1 class="text-center mb-4">Editar Detalles del Partido</h1>
+
+<div class="shadow-lg p-4 rounded bg-light">
+  <%= form_with(model: @match, local: true) do |f| %>
+    <div class="row mb-3">
+      <div class="col-md-6">
+        <%= f.label :date, "Fecha del Partido" %>
+        <%= f.date_field :date, class: "form-control", required: true %>
+      </div>
+
+      <div class="col-md-6">
+        <%= f.label :location, "Ubicación" %>
+        <%= f.text_field :location, class: "form-control", required: true %>
+      </div>
+    </div>
+
+    <div class="mb-3">
+      <%= f.label :video_url, "Enlace al Video (YouTube)" %>
+      <%= f.url_field :video_url, class: "form-control", placeholder: "https://www.youtube.com/watch?v=..." %>
+      <div id="videoHelp" class="form-text">
+        Ingresa un enlace válido de YouTube para el partido grabado.
+      </div>
+    </div>
+
+    <div class="text-center">
+      <%= f.submit "Guardar Cambios", class: "btn btn-primary" %>
+      <%= link_to "Cancelar", matches_path, class: "btn btn-secondary ms-2" %>
+    </div>
+  <% end %>
+</div>

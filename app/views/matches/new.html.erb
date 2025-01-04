@@ -1,41 +1,33 @@
-<h1>Nuevo Partido</h1>
+<h1 class="text-center mb-4">Nuevo Partido</h1>
 
-<%= form_with(model: @match, local: true) do |f| %>
-  <% if @match.errors.any? %>
-    <div id="error_explanation">
-      <h2><%= pluralize(@match.errors.count, "error") %> impidió crear el partido:</h2>
-      <ul>
-        <% @match.errors.full_messages.each do |message| %>
-          <li><%= message %></li>
-        <% end %>
-      </ul>
-    </div>
-  <% end %>
-
-  <div class="form-group">
-    <%= f.label :location, "Ubicación del partido" %>
-    <%= f.text_field :location, class: "form-control" %>
-  </div>
-
-  <div class="form-group">
-    <%= f.label :date, "Fecha del partido" %>
-    <%= f.datetime_local_field :date, class: "form-control" %>
-  </div>
-
-  <!--
-  <div class="form-group">
-    <%= f.label :player_ids, "Jugadores participantes" %>
-    <%= f.collection_check_boxes :player_ids, Player.all, :id, :name do |b| %>
-      <div class="checkbox">
-        <label>
-          <%= b.check_box %> <%= b.text %>
-        </label>
+<div class="shadow-lg p-4 rounded bg-light">
+  <%= form_with(model: @match, local: true) do |f| %>
+    <% if @match.errors.any? %>
+      <div id="error_explanation">
+        <h2><%= pluralize(@match.errors.count, "error") %> impidió crear el partido:</h2>
+        <ul>
+          <% @match.errors.full_messages.each do |message| %>
+            <li><%= message %></li>
+          <% end %>
+        </ul>
       </div>
     <% end %>
-  </div>
-  -->
 
-  <div class="actions">
-    <%= f.submit "Crear Partido", class: "btn btn-primary" %>
-  </div>
-<% end %>
+    <div class="row mb-3">
+      <div class="col-md-6">
+        <%= f.label :location, "Ubicación del partido" %>
+        <%= f.text_field :location, class: "form-control" %>
+      </div>
+
+      <div class="col-md-6">
+        <%= f.label :date, "Fecha del partido" %>
+        <%= f.datetime_local_field :date, class: "form-control" %>
+      </div>
+    </div>
+
+    <div class="text-center">
+      <%= f.submit "Guardar", class: "btn btn-primary" %>
+      <%= link_to "Cancelar", matches_path, class: "btn btn-secondary ms-2" %>
+    </div>
+  <% end %>
+</div>
