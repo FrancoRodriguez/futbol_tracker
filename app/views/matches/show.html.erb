@@ -72,7 +72,7 @@
   <% @teams.each do |team| %>
     <div class="col-lg-6 col-12 mb-4">
       <div class="shadow-lg p-4 rounded bg-white">
-        <h3 class="text-center mb-0">Equipo <%= team.name %> <%= @participations.joins(:player, :team).where(team_id: team.id).average('players.rating')&.round(2) %> </h3>
+        <h3 class="text-center mb-0">Equipo <%= team.name %></h3>
         <% if @participations.where(team: team).count == 1 %>
           <p class="text-center fw-light"><%= @participations.where(team: team).count%> jugador inscripto</p>
         <% else %>
@@ -83,8 +83,6 @@
             <thead class="table-dark text-center">
             <tr>
               <th><i class="fas fa-user"></i> Jugador</th>
-              <th><i class="fas fa-futbol"></i> Goles</th>
-              <th><i class="fas fa-star"></i> Calificación global / partido</th>
               <th>Acciones</th>
             </tr>
             </thead>
@@ -92,20 +90,18 @@
             <% @participations.where(team: team).joins(:player).order('players.rating DESC').each do |participation| %>
               <tr>
                 <td><%= link_to player_path(participation.player) do %><%= participation.player.full_name %><% end %></td>
-                <td><%= participation.goals %></td>
-                <td><b><%= participation.player.rating %></b> / <%= participation.rating %></td>
-                  <td>
-                    <% if @match.date > 3.days.ago || user_signed_in? %>
-                      <button type="button" class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editParticipationModal-<%= participation.id %>">
-                        Editar
-                      </button>
-                    <% else %>
-                      <button class="btn btn-warning btn-sm" disabled>Editar</button>
-                    <% end %>
-                    <% if user_signed_in? %>
-                      <%= button_to 'Eliminar', match_participation_path(@match, participation), method: :delete, data: { confirm: '¿Estás seguro?' }, class: 'btn btn-danger btn-sm' %>
-                    <% end %>
-                  </td>
+                <td class="text-center">
+                  <% if @match.date > 3.days.ago || user_signed_in? %>
+                    <button type="button" class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editParticipationModal-<%= participation.id %>">
+                      Editar
+                    </button>
+                  <% else %>
+                    <button class="btn btn-warning btn-sm" disabled>Editar</button>
+                  <% end %>
+                  <% if user_signed_in? %>
+                    <%= button_to 'Eliminar', match_participation_path(@match, participation), method: :delete, data: { confirm: '¿Estás seguro?' }, class: 'btn btn-danger btn-sm' %>
+                  <% end %>
+                </td>
 
                 <!-- Modal para editar participación -->
                 <div class="modal fade" id="editParticipationModal-<%= participation.id %>" tabindex="-1" aria-labelledby="editParticipationModalLabel-<%= participation.id %>">
@@ -117,16 +113,10 @@
                       </div>
                       <div class="modal-body">
                         <%= form_with(model: [@match, participation], url: match_participation_path(@match, participation), method: :patch, local: true) do |f| %>
-                          <div class="mb-3">
-                            <%= f.label :goals, 'Goles' %>
-                            <%= f.number_field :goals, class: 'form-control', value: participation.goals %>
-                          </div>
-
-                          <div class="mb-3">
+                            <div class="mb-3">
                             <%= f.label :team_id, 'Equipo' %>
                             <%= f.collection_select :team_id, Team.all, :id, :name, { selected: participation.team_id, prompt: 'Selecciona un equipo' }, { class: 'form-control' } %>
                           </div>
-
                           <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                             <%= f.submit 'Guardar cambios', class: 'btn btn-primary', onclick: 'setTimeout(() => { location.reload(); }, 2000);' %>

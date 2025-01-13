@@ -48,6 +48,6 @@ class ParticipationsController < ApplicationController
   end
 
   def participation_params
-    params.require(:participation).permit(:match_id, :player_id, :goals, :assists, :rating, :team_id)
+    params.require(:participation).permit(:match_id, :player_id, :team_id)
   end
 end
