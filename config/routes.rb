@@ -9,6 +9,7 @@ Rails.application.routes.draw do
     collection do
       get :goal_scorers
       get :assist_scorers
+      get :mvp_ranking
     end
   end
   resources :teams, only: [:index]

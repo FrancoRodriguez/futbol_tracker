@@ -10,21 +10,9 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_01_04_184602) do
+ActiveRecord::Schema[7.2].define(version: 2025_01_13_203759) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
-
-  create_table "goals", force: :cascade do |t|
-    t.bigint "player_id", null: false
-    t.bigint "match_id", null: false
-    t.string "youtube_url"
-    t.integer "minute"
-    t.string "score"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["match_id"], name: "index_goals_on_match_id"
-    t.index ["player_id"], name: "index_goals_on_player_id"
-  end
 
   create_table "matches", force: :cascade do |t|
     t.date "date"
@@ -33,6 +21,11 @@ ActiveRecord::Schema[7.2].define(version: 2025_01_04_184602) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "video_url"
+    t.bigint "home_team_id", null: false
+    t.bigint "away_team_id", null: false
+    t.bigint "mvp_id"
+    t.index ["away_team_id"], name: "index_matches_on_away_team_id"
+    t.index ["home_team_id"], name: "index_matches_on_home_team_id"
   end
 
   create_table "matches_players", id: false, force: :cascade do |t|
@@ -80,8 +73,8 @@ ActiveRecord::Schema[7.2].define(version: 2025_01_04_184602) do
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
-  add_foreign_key "goals", "matches"
-  add_foreign_key "goals", "players"
+  add_foreign_key "matches", "teams", column: "away_team_id"
+  add_foreign_key "matches", "teams", column: "home_team_id"
   add_foreign_key "participations", "matches"
   add_foreign_key "participations", "players"
 end

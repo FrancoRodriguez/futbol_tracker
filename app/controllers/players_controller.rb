@@ -75,6 +75,13 @@ class PlayersController < ApplicationController
                         .order('total_assists DESC')
   end
 
+  def mvp_ranking
+    @players = Player.joins(:mvp_matches)
+                     .select('players.*, COUNT(matches.id) AS mvp_count')
+                     .group('players.id')
+                     .order('mvp_count DESC')
+  end
+
   private
 
   def set_player

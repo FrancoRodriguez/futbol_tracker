@@ -32,6 +32,7 @@
           <th><i class="fas fa-trophy"></i> Victorias</th>
           <th><i class="fas fa-frown"></i> Derrotas</th>
           <th><i class="fas fa-meh"></i> Empates</th>
+          <th><i class="fas fa-star"></i> Veces MVP</th>
         </tr>
         </thead>
         <tbody>
@@ -40,6 +41,7 @@
           <td><%= @results_count[:victories] %></td>
           <td><%= @results_count[:defeats] %></td>
           <td><%= @results_count[:draws] %></td>
+          <td><%= @player.mvp_matches.count %></td>
         </tr>
         </tbody>
       </table>
@@ -61,7 +63,7 @@
           </thead>
           <tbody>
           <% @player.participations.joins(:match).where('matches.date < ?', Date.today).each do |participation| %>
-          <tr>
+            <tr>
               <td><%= link_to "Partido #{participation.match.date}", match_path(participation.match) %></td>
               <td><%= participation.match.location %></td>
             </tr>

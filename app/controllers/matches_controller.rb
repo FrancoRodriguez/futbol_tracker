@@ -1,7 +1,7 @@
 class MatchesController < ApplicationController
   before_action :set_match, only: [:show, :edit, :update, :destroy]
   before_action :set_teams, only: [:show]
-  before_action :available_players, only: [:show]
+  before_action :available_players, :available_players_mvp, only: [:show]
 
   include MatchesHelper
 
@@ -68,8 +68,11 @@ class MatchesController < ApplicationController
                                                            .select(:player_id))
   end
 
-  def match_params
-    params.require(:match).permit(:location, :date, :result, :video_url, player_ids: [])
+  def available_players_mvp
+    @available_players_mvp = Player.joins(:participations).where(participations: { match_id: @match.id })
   end
 
+  def match_params
+    params.require(:match).permit(:location, :date, :result, :video_url, :mvp_id, player_ids: [])
+  end
 end

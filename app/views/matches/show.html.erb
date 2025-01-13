@@ -30,6 +30,44 @@
   </button>
 </div>
 
+<% if user_signed_in? %>
+  <div class="card shadow-lg mb-4">
+    <div class="card-header bg-primary text-white text-center">
+      <h2 class="mb-0">Seleccionar MVP</h2>
+    </div>
+    <div class="card-body bg-light">
+      <%= form_with(model: @match, url: match_path(@match), method: :patch, local: true) do |f| %>
+        <div class="mb-3">
+          <%= f.label :mvp_id, "Jugador MVP", class: "form-label fw-bold" %>
+          <%= f.collection_select :mvp_id, @available_players_mvp, :id, :name,
+                                  { prompt: "Selecciona un jugador" },
+                                  { class: "form-select shadow-sm" } %>
+        </div>
+        <div class="text-center">
+          <%= f.submit "Guardar MVP", class: "btn btn-primary btn-lg px-5 mt-3 shadow-sm" %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+<% end %>
+
+<% if @match.date < Date.today %>
+  <% if @match.mvp.present? %>
+    <div class="alert alert-success text-center shadow-lg">
+      <i class="fas fa-trophy fa-2x text-warning"></i>
+      <h3 class="mt-2">MVP del Partido:</h3>
+      <p class="fs-4 fw-bold text-primary"><%= link_to player_path(@match.mvp) do %><%= @match.mvp.full_name %><% end %></p>
+    </div>
+  <% else %>
+    <div class="alert alert-warning text-center shadow-lg">
+      <i class="fas fa-exclamation-circle fa-2x text-danger"></i>
+      <h3 class="mt-2">MVP no seleccionado</h3>
+      <p class="fs-5">Aún no se ha seleccionado un MVP para este partido.</p>
+    </div>
+  <% end %>
+<% end %>
+
+
 <!-- Modal para agregar participación -->
 <div class="modal fade" id="addParticipationModal" tabindex="-1" aria-labelledby="addParticipationModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-xl">
