@@ -20,20 +20,7 @@
       <tr>
         <td class="text-center"><%= date_in_spanish(@next_match.date) %></td>
         <td><%= @next_match.location %></td>
-        <td class="text-center">
-          <% next_match_result = @match_results.find { |mr| mr[:match] == @next_match } %>
-          <% if next_match_result[:result_message].present? %>
-            <%= next_match_result[:result_message] %>
-          <% else %>
-            <% if user_signed_in? %>
-              <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addResultModal-<%= @next_match.id %>">
-                <i class="fas fa-pen"></i> Agregar resultado
-              </button>
-            <% else %>
-              <span class="badge bg-warning text-dark p-2">Resultado no subido</span>
-            <% end %>
-          <% end %>
-        </td>
+        <td class="text-center"><%= render "result", match: @next_match %></td>
         <td class="text-center">
           <%= link_to '👀 Ver', match_path(@next_match), class: 'btn btn-primary btn-sm' %>
           <%= link_to 'Editar', edit_match_path(@next_match), class: 'btn btn-warning btn-sm' %>
@@ -61,39 +48,31 @@
     </tr>
     </thead>
     <tbody>
-    <% @match_results.each do |result| %>
-      <% next if result[:match] == @next_match %> <!-- Ignora el próximo partido en el historial -->
+    <% @past_matches.each do |match| %>
       <tr>
-        <td class="text-center"><%= date_in_spanish(result[:match].date) %></td>
+        <td class="text-center"><%= date_in_spanish(match.date) %></td>
         <td class="text-center">
-          <% if result[:match].video_url %>
-            <%= link_to result[:match].video_url, target: "_blank", rel: "noopener noreferrer", class: "text-decoration-none" do %>
+          <% if match.video_url %>
+            <%= link_to match.video_url, target: "_blank", rel: "noopener noreferrer", class: "text-decoration-none" do %>
               <i class="fas fa-video text-danger"></i>
             <% end %>
           <% else %>
             No hay video adjunto
           <% end %>
         </td>
+        <td class="text-center"><%= render "result", match: match %></td>
         <td class="text-center">
-          <% if result[:result_message].present? %>
-            <%= result[:result_message] %>
-          <% else %>
-            <% if user_signed_in? %>
-              <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addResultModal-<%= result[:match].id %>">
-                <i class="fas fa-pen"></i> Agregar resultado
-              </button>
-            <% else %>
-              <span class="badge bg-warning text-dark p-2">Resultado no subido</span>
-            <% end %>
-          <% end %>
-        </td>
-        <td class="text-center">
-          <%= link_to '👀 Ver', match_path(result[:match]), class: 'btn btn-primary btn-sm' %>
+          <%= link_to '👀 Ver', match_path(match), class: 'btn btn-primary btn-sm' %>
           <% if user_signed_in? %>
-            <%= link_to 'Editar', edit_match_path(result[:match]), class: 'btn btn-warning btn-sm' %>
+            <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addResultModal-<%= match.id %>">
+              <i class="fas fa-pen"></i> Agregar resultado
+            </button>
+            <%= link_to 'Editar', edit_match_path(match), class: 'btn btn-warning btn-sm' %>
           <% end %>
         </td>
       </tr>
+
+      <%= render "modals/add_result", match: match %>
     <% end %>
     </tbody>
   </table>

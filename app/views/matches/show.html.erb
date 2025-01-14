@@ -17,7 +17,19 @@
           <i class="fas fa-video text-danger"></i>
         <% end %>
       </td>
-      <td><span class="badge bg-warning text-dark p-2"><%= @result_message %></span></td>
+      <td class="text-center">
+        <% if @match.result.present? %>
+          <%= render "result", match: @match %>
+        <% else %>
+            <% if user_signed_in? %>
+              <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addResultModal-<%= @match.id %>">
+                Agregar resultado
+              </button>
+            <% else %>
+              Resultado no subido
+            <% end %>
+        <% end %>
+      </td>
     </tr>
     </tbody>
   </table>
@@ -69,7 +81,7 @@
 
 
 <!-- Modal para agregar participación -->
-<div class="modal fade" id="addParticipationModal" tabindex="-1" aria-labelledby="addParticipationModalLabel" aria-hidden="true">
+<div class="modal fade" id="addParticipationModal" aria-labelledby="addParticipationModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-xl">
     <div class="modal-content">
       <div class="modal-header">
@@ -142,7 +154,7 @@
                 </td>
 
                 <!-- Modal para editar participación -->
-                <div class="modal fade" id="editParticipationModal-<%= participation.id %>" tabindex="-1" aria-labelledby="editParticipationModalLabel-<%= participation.id %>">
+                <div class="modal fade" id="editParticipationModal-<%= participation.id %>" aria-labelledby="editParticipationModalLabel-<%= participation.id %>">
                   <div class="modal-dialog modal-dialog-centered modal-lg">
                     <div class="modal-content">
                       <div class="modal-header">
@@ -173,3 +185,5 @@
     </div>
   <% end %>
 </div>
+
+<%= render "modals/add_result", match: @match %>

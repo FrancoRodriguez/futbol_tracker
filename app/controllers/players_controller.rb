@@ -5,22 +5,16 @@ class PlayersController < ApplicationController
     @player = Player.find(params[:id])
     @results_count = {victories: 0, defeats: 0, draws: 0}
 
-    @player.participations.each do |participation|
+    @player.participations.joins(:match).where('matches.date <= ?', Date.today).each do |participation|
       match = participation.match
-      participations = match.participations.includes(:player)
-      opponent_participation = participations.reject { |p| p.team == participation.team }.first
+      next if match.win_id.nil?
 
-      if opponent_participation
-        opponent_team_goals = opponent_participation.goals
-        player_team_goals = participation.goals
-
-        if player_team_goals > opponent_team_goals
-          @results_count[:victories] += 1
-        elsif player_team_goals < opponent_team_goals
-          @results_count[:defeats] += 1
-        else
-          @results_count[:draws] += 1
-        end
+      if match.win_id.nil?
+        @results_count[:draws] += 1
+      elsif match.win_id == participation.team_id
+        @results_count[:victories] += 1
+      else
+        @results_count[:defeats] += 1
       end
     end
   end

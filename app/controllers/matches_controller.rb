@@ -30,7 +30,7 @@ class MatchesController < ApplicationController
 
   def create
     @match = Match.new(match_params)
-    if @match.save
+    if @match.save!
       redirect_to @match, notice: 'El partido fue creado con éxito.'
     else
       render :new
@@ -73,6 +73,7 @@ class MatchesController < ApplicationController
   end
 
   def match_params
-    params.require(:match).permit(:location, :date, :result, :video_url, :mvp_id, player_ids: [])
+    params.require(:match).permit(:date, :location, :result, :home_team_id, :away_team_id, :video_url, :mvp_id, :win_id)
   end
+
 end

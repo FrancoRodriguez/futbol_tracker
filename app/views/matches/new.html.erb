@@ -25,6 +25,18 @@
       </div>
     </div>
 
+    <div class="row mb-3">
+      <div class="col-md-6">
+        <%= f.label :home_team_id, "Equipo Local" %>
+        <%= f.collection_select :home_team_id, Team.all, :id, :name, { prompt: "Selecciona el equipo local" }, class: "form-select" %>
+      </div>
+
+      <div class="col-md-6">
+        <%= f.label :away_team_id, "Equipo Visitante" %>
+        <%= f.collection_select :away_team_id, Team.all, :id, :name, { prompt: "Selecciona el equipo visitante" }, class: "form-select" %>
+      </div>
+    </div>
+
     <div class="text-center">
       <%= f.submit "Guardar", class: "btn btn-primary" %>
       <%= link_to "Cancelar", matches_path, class: "btn btn-secondary ms-2" %>

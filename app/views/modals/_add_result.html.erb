@@ -1,0 +1,35 @@
+<div class="modal fade" id="addResultModal-<%= match.id %>" aria-labelledby="addResultModalLabel-<%= match.id %>" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addResultModalLabel-<%= match.id %>">Agregar Resultado</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <%= form_with(model: match, url: match_path(match), method: :patch, local: true) do |f| %>
+          <div class="mb-3">
+            <%= f.label :home_team_id, "Equipo Local" %>
+            <%= f.collection_select :home_team_id, Team.all, :id, :name, { prompt: "Selecciona el equipo local" }, class: "form-select" %>
+          </div>
+
+          <div class="mb-3">
+            <%= f.label :away_team_id, "Equipo Visitante" %>
+            <%= f.collection_select :away_team_id, Team.all, :id, :name, { prompt: "Selecciona el equipo visitante" }, class: "form-select" %>
+          </div>
+
+          <div class="mb-3">
+            <%= f.label :result, "Resultado" %>
+            <%= f.text_field :result, class: "form-control", placeholder: "Ejemplo: 2-1" %>
+          </div>
+
+          <div class="mb-3">
+            <%= f.label :win_id, "Ganador" %>
+            <%= f.collection_select :win_id, Team.all, :id, :name, { prompt: "Selecciona el equipo ganador" }, class: "form-select" %>
+          </div>
+
+          <%= f.submit "Guardar", class: "btn btn-primary" %>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>

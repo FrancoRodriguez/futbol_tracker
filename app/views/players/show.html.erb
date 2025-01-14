@@ -58,14 +58,16 @@
           <thead class="table-dark">
           <tr>
             <th>Partido</th>
-            <th>Ubicación</th>
+            <th>Equipo</th>
+            <th>Resultado</th>
           </tr>
           </thead>
           <tbody>
           <% @player.participations.joins(:match).where('matches.date < ?', Date.today).each do |participation| %>
-            <tr>
+            <tr class="align-middle">
               <td><%= link_to "Partido #{participation.match.date}", match_path(participation.match) %></td>
-              <td><%= participation.match.location %></td>
+              <td><%= participation.team.name %></td>
+              <td class="text-center"><%= render "matches/result", match: participation.match %></td>
             </tr>
           <% end %>
           </tbody>

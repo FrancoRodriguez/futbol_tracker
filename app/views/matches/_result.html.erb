@@ -1,0 +1,23 @@
+<div class="scoreboard bg-light shadow-sm p-3 rounded">
+  <div class="d-flex justify-content-between align-items-center">
+    <div class="team fw-bold text-uppercase">
+      <%= match.home_team.name %>
+    </div>
+    <div class="score text-dark fs-4 fw-bold mx-3">
+      <%= match.result || "vs" %>
+    </div>
+    <div class="team fw-bold text-uppercase">
+      <%= match.away_team.name %>
+    </div>
+  </div>
+  <hr class="my-2">
+  <div class="match-info text-secondary">
+    <% if match.win == match.home_team %>
+      <small class="text-success fw-bold">Ganador: <%= match.home_team.name %></small>
+    <% elsif match.win == nil %>
+      <small>Resultado no definido</small>
+    <% else %>
+      <small class="text-success fw-bold">Ganador: <%= match.away_team.name %></small>
+    <% end %>
+  </div>
+</div>
