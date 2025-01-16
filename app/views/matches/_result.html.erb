@@ -15,7 +15,9 @@
     <% if match.win == match.home_team %>
       <small class="text-success fw-bold">Ganador: <%= match.home_team.name %></small>
     <% elsif match.win == nil %>
-      <small>Resultado no definido</small>
+      <small class="text-danger fw-bold">Resultado no definido</small>
+    <% elsif match.win == 10 %>
+      <small class="text-warning fw-bold">Empate</small>
     <% else %>
       <small class="text-success fw-bold">Ganador: <%= match.away_team.name %></small>
     <% end %>
