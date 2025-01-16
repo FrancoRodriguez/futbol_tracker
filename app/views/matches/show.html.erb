@@ -63,7 +63,7 @@
   </div>
 <% end %>
 
-<% if @match.date < Date.today %>
+<% if @match.date <= Date.today %>
   <% if @match.mvp.present? %>
     <div class="alert alert-success text-center shadow-lg">
       <i class="fas fa-trophy fa-2x text-warning"></i>
