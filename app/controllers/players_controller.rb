@@ -9,7 +9,7 @@ class PlayersController < ApplicationController
       match = participation.match
       next if match.win_id.nil?
 
-      if match.win_id.nil?
+      if match.win.name == 'Empate'
         @results_count[:draws] += 1
       elsif match.win_id == participation.team_id
         @results_count[:victories] += 1
