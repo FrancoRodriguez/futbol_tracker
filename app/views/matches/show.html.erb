@@ -13,8 +13,12 @@
     <tr class="text-center">
       <td><%= @match.date %></td>
       <td>
-        <%= link_to @match.video_url, target: "_blank", rel: "noopener noreferrer", class: "text-decoration-none" do %>
-          <i class="fas fa-video text-danger"></i>
+        <% if @match.video_url %>
+          <%= link_to @match.video_url, target: "_blank", rel: "noopener noreferrer", class: "text-decoration-none" do %>
+            <i class="fas fa-video text-danger"></i>
+          <% end %>
+        <% else %>
+          No hay video adjunto
         <% end %>
       </td>
       <td class="text-center">
