@@ -15,17 +15,7 @@
         <tbody>
         <% @players.each_with_index do |player, index| %>
           <tr class="<%= 'top-scorer' if index < 3 %>">
-            <td class="text-center">
-              <% if index == 0 %>
-                <span class="badge bg-gold text-dark p-2"><%= index + 1 %></span>
-              <% elsif index == 1 %>
-                <span class="badge bg-silver text-dark p-2"><%= index + 1 %></span>
-              <% elsif index == 2 %>
-                <span class="badge bg-bronze text-dark p-2"><%= index + 1 %></span>
-              <% else %>
-                <span class="badge bg-secondary p-2"><%= index + 1 %></span>
-              <% end %>
-            </td>
+            <td class="text-center"><%= render "tables/top_three", index: %></td>
             <td class="text-center">
               <%= link_to player.name, player_path(player), class: "text-decoration-none text-dark" %>
             </td>
