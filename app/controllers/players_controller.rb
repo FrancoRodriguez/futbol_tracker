@@ -76,6 +76,22 @@ class PlayersController < ApplicationController
                      .order('mvp_count DESC')
   end
 
+  def win_ranking
+    @players = Player
+                 .joins(participations: :match)
+                 .where.not('matches.result ~* ?', '^\s*(\d+)-\1\s*$') # Exclude draws where scores are equal
+                 .select(
+                   'players.*,
+                  COUNT(CASE WHEN participations.team_id = matches.win_id THEN 1 END) AS total_wins,
+                  COUNT(CASE WHEN participations.team_id != matches.win_id THEN 1 END) AS total_losses'
+                 )
+                 .group('players.id')
+                 .order(Arel.sql('
+                 COUNT(CASE WHEN participations.team_id = matches.win_id THEN 1 END) -
+                 COUNT(CASE WHEN participations.team_id != matches.win_id THEN 1 END) DESC
+               ')) # Order by win-loss difference
+  end
+
   private
 
   def set_player

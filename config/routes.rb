@@ -7,9 +7,8 @@ Rails.application.routes.draw do
 
   resources :players do
     collection do
-      get :goal_scorers
-      get :assist_scorers
       get :mvp_ranking
+      get :win_ranking
     end
   end
   resources :teams, only: [:index]
