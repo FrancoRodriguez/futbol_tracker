@@ -20,7 +20,7 @@
               <%= link_to player.name, player_path(player), class: "text-decoration-none text-dark" %>
             </td>
             <td class="text-center text-success">
-              <%= player.total_wins - player.total_losses %>
+              <%= player.win_diff %>
             </td>
             <td class="text-center text-success"><%= player.total_wins %></td>
             <td class="text-center text-danger"><%= player.total_losses %></td>

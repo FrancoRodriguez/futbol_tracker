@@ -79,17 +79,17 @@ class PlayersController < ApplicationController
   def win_ranking
     @players = Player
                  .joins(participations: :match)
-                 .where.not('matches.result ~* ?', '^\s*(\d+)-\1\s*$') # Exclude draws where scores are equal
+                 .where.not('matches.result ~* ?', '^\s*(\d+)-\1\s*$') # Excluir empates
                  .select(
                    'players.*,
                   COUNT(CASE WHEN participations.team_id = matches.win_id THEN 1 END) AS total_wins,
-                  COUNT(CASE WHEN participations.team_id != matches.win_id THEN 1 END) AS total_losses'
+                  COUNT(CASE WHEN participations.team_id != matches.win_id THEN 1 END) AS total_losses,
+                  (COUNT(CASE WHEN participations.team_id = matches.win_id THEN 1 END) -
+                   COUNT(CASE WHEN participations.team_id != matches.win_id THEN 1 END)) AS win_diff,
+                  COUNT(*) AS total_matches'
                  )
                  .group('players.id')
-                 .order(Arel.sql('
-                 COUNT(CASE WHEN participations.team_id = matches.win_id THEN 1 END) -
-                 COUNT(CASE WHEN participations.team_id != matches.win_id THEN 1 END) DESC
-               ')) # Order by win-loss difference
+                 .order(Arel.sql('win_diff DESC, total_matches DESC'))
   end
 
   private
