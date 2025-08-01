@@ -3,20 +3,40 @@ class PlayersController < ApplicationController
 
   def show
     @player = Player.find(params[:id])
-    @results_count = {victories: 0, defeats: 0, draws: 0}
+    @results_count = { victories: 0, defeats: 0, draws: 0 }
 
-    @player.participations.joins(:match).where('matches.date <= ?', Date.today).each do |participation|
+    participations = @player.participations.joins(:match).where('matches.date <= ?', Date.today).order('matches.date ASC')
+
+    balance = 0
+    dates = []
+    balance_cumulative = []
+
+    participations.each do |participation|
       match = participation.match
       next if match.win_id.nil?
 
       if match.win.name == 'Empate'
         @results_count[:draws] += 1
+        # No cambia el balance en empate
       elsif match.win_id == participation.team_id
         @results_count[:victories] += 1
+        balance += 1  # Subir en 1 si gana
       else
         @results_count[:defeats] += 1
+        balance -= 1  # Bajar en 1 si pierde
       end
+
+      dates << match.date.strftime("%Y-%m-%d")
+      balance_cumulative << balance
     end
+
+    total_matches = participations.count
+    @win_rate = total_matches > 0 ? (@results_count[:victories].to_f / total_matches * 100).round(2) : 0
+
+    @chart_data = {
+      dates: dates,
+      balance: balance_cumulative
+    }
   end
 
   def new

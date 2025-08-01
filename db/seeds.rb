@@ -28,18 +28,17 @@ players = [
   Player.create!(name: 'Felipe Castro')
 ]
 
-# Crear 10 partidos con participaciones aleatorias
-10.times do
+# Crear 100 partidos con participaciones aleatorias para historial amplio
+100.times do |i|
   home_team, away_team = teams.sample(2)
-
-  # Evitar que ambos equipos sean el mismo
   while home_team == away_team
     away_team = teams.sample
   end
 
-  match_players = players.sample(4)
-  match_date = rand(-10..10).days.from_now.to_date
+  # Fecha distribuida entre hace 1 año y hoy
+  match_date = (Date.today - rand(0..365))
 
+  # Crear goles aleatorios
   goals_home = rand(0..5)
   goals_away = rand(0..5)
   result = "#{goals_home}-#{goals_away}"
@@ -49,8 +48,11 @@ players = [
            elsif goals_away > goals_home
              away_team
            else
-             nil
+             nil # empate
            end
+
+  # Seleccionar jugadores aleatoriamente para el partido (4 a 6 jugadores)
+  match_players = players.sample(rand(4..6))
 
   match = Match.create!(
     home_team: home_team,
@@ -62,12 +64,14 @@ players = [
     players: match_players
   )
 
-  # Crear participaciones con stats aleatorios
+  # Asignar equipo y stats a cada participación
   match.participations.each do |p|
+    # Aseguramos que la participación pertenezca a uno de los equipos del partido
+    team = [home_team, away_team].sample
     p.update!(
       goals: rand(0..3),
       assists: rand(0..2),
-      team: [home_team, away_team].sample
+      team: team
     )
   end
 end

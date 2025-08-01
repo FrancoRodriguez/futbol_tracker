@@ -45,9 +45,79 @@
         </tr>
         </tbody>
       </table>
+
+      <!-- Porcentaje de Victorias -->
+      <table class="table table-bordered text-center mt-3">
+        <tbody>
+        <tr>
+          <th>Porcentaje de Victorias</th>
+          <td colspan="4"><%= "#{@win_rate}%" %></td>
+        </tr>
+        </tbody>
+      </table>
     </div>
   </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<div class="card shadow-sm mb-4">
+  <div class="card-body">
+    <h5 class="card-title">Balance histórico (Victorias vs Derrotas)</h5>
+    <canvas id="balanceChart" width="600" height="300"></canvas>
+  </div>
+</div>
+
+<script>
+    document.addEventListener("turbolinks:load", function() {
+        drawBalanceChart();
+    });
+
+    document.addEventListener("turbo:load", function() {
+        drawBalanceChart();
+    });
+
+    function drawBalanceChart() {
+        const ctx = document.getElementById('balanceChart');
+        if (!ctx) return;  // Por si no está en esta página
+
+        const chartContext = ctx.getContext('2d');
+
+        // Si ya tienes un chart creado, destrúyelo para evitar duplicados
+        if (window.balanceChartInstance) {
+            window.balanceChartInstance.destroy();
+        }
+
+        window.balanceChartInstance = new Chart(chartContext, {
+            type: 'line',
+            data: {
+                labels: <%= raw @chart_data[:dates].to_json %>,
+                datasets: [{
+                    label: 'Balance (Victorias - Derrotas)',
+                    data: <%= raw @chart_data[:balance].to_json %>,
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    fill: true,
+                    tension: 0.1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    x: {
+                        title: { display: true, text: 'Fecha' }
+                    },
+                    y: {
+                        title: { display: true, text: 'Balance acumulado' },
+                        beginAtZero: true,
+                        suggestedMin: -5,
+                        suggestedMax: 10
+                    }
+                }
+            }
+        });
+    }
+</script>
 
 <% if @player.participations.any? %>
   <div class="card shadow-sm mb-4">
