@@ -110,7 +110,6 @@ class PlayersController < ApplicationController
                      )
                      .group('players.id')
                      .order('win_diff DESC, total_matches DESC')
-                     .limit(3)
   end
 
   private
