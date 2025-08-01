@@ -58,4 +58,4 @@ end
 
 gem "devise", "~> 4.9"
 gem 'kaminari' # used for pagination
-
+gem "image_processing"

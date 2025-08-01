@@ -14,5 +14,10 @@
     <%= f.text_field :contact_info, class: "form-control" %>
   </div>
 
+  <div class="form-group">
+    <%= f.label :profile_photo %>
+    <%= f.file_field :profile_photo %>
+  </div>
+
   <%= f.submit 'Editar Jugador', class: "btn btn-primary" %>
 <% end %>
