@@ -13,7 +13,7 @@
         </tr>
         </thead>
         <tbody>
-        <% @players.each_with_index do |player, index| %>
+        <% @top_players.each_with_index do |player, index| %>
           <tr class="<%= 'top-scorer' if index < 3 %>">
             <td class="text-center"><%= render "tables/top_three", index: %></td>
             <td class="text-center">

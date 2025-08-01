@@ -25,19 +25,20 @@
 </head>
 
 <body>
-  <%= render 'layouts/navbar' %>
-  <div class="container mt-4">
-    <%= render 'layouts/errors' %>
-    <%= yield %>
-  </div>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>
+<%= render 'layouts/navbar' %>
+<div class="container mt-4">
+  <%= render 'layouts/errors' %>
+  <%= yield %>
+</div>
+
+<!-- Solo un Bootstrap Bundle que incluye Popper -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 
 <style>
     /* Colores de fondo */
     .bg-primary {
         background-color: #08A6FE !important;
+    }
     .bg-success {
         background-color: #28a745 !important;
     }
@@ -133,6 +134,31 @@
     .team-name:hover {
         color: #17a2b8; /* Color al pasar el ratón */
         text-decoration: underline;
+    }
+
+    .card-stats {
+        min-height: 300px;
+        border-radius: 12px;
+        background-color: #ffffff;
+        box-shadow: 0 20px 30px rgba(0, 0, 0, 0.25) !important;
+        transition: transform 0.25s ease-in-out, box-shadow 0.25s ease-in-out;
+        border-bottom: 4px solid #08A6FE;
+    }
+
+    .card-stats:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 25px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    /* CENTRADO vertical del contenido interno */
+    .card-stats .card-body {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+        padding: 1rem;
+        text-align: center;
     }
 
 </style>

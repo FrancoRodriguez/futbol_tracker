@@ -9,6 +9,7 @@ class MatchesController < ApplicationController
     @matches = Match.order(date: :desc)
     @next_match = @matches.where("date >= ?", Time.zone.today).first
     @past_matches = @matches.where("date < ?", Time.zone.today).page(params[:page]).per(PAGINATION_NUMBER)
+
     @match_results = @matches.map do |match|
       participations = match.participations.includes(:player)
       teams = participations.map(&:team).uniq
@@ -17,6 +18,19 @@ class MatchesController < ApplicationController
         result_message: calculate_team_goals(teams, participations)
       }
     end
+
+    @top_mvp = Player.joins(:mvp_matches).group(:id).order('COUNT(matches.id) DESC').first
+
+    @top_players = Player
+                     .joins(participations: :match)
+                     .where.not('matches.result ~* ?', '^\s*(\d+)-\1\s*$')
+                     .select(
+                       'players.*,
+       COUNT(CASE WHEN participations.team_id = matches.win_id THEN 1 END) AS total_wins'
+                     )
+                     .group('players.id')
+                     .order('total_wins DESC')
+                     .limit(3)
   end
 
   def show
