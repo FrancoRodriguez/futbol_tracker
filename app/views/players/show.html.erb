@@ -1,5 +1,4 @@
 <div class="container my-5">
-
   <!-- Nombre del jugador -->
   <div class="text-center mb-4">
     <h1 class="display-4 fw-bold"><%= @player.full_name %></h1>
@@ -31,6 +30,7 @@
         <div>
           <h5 class="card-title mb-1">Información de Contacto</h5>
             <%= link_to 'WhatsApp', "https://wa.me/#{@player.contact_info.gsub(/\D/, '')}", target: "_blank", class: "btn btn-success btn-sm mt-1" %>
+          <%= link_to 'WhatsApp', "https://wa.me/#{@player.contact_info.gsub(/\D/, '')}", target: "_blank", class: "btn btn-success btn-sm mt-1" %>
         </div>
       </div>
     </div>
@@ -73,7 +73,7 @@
     </div>
   </div>
 
-  <!-- Balance de victorias vs derrotas -->
+  <!-- Balance histórico -->
   <div class="card shadow-sm mb-4">
     <div class="card-body">
       <h5 class="card-title mb-3"><i class="fas fa-chart-line me-2"></i>Balance histórico</h5>
@@ -116,19 +116,21 @@
       Este jugador aún no ha participado en ningún partido.
     </div>
   <% end %>
-
-
 </div>
 
+<!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    document.addEventListener("turbolinks:load", drawBalanceChart);
     document.addEventListener("turbo:load", drawBalanceChart);
+    document.addEventListener("turbolinks:load", drawBalanceChart);
 
     function drawBalanceChart() {
         const ctx = document.getElementById('balanceChart');
         if (!ctx) return;
+
         const chartContext = ctx.getContext('2d');
+        const balanceData = <%= raw @chart_data[:balance].to_json %>;
+        const labels = <%= raw @chart_data[:dates].to_json %>;
 
         if (window.balanceChartInstance) {
             window.balanceChartInstance.destroy();
@@ -137,14 +139,24 @@
         window.balanceChartInstance = new Chart(chartContext, {
             type: 'line',
             data: {
-                labels: <%= raw @chart_data[:dates].to_json %>,
+                labels: labels,
                 datasets: [{
                     label: 'Balance (Victorias - Derrotas)',
-                    data: <%= raw @chart_data[:balance].to_json %>,
-                    borderColor: 'rgba(54, 162, 235, 1)',
-                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                    fill: true,
-                    tension: 0.1
+                    data: balanceData,
+                    fill: {
+                        target: 'origin',
+                        above: 'rgba(75, 192, 192, 0.2)',  // Verde claro para positivo
+                        below: 'rgba(255, 99, 132, 0.2)'   // Rojo claro para negativo
+                    },
+                    tension: 0.1,
+                    borderWidth: 2,
+                    borderColor: 'rgba(0,0,0,0)', // invisible, lo pinta el segment
+                    segment: {
+                        borderColor: ctx =>
+                            (ctx.p0.parsed.y < 0 || ctx.p1.parsed.y < 0)
+                                ? 'rgba(255, 99, 132, 1)'  // rojo para negativo
+                                : 'rgba(75, 192, 192, 1)'  // verde para positivo
+                    }
                 }]
             },
             options: {
@@ -153,9 +165,8 @@
                     x: { title: { display: true, text: 'Fecha' } },
                     y: {
                         title: { display: true, text: 'Balance acumulado' },
-                        beginAtZero: true,
-                        suggestedMin: -5,
-                        suggestedMax: 10
+                        suggestedMin: Math.min(...balanceData) - 1,
+                        suggestedMax: Math.max(...balanceData) + 1
                     }
                 }
             }
