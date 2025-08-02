@@ -10,7 +10,7 @@
           <th>Asistencias</th>
         </tr>
         </thead>
-        <tbody>
+        <tbody class="table-dark">
         <% @assist_scorers.each_with_index do |assist_scorer, index| %>
           <tr class="<%= 'top-scorer' if index < 3 %>">
             <td class="text-center">

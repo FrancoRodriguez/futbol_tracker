@@ -35,119 +35,34 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 
 <style>
-    /* Colores de fondo */
-    .bg-primary {
-        background-color: #08A6FE !important;
-    }
-    .bg-success {
-        background-color: #28a745 !important;
-    }
-    .bg-warning {
-        background-color: #ffc107 !important;
-    }
-    .bg-danger {
-        background-color: #dc3545 !important;
-    }
-
-    /* Colores de texto */
-    .text-primary {
-        color: #08A6FE !important;
-    }
-    .text-success {
-        color: #28a745 !important;
-    }
-    .text-warning {
-        color: #ffc107 !important;
-    }
-    .text-danger {
-        color: #dc3545 !important;
-    }
-
-    /* Colores de bordes */
-    .border-primary {
-        border-color: #08A6FE !important;
-    }
-    .border-success {
-        border-color: #28a745 !important;
-    }
-
-    /* Botones */
-    .btn-primary {
-        background-color: #08A6FE;
-        border-color: #08A6FE;
-    }
-    .btn-success {
-        background-color: #28a745;
-        border-color: #28a745;
-    }
-    .btn-warning {
-        background-color: #ffc107;
-        border-color: #ffc107;
-    }
-    .btn-danger {
-        background-color: #dc3545;
-        border-color: #dc3545;
-    }
-
-    /* Estilo para la columna de índices */
-    .index-column {
-        width: 60px;
-        text-align: center;
-    }
-
-    /* Colores de las medallas */
-    .bg-gold {
-        background-color: #ffd700;
-    }
-    .bg-silver {
-        background-color: #c0c0c0;
-    }
-    .bg-bronze {
-        background-color: #cd7f32;
-    }
-
-    /* Resaltar a los goleadores en el top 3 */
-    .top-scorer {
-        background-color: #f8f9fa;
-        font-weight: bold;
-    }
-
-    /* Diseño general de la tabla */
-    .table {
-        border-radius: 10px;
-        overflow: hidden;
-    }
-
-    .table-hover tbody tr:hover {
-        background-color: #f1f1f1;
-    }
-
-    .shadow-lg {
-        box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.1);
-    }
-
-    /* Encabezado oscuro */
-    .table-dark {
-        background-color: #343a40;
-        color: #fff;
-    }
-    .team-name:hover {
-        color: #17a2b8; /* Color al pasar el ratón */
-        text-decoration: underline;
+    /* Fondos */
+    body, .container {
+        background-color: #121212 !important;
+        color: #E0E0E0 !important;
     }
 
     .card-stats {
         min-height: 300px;
+        border: none !important;
+        box-shadow: 0 8px 15px rgba(0,0,0,0.7) !important;
         border-radius: 12px;
-        background-color: #ffffff;
-        box-shadow: 0 20px 30px rgba(0, 0, 0, 0.25) !important;
-        transition: transform 0.25s ease-in-out, box-shadow 0.25s ease-in-out;
+        transition: all 0.3s ease;
         border-bottom: 4px solid #08A6FE;
     }
 
+    .card, .card-status {
+        color: white !important;
+        background-color: #1E1E1E !important;
+    }
+
     .card-stats:hover {
-        transform: translateY(-6px);
-        box-shadow: 0 25px 40px rgba(0, 0, 0, 0.3);
+        box-shadow: 0 15px 30px rgba(8,166,254,0.6) !important;
+        transform: translateY(-5px);
+    }
+
+    .card-gold:hover {
+        box-shadow: 0 10px 30px rgb(234, 225, 55) !important;
+        transform: translateY(-5px);
     }
 
     /* CENTRADO vertical del contenido interno */
@@ -161,6 +76,360 @@
         text-align: center;
     }
 
+    /* Textos */
+    h1, h2, h3, h4, h5, h6, p, a, span {
+        color: #E0E0E0 !important;
+    }
+
+    .text-muted, .text-secondary {
+        color: #888888 !important;
+    }
+
+    /* Botones */
+    .btn-primary {
+        background-color: #08A6FE !important;
+        border-color: #08A6FE !important;
+        color: #121212 !important;
+        font-weight: 600;
+    }
+
+    .btn-primary:hover, .btn-primary:focus {
+        background-color: #06a0f8 !important;
+        border-color: #06a0f8 !important;
+        color: #fff !important;
+        box-shadow: 0 0 8px #08A6FE;
+    }
+
+    .btn-success {
+        background-color: #28a745 !important;
+        border-color: #28a745 !important;
+        color: #121212 !important;
+        font-weight: 600;
+    }
+
+    .btn-success:hover, .btn-success:focus {
+        background-color: #239636 !important;
+        border-color: #239636 !important;
+        color: #fff !important;
+        box-shadow: 0 0 8px #28a745;
+    }
+
+    .btn-warning {
+        background-color: #FFC107 !important;
+        border-color: #FFC107 !important;
+        color: #121212 !important;
+        font-weight: 600;
+    }
+
+    .btn-warning:hover, .btn-warning:focus {
+        background-color: #e6b800 !important;
+        border-color: #e6b800 !important;
+        color: #121212 !important;
+        box-shadow: 0 0 8px #FFC107;
+    }
+
+    .btn-danger {
+        background-color: #dc3545 !important;
+        border-color: #dc3545 !important;
+        color: #fff !important;
+        font-weight: 600;
+    }
+
+    .btn-danger:hover, .btn-danger:focus {
+        background-color: #b02a37 !important;
+        border-color: #b02a37 !important;
+        box-shadow: 0 0 8px #dc3545;
+    }
+
+    /* Bordes y líneas */
+    .table, .table-bordered {
+        border-color: #2E2E2E !important;
+    }
+
+    .table-dark thead, .table-dark th {
+        background-color: #2E2E2E !important;
+        color: #E0E0E0 !important;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: #333333 !important;
+    }
+
+    /* Iconos y efectos */
+    .fas {
+        color: #08A6FE;
+    }
+
+    /* Scrollbar oscuro (opcional) */
+    ::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: #1E1E1E;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background-color: #08A6FE;
+        border-radius: 10px;
+        border: 2px solid #1E1E1E;
+    }
+
+    /* Navbar */
+    .navbar.bg-primary {
+        background-color: #121212 !important; /* fondo oscuro */
+        border-bottom: 2px solid #08A6FE;
+    }
+
+    .navbar .nav-link {
+        color: #E0E0E0 !important;
+        font-weight: 600;
+        transition: color 0.3s ease;
+    }
+
+    .navbar .nav-link:hover,
+    .navbar .nav-link.active {
+        color: #08A6FE !important; /* color principal */
+    }
+
+    .navbar .btn.btn-light {
+        background-color: #333 !important;
+        color: #E0E0E0 !important;
+        font-weight: 600;
+        border: none;
+        box-shadow: none;
+    }
+
+    .navbar .btn.btn-light:hover,
+    .navbar .btn.btn-light:focus {
+        background-color: #08A6FE !important;
+        color: #121212 !important;
+        box-shadow: 0 0 8px #08A6FE;
+    }
+
+    /* Tablas con fondo blanco */
+    .table-responsive.bg-white {
+        background-color: #1E1E1E !important; /* fondo oscuro */
+        padding: 1rem;
+        border-radius: 12px;
+        box-shadow: 0 8px 15px rgba(0,0,0,0.7);
+    }
+
+    .table-responsive.bg-white table.table {
+        background-color: #2E2E2E !important; /* tabla oscuro */
+        color: #E0E0E0 !important;
+        border-radius: 12px;
+        border-collapse: separate !important;
+        border-spacing: 0 8px;
+        overflow: hidden;
+    }
+
+    .table-responsive.bg-white table.table thead.table-dark {
+        background-color: #343a40 !important; /* un poco más oscuro */
+        color: #08A6FE !important; /* color azul principal para encabezados */
+        border: none !important;
+    }
+
+    .table-responsive.bg-white table.table tbody tr {
+        background-color: #1E1E1E !important;
+        border-radius: 12px;
+        transition: background-color 0.3s ease;
+    }
+
+    .table-responsive.bg-white table.table tbody tr:hover {
+        background-color: #08A6FE !important;
+        color: #121212 !important;
+    }
+
+    .table-responsive.bg-white table.table td,
+    .table-responsive.bg-white table.table th {
+        border: none !important;
+        vertical-align: middle;
+        padding: 0.75rem 1rem;
+    }
+
+    .table-responsive.bg-white table.table td a,
+    .table-responsive.bg-white table.table td small,
+    .table-responsive.bg-white table.table td p {
+        color: inherit;
+    }
+
+    .table-responsive.bg-white .dropdown-menu {
+        background-color: #2E2E2E;
+        border: none;
+        box-shadow: 0 8px 15px rgba(0,0,0,0.7);
+    }
+
+    .table-responsive.bg-white .dropdown-menu .dropdown-item {
+        color: #E0E0E0;
+        transition: background-color 0.3s ease;
+    }
+
+    .table-responsive.bg-white .dropdown-menu .dropdown-item:hover,
+    .table-responsive.bg-white .dropdown-menu .dropdown-item:focus {
+        background-color: #08A6FE;
+        color: #121212;
+    }
+
+    /* Botones dentro de tablas */
+    .table-responsive.bg-white .btn-secondary {
+        background-color: #333 !important;
+        border-color: #333 !important;
+        color: #E0E0E0 !important;
+        font-weight: 600;
+        transition: background-color 0.3s ease;
+    }
+
+    .table-responsive.bg-white .btn-secondary:hover,
+    .table-responsive.bg-white .btn-secondary:focus {
+        background-color: #08A6FE !important;
+        border-color: #08A6FE !important;
+        color: #121212 !important;
+        box-shadow: 0 0 8px #08A6FE;
+    }
+
+    /* Íconos */
+    .table-responsive.bg-white i.fas {
+        color: #08A6FE;
+    }
+
+    /* Scores y otros textos */
+    .scoreboard.bg-light {
+        background-color: #1E1E1E !important;
+        color: #E0E0E0 !important;
+        border-radius: 12px;
+        box-shadow: 0 8px 15px rgba
+    }
+
+    /* === Tablas oscuras === */
+
+    .table {
+        background-color: #1E1E1E !important;
+        color: #E0E0E0 !important;
+        border-collapse: separate;
+        border-spacing: 0;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    .table thead {
+        background-color: #2E2E2E !important;
+        color: #08A6FE !important;
+    }
+
+    .table td, .table th {
+        border-top: 1px solid #2E2E2E !important;
+    }
+
+    .table td .btn {
+        background-color: #2E2E2E;
+        color: #E0E0E0;
+    }
+
+    .table td .btn:hover {
+        background-color: #3a3a3a;
+    }
+
+
+    .table-hover tbody tr:hover {
+        background-color: #2a2a2a !important;
+    }
+
+    .table .text-dark {
+        color: #E0E0E0 !important;
+    }
+
+    .bg-light {
+        background-color: #1E1E1E !important;
+        color: #E0E0E0 !important;
+    }
+
+    .text-secondary {
+        color: #aaa !important;
+    }
+
+    /* === Scoreboard oscuro === */
+
+    .scoreboard {
+        background-color: #1E1E1E !important;
+        color: #E0E0E0 !important;
+        border-radius: 12px;
+        box-shadow: 0 8px 15px rgba(0,0,0,0.7);
+    }
+
+    .scoreboard .score {
+        color: #08A6FE !important;
+    }
+
+    .scoreboard .team {
+        color: #E0E0E0 !important;
+    }
+
+    .scoreboard .match-info small {
+        color: #ccc !important;
+    }
+
+    .pagination {
+        justify-content: center;
+        margin-top: 2rem;
+    }
+
+    .pagination .page-item {
+        background-color: transparent;
+    }
+
+    .pagination .page-link {
+        background-color: #2E2E2E; /* gris oscuro */
+        border: 1px solid #444;
+        color: #E0E0E0;
+        font-weight: bold;
+        transition: all 0.2s ease-in-out;
+    }
+
+    .pagination .page-link:hover {
+        background-color: #08A6FE;
+        color: #121212;
+        border-color: #08A6FE;
+    }
+
+    .pagination .page-item.active .page-link {
+        background-color: #08A6FE;
+        color: #121212;
+        border-color: #08A6FE;
+    }
+
+    .pagination .page-item.disabled .page-link {
+        background-color: #1E1E1E;
+        color: #888;
+        border-color: #333;
+        pointer-events: none;
+        opacity: 0.7;
+    }
+
+    .profile-header-card {
+        background-color: #1E1E1E !important;
+        border-left: 4px solid #08A6FE;
+        border-radius: 16px;
+    }
+
+    .border-primary {
+        border-color: #08A6FE !important;
+    }
+
+    .gold-border {
+        border: 3px solid #ffd700 !important;
+        border-radius: 8px;
+    }
+
+    .silver-border {
+        border: 3px solid #c0c0c0 !important;
+        border-radius: 8px;
+    }
+
+    .bronze-border {
+        border: 3px solid #cd7f32 !important;
+        border-radius: 8px;
+    }
 </style>
 </body>
 </html>

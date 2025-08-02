@@ -1,0 +1,71 @@
+<% last_month = Date.today.last_month %>
+<% last_month_range = last_month.beginning_of_month..last_month.end_of_month %>
+
+<% player_of_the_month = Player
+  .joins(participations: :match)
+  .where(matches: { date: last_month_range })
+  .group(:id)
+  .select('players.*,
+           COUNT(*) AS total_matches,
+           COUNT(CASE WHEN participations.team_id = matches.win_id THEN 1 END) AS victories')
+  .sort_by do |player|
+  mvp_count = Match.where(date: last_month_range, mvp_id: player.id).count
+  [-player.victories.to_i, -mvp_count, -player.total_matches.to_i]
+end
+  .first %>
+
+<% if player_of_the_month %>
+  <% mvp_count = Match.where(date: last_month_range, mvp_id: player_of_the_month.id).count %>
+  <% total_games = player_of_the_month.participations
+                                      .joins(:match)
+                                      .where(matches: { date: last_month_range })
+                                      .count %>
+  <% wins = player_of_the_month.participations
+                               .joins(:match)
+                               .where(matches: { date: last_month_range })
+                               .where('participations.team_id = matches.win_id')
+                               .count %>
+  <% win_percentage = total_games > 0 ? (100.0 * wins / total_games).round : 0 %>
+
+  <div class="card shadow-sm mb-4 border border-warning bg-dark text-light card-gold">
+    <div class="card-body d-flex flex-column flex-md-row align-items-center text-center text-md-start justify-content-between">
+
+      <!-- Foto + Info -->
+      <div class="d-flex align-items-center mb-3 mb-md-0">
+        <!-- Foto -->
+        <div class="me-4">
+          <% if player_of_the_month.profile_photo.attached? %>
+            <%= image_tag player_of_the_month.profile_photo,
+                          class: "rounded-circle border border-3 border-warning",
+                          style: "width: 100px; height: 100px; object-fit: cover;" %>
+          <% else %>
+            <%= image_tag "default_avatar.png",
+                          class: "rounded-circle border border-3 border-warning",
+                          width: 100, height: 100 %>
+          <% end %>
+        </div>
+
+        <!-- Info -->
+        <div>
+          <h4 class="fw-bold mb-1 text-warning">
+            <i class="fas fa-star me-2"></i>Jugador del Mes - <%= mes_anio_espanol(last_month) %>
+          </h4>
+          <h5 class="mb-2"><%= player_of_the_month.full_name %></h5>
+          <p class="mb-1">
+            🏟️ Partidos: <strong><%= total_games %></strong>
+            🏆 Victorias: <strong><%= wins %></strong>
+            ✨ MVPs: <strong><%= mvp_count %></strong>
+          </p>
+        </div>
+      </div>
+
+      <!-- Porcentaje a la derecha -->
+      <div class="text-end ms-md-4" style="min-width: 120px;">
+        <p class="mb-0 fw-bold fs-4 text-success">
+          📈 <%= win_percentage %>%
+        </p>
+        <small class="text-muted">Porcentaje de victorias</small>
+      </div>
+    </div>
+  </div>
+<% end %>

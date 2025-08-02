@@ -1,55 +1,59 @@
-<h1 class="text-center mb-4">Detalles del Partido</h1>
+<h1 class="text-center mb-4 fw-bold">Detalles del Partido</h1>
 
-<div class="table-responsive shadow-lg rounded bg-light">
-  <table class="table table-bordered align-middle">
-    <thead class="table-dark text-center">
-    <tr>
-      <th>Fecha</th>
-      <th>Video</th>
-      <th>Resultado</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr class="text-center">
-      <td><%= @match.date %></td>
-      <td>
-        <% if @match.video_url %>
-          <%= link_to @match.video_url, target: "_blank", rel: "noopener noreferrer", class: "text-decoration-none" do %>
-            <i class="fas fa-video text-danger"></i>
-          <% end %>
-        <% else %>
-          No hay video adjunto
-        <% end %>
-      </td>
-      <td class="text-center">
-        <% if @match.result.present? %>
-          <%= render "result", match: @match %>
-        <% else %>
-            <% if user_signed_in? %>
-              <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addResultModal-<%= @match.id %>">
-                Agregar resultado
-              </button>
+<div class="card shadow-lg rounded mb-4">
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-bordered align-middle mb-0">
+        <thead class="table-dark text-center">
+        <tr>
+          <th>Fecha</th>
+          <th>Video</th>
+          <th>Resultado</th>
+        </tr>
+        </thead>
+        <tbody class="table-dark text-center">
+        <tr>
+          <td><%= @match.date %></td>
+          <td>
+            <% if @match.video_url.present? %>
+              <%= link_to @match.video_url, target: "_blank", rel: "noopener noreferrer", class: "text-decoration-none" do %>
+                <i class="fas fa-video text-danger fs-4"></i>
+              <% end %>
             <% else %>
-              Resultado no subido
+              <span class="text-muted fst-italic">No hay video adjunto</span>
             <% end %>
-        <% end %>
-      </td>
-    </tr>
-    </tbody>
-  </table>
+          </td>
+          <td>
+            <% if @match.result.present? %>
+              <%= render "result", match: @match %>
+            <% else %>
+              <% if user_signed_in? %>
+                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addResultModal-<%= @match.id %>">
+                  Agregar resultado
+                </button>
+              <% else %>
+                <span class="text-muted fst-italic">Resultado no subido</span>
+              <% end %>
+            <% end %>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
 </div>
 
-<!-- Botón para abrir el modal de agregar participación -->
-<div class="text-center mb-4 mt-4">
-  <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addParticipationModal">
-    Agregar Jugador
+<!-- Botón para agregar jugador -->
+<div class="text-center mb-5">
+  <button type="button" class="btn btn-primary btn-lg shadow" data-bs-toggle="modal" data-bs-target="#addParticipationModal">
+    <i class="fas fa-user-plus me-2"></i> Agregar Jugador
   </button>
 </div>
 
 <% if user_signed_in? %>
-  <div class="card shadow-lg mb-4">
+  <div class="card shadow-lg mb-5">
     <div class="card-header bg-primary text-white text-center">
-      <h2 class="mb-0">Seleccionar MVP</h2>
+      <h2 class="mb-0 fw-bold">Seleccionar MVP</h2>
     </div>
     <div class="card-body bg-light">
       <%= form_with(model: @match, url: match_path(@match), method: :patch, local: true) do |f| %>
@@ -67,54 +71,41 @@
   </div>
 <% end %>
 
-<% if @match.date <= Date.today %>
-  <% if @match.mvp.present? %>
-    <div class="alert alert-success text-center shadow-lg">
-      <i class="fas fa-trophy fa-2x text-warning"></i>
-      <h3 class="mt-2">MVP del Partido:</h3>
-      <p class="fs-4 fw-bold text-primary"><%= link_to player_path(@match.mvp) do %><%= @match.mvp.full_name %><% end %></p>
-    </div>
-  <% else %>
-    <div class="alert alert-warning text-center shadow-lg">
-      <i class="fas fa-exclamation-circle fa-2x text-danger"></i>
-      <h3 class="mt-2">MVP no seleccionado</h3>
-      <p class="fs-5">Aún no se ha seleccionado un MVP para este partido.</p>
-    </div>
-  <% end %>
-<% end %>
-
+<%= render "matches/show/mvp", match: @match %>
 
 <!-- Modal para agregar participación -->
 <div class="modal fade" id="addParticipationModal" aria-labelledby="addParticipationModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-xl">
     <div class="modal-content">
-      <div class="modal-header">
+      <div class="modal-header bg-primary text-white">
         <h5 class="modal-title" id="addParticipationModalLabel">Agregar Jugadores al Partido</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
       </div>
       <div class="modal-body">
         <%= form_with(model: Participation.new, url: match_participations_path(@match), local: true) do |f| %>
-          <div class="form-group">
-            <%= f.hidden_field :match_id, value: @match.id %>
-            <p><strong>Partido:</strong> <%= @match.location %> - <%= date_in_spanish(@match.date) %></p>
-          </div>
+          <%= f.hidden_field :match_id, value: @match.id %>
+          <p><strong>Partido:</strong> <%= @match.location %> - <%= date_in_spanish(@match.date) %></p>
 
           <div class="row">
             <div class="col-md-6 mb-3">
-              <%= f.label :player_id, "Jugador" %>
-              <%= f.collection_select :player_id, @available_players, :id, :name, { prompt: "Selecciona un jugador" }, { class: "form-control" } %>
-              <div id="emailHelp" class="form-text">Si el jugador no se encuentra en la lista debe ser porque ya está inscripto en el partido.</div>
+              <%= f.label :player_id, "Jugador", class: "form-label" %>
+              <%= f.collection_select :player_id, @available_players, :id, :name,
+                                      { prompt: "Selecciona un jugador" },
+                                      { class: "form-select" } %>
+              <div class="form-text">Si el jugador no aparece, ya está inscripto.</div>
             </div>
 
             <div class="col-md-6 mb-3">
-              <%= f.label :team_id, "Equipo" %>
-              <%= f.collection_select :team_id, Team.all, :id, :name, { prompt: "Selecciona un equipo" }, { class: "form-control" } %>
+              <%= f.label :team_id, "Equipo", class: "form-label" %>
+              <%= f.collection_select :team_id, Team.all, :id, :name,
+                                      { prompt: "Selecciona un equipo" },
+                                      { class: "form-select" } %>
             </div>
           </div>
 
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-            <%= f.submit "Agregar Participación", class: "btn btn-primary", id: "submitParticipationButton", disabled: true %>
+            <%= f.submit "Agregar Participación", class: "btn btn-primary", disabled: true, id: "submitParticipationButton" %>
           </div>
         <% end %>
       </div>
@@ -125,32 +116,34 @@
 <div class="row mt-4">
   <% @teams.each do |team| %>
     <div class="col-lg-6 col-12 mb-4">
-      <div class="shadow-lg p-4 rounded bg-white">
-        <h3 class="text-center mb-0">Equipo <%= team.name %></h3>
-        <% if @participations.where(team: team).count == 1 %>
-          <p class="text-center fw-light"><%= @participations.where(team: team).count%> jugador inscripto</p>
-        <% else %>
-        <p class="text-center fw-light"><%= @participations.where(team: team).count%> jugadores inscriptos</p>
-        <% end %>
+      <div class="card shadow-lg p-4 rounded bg-white">
+        <h3 class="text-center mb-3 fw-bold">Equipo <%= team.name %></h3>
+        <p class="text-center fst-italic text-muted mb-3">
+          <%= pluralize(@participations.where(team: team).count, 'jugador inscripto', 'jugadores inscriptos') %>
+        </p>
         <div class="table-responsive">
-          <table class="table table-hover align-middle">
+          <table class="table table-hover align-middle mb-0">
             <thead class="table-dark text-center">
             <tr>
               <th><i class="fas fa-user"></i> Jugador</th>
               <th>Acciones</th>
             </tr>
             </thead>
-            <tbody>
+            <tbody class="table-dark">
             <% @participations.where(team: team).joins(:player).order('players.rating DESC').each do |participation| %>
               <tr>
-                <td><%= link_to player_path(participation.player) do %><%= participation.player.full_name %><% end %></td>
+                <td>
+                  <%= link_to player_path(participation.player), class: "text-decoration-none" do %>
+                    <%= participation.player.full_name %>
+                  <% end %>
+                </td>
                 <td class="text-center">
                   <% if @match.date > 3.days.ago || user_signed_in? %>
-                    <button type="button" class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editParticipationModal-<%= participation.id %>">
+                    <button type="button" class="btn btn-warning btn-sm me-2" data-bs-toggle="modal" data-bs-target="#editParticipationModal-<%= participation.id %>">
                       Editar
                     </button>
                   <% else %>
-                    <button class="btn btn-warning btn-sm" disabled>Editar</button>
+                    <button class="btn btn-warning btn-sm me-2" disabled>Editar</button>
                   <% end %>
                   <% if user_signed_in? %>
                     <%= button_to 'Eliminar', match_participation_path(@match, participation), method: :delete, data: { confirm: '¿Estás seguro?' }, class: 'btn btn-danger btn-sm' %>
@@ -158,18 +151,18 @@
                 </td>
 
                 <!-- Modal para editar participación -->
-                <div class="modal fade" id="editParticipationModal-<%= participation.id %>" aria-labelledby="editParticipationModalLabel-<%= participation.id %>">
+                <div class="modal fade" id="editParticipationModal-<%= participation.id %>" aria-labelledby="editParticipationModalLabel-<%= participation.id %>" tabindex="-1" aria-hidden="true">
                   <div class="modal-dialog modal-dialog-centered modal-lg">
                     <div class="modal-content">
-                      <div class="modal-header">
+                      <div class="modal-header bg-primary text-white">
                         <h5 class="modal-title" id="editParticipationModalLabel-<%= participation.id %>">Editar Participación de <b><%= participation.player.full_name %></b></h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                       </div>
                       <div class="modal-body">
                         <%= form_with(model: [@match, participation], url: match_participation_path(@match, participation), method: :patch, local: true) do |f| %>
-                            <div class="mb-3">
-                            <%= f.label :team_id, 'Equipo' %>
-                            <%= f.collection_select :team_id, Team.all, :id, :name, { selected: participation.team_id, prompt: 'Selecciona un equipo' }, { class: 'form-control' } %>
+                          <div class="mb-3">
+                            <%= f.label :team_id, 'Equipo', class: "form-label" %>
+                            <%= f.collection_select :team_id, Team.all, :id, :name, { selected: participation.team_id, prompt: 'Selecciona un equipo' }, { class: 'form-select' } %>
                           </div>
                           <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
@@ -180,6 +173,7 @@
                     </div>
                   </div>
                 </div>
+
               </tr>
             <% end %>
             </tbody>

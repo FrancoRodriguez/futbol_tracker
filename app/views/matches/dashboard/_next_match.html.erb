@@ -1,0 +1,49 @@
+<% if @next_match %>
+  <h2 class="text-center my-4">Próximo Partido</h2>
+  <div class="table-responsive shadow-lg rounded bg-white mb-5">
+    <table class="table table-hover align-middle text-center mb-0">
+      <thead class="table-dark">
+      <tr>
+        <th>Fecha</th>
+        <th>Ubicación</th>
+        <th>Resultado</th>
+        <th>Acciones</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr>
+        <td><%= date_in_spanish(@next_match.date) %></td>
+        <td><%= @next_match.location.presence || 'No especificada' %></td>
+        <td><%= render "result", match: @next_match %></td>
+        <td>
+          <% if user_signed_in? %>
+            <div class="dropdown">
+              <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" id="dropdownMenuButton-next-<%= @next_match.id %>" data-bs-toggle="dropdown" aria-expanded="false">
+                Acciones
+              </button>
+              <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton-next-<%= @next_match.id %>">
+                <li><%= link_to '👀 Ver', match_path(@next_match), class: 'dropdown-item' %></li>
+                <li>
+                  <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#addResultModal-<%= @next_match.id %>">
+                    <i class="fas fa-pen"></i> Agregar resultado
+                  </button>
+                </li>
+                <li><%= link_to 'Editar', edit_match_path(@next_match), class: 'dropdown-item' %></li>
+                <% if @next_match.date >= Date.today %>
+                  <li>
+                    <%= button_to 'Eliminar', match_path(@next_match), method: :delete, data: { confirm: '¿Estás seguro?' }, class: 'dropdown-item text-danger' %>
+                  </li>
+                <% end %>
+              </ul>
+            </div>
+          <% else %>
+            <%= link_to '👀 Ver', match_path(@next_match), class: 'btn btn-primary btn-sm' %>
+          <% end %>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+<% else %>
+  <div class="alert alert-info text-center mb-0">No hay partidos programados próximamente.</div>
+<% end %>

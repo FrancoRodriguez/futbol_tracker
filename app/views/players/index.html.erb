@@ -1,47 +1,85 @@
 <h1 class="text-center mb-4"><i class="fas fa-users"></i> Jugadores <i class="fas fa-users"></i></h1>
 
-<%= link_to 'Nuevo Jugador', new_player_path, class: "btn btn-primary mb-3" %>
+<%= link_to new_player_path, class: "btn btn-primary mb-3" do %>
+  <i class="fas fa-user-plus me-2"></i> Nuevo Jugador
+<% end %>
 
 <div class="table-responsive shadow-lg rounded bg-light">
   <table class="table table-hover align-middle">
     <thead class="table-dark text-center">
     <tr>
       <th>#</th>
-      <th>Nombre</th>
-      <th class="text-center">Apodo</th>
-      <th class="text-center">Contacto</th>
-      <th class="text-center">Partidos Inscripto</th>
-      <th><i class="fas fa-star"></i> Veces MVP</th>
+      <th>Jugador</th>
+      <th>Apodo</th>
+      <th>Contacto</th>
+      <th>Partidos</th>
       <% if user_signed_in? %>
         <th>Acciones</th>
       <% end %>
     </tr>
     </thead>
-    <tbody>
+    <tbody class="table-dark">
     <% @players.each_with_index do |player, index| %>
       <tr>
         <td class="text-center">
           <span class="badge bg-secondary p-2"><%= index + 1 %></span>
         </td>
-        <td><%= link_to player_path(player) do %><%= player.name %><% end %></td>
-        <td class="text-center"><%= player.nickname %></td>
+
+        <td>
+          <div class="d-flex align-items-center">
+            <% if player.profile_photo.attached? %>
+              <%= image_tag player.profile_photo,
+                            class: "rounded-circle border border-light me-3",
+                            width: 40, height: 40,
+                            style: "object-fit: cover;" %>
+            <% else %>
+              <%= image_tag "default_avatar.png",
+                            class: "rounded-circle border border-light me-3",
+                            width: 40, height: 40 %>
+            <% end %>
+            <%= link_to player.name, player_path(player),
+                        class: "text-decoration-none text-light fw-bold" %>
+          </div>
+        </td>
+
+        <td class="text-center"><%= player.nickname.presence || "-" %></td>
+
         <td class="text-center">
           <% if player.contact_info.present? %>
-            <%= link_to 'WhatsApp', "https://wa.me/#{player.contact_info.gsub(/\D/, '')}", target: "_blank", class: "btn btn-success" %>
+            <%= link_to "WhatsApp", "https://wa.me/#{player.contact_info.gsub(/\D/, '')}",
+                        target: "_blank",
+                        class: "btn btn-success btn-sm",
+                        data: { bs_toggle: "tooltip" },
+                        title: "Enviar WhatsApp a #{player.name}" %>
           <% else %>
-            <span>No disponible</span>
+            <span class="text-muted fst-italic">No disponible</span>
           <% end %>
         </td>
+
         <td class="text-center"><%= player.participations.count %></td>
-        <td class="text-center"><%= player.mvp_matches.count %></td>
-        <td>
-          <% if user_signed_in? %>
-            <%= link_to 'Editar', edit_player_path(player), class: "btn btn-warning" %>
-            <%= button_to 'Eliminar', player_path(player), method: :delete, class: "btn btn-danger" %>
-          <% end %>
-        </td>
+
+        <% if user_signed_in? %>
+          <td class="text-center">
+            <%= link_to edit_player_path(player), class: "btn btn-warning btn-sm me-1", data: { bs_toggle: "tooltip" }, title: "Editar" do %>
+              <i class="fas fa-edit"></i>
+            <% end %>
+            <%= button_to player_path(player), method: :delete,
+                          data: { confirm: "¿Estás seguro?", bs_toggle: "tooltip", title: "Eliminar" },
+                          class: "btn btn-danger btn-sm" do %>
+              <i class="fas fa-trash-alt"></i>
+            <% end %>
+          </td>
+        <% end %>
       </tr>
     <% end %>
     </tbody>
   </table>
 </div>
+
+<script>
+    // Inicializar tooltips Bootstrap
+    document.addEventListener('DOMContentLoaded', () => {
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.map((tooltipTriggerEl) => new bootstrap.Tooltip(tooltipTriggerEl));
+    });
+</script>

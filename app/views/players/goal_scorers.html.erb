@@ -11,7 +11,7 @@
           <th>Goles</th>
         </tr>
         </thead>
-        <tbody>
+        <tbody class="table-dark">
         <% @goal_scorers.each_with_index do |goal_scorer, index| %>
           <tr class="<%= 'top-scorer' if index < 3 %>">
             <td class="text-center">

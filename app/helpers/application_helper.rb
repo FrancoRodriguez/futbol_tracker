@@ -10,4 +10,11 @@ module ApplicationHelper
 
     "#{day_week} #{day} de #{month} del #{year}"
   end
+
+  def mes_anio_espanol(fecha)
+    meses = %w[enero febrero marzo abril mayo junio julio agosto septiembre octubre noviembre diciembre]
+    nombre_mes = meses[fecha.month - 1].capitalize
+    "#{nombre_mes} #{fecha.year}"
+  end
+
 end

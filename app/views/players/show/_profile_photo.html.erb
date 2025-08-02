@@ -1,0 +1,10 @@
+<!-- Foto de perfil -->
+<% if @player.profile_photo.attached? %>
+  <div class="d-flex justify-content-center mb-4">
+    <div class="position-relative" style="width: 160px; height: 160px;">
+      <%= image_tag @player.profile_photo, alt: @player.full_name,
+                    class: "rounded-circle shadow border border-3 border-white",
+                    style: "object-fit: cover; width: 100%; height: 100%;" %>
+    </div>
+  </div>
+<% end %>
