@@ -1,0 +1,20 @@
+<section class="mb-5 px-3 px-md-5">
+  <h3 class="mb-3 fw-bold text-center"><i class="fas fa-video text-danger"></i> Video del Partido</h3>
+  <div class="d-flex justify-content-center">
+    <% if match.video_url.present? %>
+      <% if match.video_url.include?("youtube.com") || match.video_url.include?("youtu.be") %>
+        <% video_id = match.video_url[/((?<=v=)[^&]+)|((?<=be\/)[^?&]+)/] %>
+        <div class="ratio ratio-16x9 rounded shadow-lg" style="max-width: 900px; width: 100%;">
+          <iframe src="https://www.youtube.com/embed/<%= video_id %>" title="Video del partido" allowfullscreen></iframe>
+        </div>
+      <% else %>
+        <video controls class="w-100 rounded shadow-lg" style="max-width: 900px; max-height: 480px;">
+          <source src="<%= match.video_url %>" type="video/mp4">
+          Tu navegador no soporta la reproducción de video.
+        </video>
+      <% end %>
+    <% else %>
+      <p class="text-center fst-italic text-muted">No hay video adjunto para este partido.</p>
+    <% end %>
+  </div>
+</section>

@@ -1,0 +1,38 @@
+<div class="modal fade" id="addParticipationModal" aria-labelledby="addParticipationModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-xl">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title" id="addParticipationModalLabel">Agregar Jugadores al Partido</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <%= form_with(model: Participation.new, url: match_participations_path(match), local: true) do |f| %>
+          <%= f.hidden_field :match_id, value: match.id %>
+          <p><strong>Partido:</strong> <%= match.location %> - <%= date_in_spanish(match.date) %></p>
+
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <%= f.label :player_id, "Jugador", class: "form-label" %>
+              <%= f.collection_select :player_id, available_players, :id, :name,
+                                      { prompt: "Selecciona un jugador" },
+                                      { class: "form-select" } %>
+              <div class="form-text">Si el jugador no aparece, ya está inscripto.</div>
+            </div>
+
+            <div class="col-md-6 mb-3">
+              <%= f.label :team_id, "Equipo", class: "form-label" %>
+              <%= f.collection_select :team_id, Team.all, :id, :name,
+                                      { prompt: "Selecciona un equipo" },
+                                      { class: "form-select" } %>
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <%= f.submit "Agregar Participación", class: "btn btn-primary", disabled: true, id: "submitParticipationButton" %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>

@@ -10,4 +10,12 @@ class Player < ApplicationRecord
 
     self.name
   end
+
+  def total_matches
+    participations.count
+  end
+
+  def total_wins
+    participations.joins(:match).where('participations.team_id = matches.win_id').count
+  end
 end

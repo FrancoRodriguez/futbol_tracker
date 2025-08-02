@@ -1,0 +1,23 @@
+<section class="d-flex justify-content-between align-items-center mb-4 px-3 px-md-5" style="min-height: 60px;">
+  <!-- Fecha y Lugar -->
+  <div class="text-muted" style="font-size: 0.9rem;">
+    <i class="fas fa-calendar-alt me-2"></i><%= date_in_spanish(match.date) %>
+    &nbsp;&nbsp;&nbsp;
+    <i class="fas fa-map-marker-alt me-2"></i><%= match.location.presence || "Ubicación no disponible" %>
+  </div>
+
+  <!-- Resultado -->
+  <div class="text-success fw-bold" style="font-size: 1.1rem;">
+    <% if match.result.present? %>
+      <%= render "result", match: match %>
+    <% else %>
+      <% if user_signed_in? %>
+        <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addResultModal-<%= match.id %>">
+          Agregar resultado
+        </button>
+      <% else %>
+        <span class="fst-italic text-muted">Resultado no disponible</span>
+      <% end %>
+    <% end %>
+  </div>
+</section>

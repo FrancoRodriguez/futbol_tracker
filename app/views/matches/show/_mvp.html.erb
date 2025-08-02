@@ -1,44 +1,31 @@
-<% if @match.date <= Date.today %>
-  <div class="card border border-warning bg-dark text-light shadow-sm mx-auto mb-5">
-    <% if @match.mvp.present? %>
-      <div class="row g-0 align-items-center p-3">
-
-        <!-- Foto del jugador -->
-        <div class="col-auto">
-          <% if @match.mvp.profile_photo.attached? %>
-            <%= image_tag @match.mvp.profile_photo.variant(resize_to_fill: [120, 120]),
-                          class: "rounded-circle border border-3 border-warning",
-                          alt: @match.mvp.full_name,
-                          style: "width: 120px; height: 120px; object-fit: cover;" %>
+<section class="mb-5 px-3 px-md-5">
+  <h3 class="mb-4 fw-bold text-center text-warning"><i class="fas fa-star"></i> Jugador MVP</h3>
+  <% if match.mvp.present? %>
+    <div class="d-flex justify-content-center">
+      <div class="card shadow-lg p-4 rounded bg-dark text-light" style="max-width: 600px; width: 100%;">
+        <div class="d-flex align-items-center gap-4">
+          <% if match.mvp.profile_photo.attached? %>
+            <%= image_tag match.mvp.profile_photo,
+                          class: "rounded-circle border border-warning",
+                          style: "width: 100px; height: 100px; object-fit: cover;" %>
           <% else %>
             <%= image_tag "default_avatar.png",
-                          class: "rounded-circle border border-3 border-warning",
-                          alt: "Foto por defecto",
-                          style: "width: 120px; height: 120px; object-fit: cover;" %>
+                          class: "rounded-circle border border-warning",
+                          width: 100, height: 100 %>
           <% end %>
+          <div>
+            <h4 class="fw-bold mb-1"><%= match.mvp.full_name %></h4>
+            <p class="mb-1 fs-6">Destacado como MVP en este partido</p>
+            <%= link_to "Ver perfil", player_path(match.mvp), class: "btn btn-warning btn-sm mt-2" %>
+          </div>
         </div>
-
-        <!-- Texto e ícono -->
-        <div class="col ps-4 text-center text-md-start">
-          <h3 class="fw-bold text-warning mb-2">MVP del Partido</h3>
-
-          <p class="fs-5 fw-semibold mb-0 d-flex justify-content-center justify-content-md-start align-items-center gap-2">
-            <i class="fas fa-trophy text-warning fa-lg"></i>
-            <%= link_to player_path(@match.mvp), class: "text-decoration-none text-warning" do %>
-              <%= @match.mvp.full_name %>
-            <% end %>
-          </p>
-        </div>
-
       </div>
+    </div>
+  <% else %>
+    <% if user_signed_in? %>
+      <p class="text-center fst-italic text-muted">No se ha seleccionado un MVP aún.</p>
     <% else %>
-      <div class="text-center p-4">
-        <div class="mb-3">
-          <i class="fas fa-user-clock fa-4x text-warning"></i>
-        </div>
-        <h3 class="fw-bold mb-2 text-warning">MVP no seleccionado</h3>
-        <p class="fs-6 fst-italic">Aún no se ha seleccionado un MVP para este partido.</p>
-      </div>
+      <p class="text-center fst-italic text-muted">MVP no disponible.</p>
     <% end %>
-  </div>
-<% end %>
+  <% end %>
+</section>
