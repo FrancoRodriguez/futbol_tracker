@@ -6,7 +6,7 @@ class PlayersController < ApplicationController
     @results_count = { victories: 0, defeats: 0, draws: 0 }
 
     # Query sin paginar para calcular estadísticas (victorias, derrotas, draws, win_rate)
-    participations_all = @player.participations.joins(:match).where('matches.date <= ?', Date.today).order('matches.date ASC')
+    participations_all = @player.participations.joins(:match).where('matches.date <= ?', Date.today).order('matches.date DESC')
 
     balance = 0
     dates = []
