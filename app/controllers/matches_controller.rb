@@ -35,8 +35,25 @@ class MatchesController < ApplicationController
 
   def show
     @participations = @match.participations.includes(:player)
-    @result_message = calculate_team_goals(@teams, @participations)
+    @teams = [@match.home_team, @match.away_team].compact
+
+    @team_win_percentages = {}
+
+    @teams.each do |team|
+      players = @participations.select { |p| p.team_id == team.id }.map(&:player)
+
+      next if players.empty?
+
+      # Suma simple de porcentaje de victorias individuales
+      total = players.sum do |player|
+        player.total_matches.to_i > 0 ? (player.total_wins.to_f / player.total_matches) : 0
+      end
+
+      average = (total / players.size * 100).round(1)
+      @team_win_percentages[team.id] = average
+    end
   end
+
 
   def new
     @match = Match.new

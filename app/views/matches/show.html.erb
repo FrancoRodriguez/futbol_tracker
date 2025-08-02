@@ -1,10 +1,10 @@
 <h1 class="text-center mb-5 fw-bold">Detalles del Partido</h1>
 
 <%= render "matches/show/summary", match: @match %>
-<%= render "matches/show/video", match: @match %>
 <%= render "matches/show/mvp", match: @match %>
 <%= render "matches/show/team_players", match: @match, teams: @teams, participations: @participations %>
 <%= render "matches/show/add_participation_button" %>
+<%= render "matches/show/video", match: @match %>
 <%= render "modals/add_participation", match: @match, available_players: @available_players %>
 <%= render "modals/add_result", match: @match %>
 

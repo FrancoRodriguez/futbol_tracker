@@ -4,7 +4,13 @@
     <% teams.each do |team| %>
       <div class="col-lg-6">
         <div class="card shadow-lg rounded p-3 h-100 bg-dark text-light">
-          <h4 class="text-center mb-3 fw-bold">Equipo <%= team.name %></h4>
+          <h4 class="text-center mb-1 fw-bold">Equipo <%= team.name %></h4>
+          <p class="text-center text-muted mb-2">
+            Probabilidad de victoria:
+            <span class="fw-semibold text-success">
+              <%= @team_win_percentages[team.id].present? ? "#{@team_win_percentages[team.id]}%" : "N/A" %>
+            </span>
+          </p>
           <p class="text-center fst-italic text-muted mb-3">
             <%= pluralize(participations.where(team: team).count, 'jugador inscripto', 'jugadores inscriptos') %>
           </p>
