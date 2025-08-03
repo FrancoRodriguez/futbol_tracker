@@ -1,11 +1,13 @@
 <div class="col-md-4 mb-3">
-  <div class="card card-stats shadow-sm border-0">
-    <div class="card-body">
-      <i class="fas fa-futbol fa-2x text-primary mb-2"></i>
-      <h5 class="card-title">Partidos Totales</h5>
-      <p class="display-6 fw-bold"><%= Match.count %></p>
+  <%= link_to matches_path, class: "text-decoration-none text-dark" do %>
+    <div class="card card-stats shadow-sm border-0">
+      <div class="card-body">
+        <i class="fas fa-futbol fa-2x text-primary mb-2"></i>
+        <h5 class="card-title">Partidos Totales</h5>
+        <p class="display-6 fw-bold"><%= Match.count %></p>
+      </div>
     </div>
-  </div>
+  <% end %>
 </div>
 
 <div class="col-md-4 mb-3">

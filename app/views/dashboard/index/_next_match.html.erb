@@ -14,7 +14,7 @@
       <tr>
         <td><%= date_in_spanish(@next_match.date) %></td>
         <td><%= @next_match.location.presence || 'No especificada' %></td>
-        <td><%= render "result", match: @next_match %></td>
+        <td><%= render "matches/result", match: @next_match %></td>
         <td>
           <% if user_signed_in? %>
             <div class="dropdown">
