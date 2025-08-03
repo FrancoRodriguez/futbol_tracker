@@ -9,6 +9,8 @@ class Player < ApplicationRecord
   def clear_global_stats_cache
     Rails.cache.delete("stats:top_mvp")
     Rails.cache.delete("stats:top_winners")
+    Rails.cache.delete("stats:win_ranking")
+    Rails.cache.delete("stats:mvp_ranking")
     (Player.all.pluck(:id)).compact.uniq.each do |id|
       Rails.cache.delete("player:#{id}:stats")
     end
@@ -74,21 +76,35 @@ class Player < ApplicationRecord
     end
   end
 
-  def self.top_winners(limit = 3)
-    Rails.cache.fetch("stats:top_winners", expires_in: 12.hours) do
+  def self.win_ranking
+    Rails.cache.fetch("stats:win_ranking", expires_in: 12.hours) do
       joins(participations: :match)
-         .where.not('matches.result ~* ?', '^\s*(\d+)-\1\s*$')
-         .select(
-           'players.*,
-           COUNT(CASE WHEN participations.team_id = matches.win_id THEN 1 END) AS total_wins,
-           COUNT(CASE WHEN participations.team_id != matches.win_id THEN 1 END) AS total_losses,
-           (COUNT(CASE WHEN participations.team_id = matches.win_id THEN 1 END) -
-            COUNT(CASE WHEN participations.team_id != matches.win_id THEN 1 END)) AS win_diff,
-           COUNT(*) AS total_matches'
-         )
+        .where.not('matches.result ~* ?', '^\s*(\d+)-\1\s*$') # Excluir empates
+        .select(
+          <<~SQL.squish
+          players.*,
+          COUNT(CASE WHEN participations.team_id = matches.win_id THEN 1 END) AS total_wins,
+          COUNT(CASE WHEN participations.team_id != matches.win_id THEN 1 END) AS total_losses,
+          (COUNT(CASE WHEN participations.team_id = matches.win_id THEN 1 END) -
+           COUNT(CASE WHEN participations.team_id != matches.win_id THEN 1 END)) AS win_diff,
+          COUNT(*) AS total_matches
+        SQL
+      )
+        .group('players.id')
+        .order('win_diff DESC, total_matches DESC')
+    end
+  end
+
+  def self.top_winners(limit = 3)
+    win_ranking.first(limit)
+  end
+
+  def self.mvp_ranking
+    Rails.cache.fetch("stats:mvp_ranking", expires_in: 12.hours) do
+      joins(:mvp_matches)
+         .select('players.*, COUNT(matches.id) AS mvp_count')
          .group('players.id')
-         .order('win_diff DESC, total_matches DESC')
-         .limit(3)
+         .order('mvp_count DESC')
     end
   end
 

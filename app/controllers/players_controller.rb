@@ -45,26 +45,11 @@ class PlayersController < ApplicationController
   end
 
   def mvp_ranking
-    @players = Player.joins(:mvp_matches)
-                     .select('players.*, COUNT(matches.id) AS mvp_count')
-                     .group('players.id')
-                     .order('mvp_count DESC')
+    @players = Player.mvp_ranking
   end
 
   def win_ranking
-    @top_players = Player
-                     .joins(participations: :match)
-                     .where.not('matches.result ~* ?', '^\s*(\d+)-\1\s*$') # Excluir empates
-                     .select(
-                       'players.*,
-      COUNT(CASE WHEN participations.team_id = matches.win_id THEN 1 END) AS total_wins,
-      COUNT(CASE WHEN participations.team_id != matches.win_id THEN 1 END) AS total_losses,
-      (COUNT(CASE WHEN participations.team_id = matches.win_id THEN 1 END) -
-       COUNT(CASE WHEN participations.team_id != matches.win_id THEN 1 END)) AS win_diff,
-      COUNT(*) AS total_matches'
-                     )
-                     .group('players.id')
-                     .order('win_diff DESC, total_matches DESC')
+    @top_players = Player.win_ranking
   end
 
   private
