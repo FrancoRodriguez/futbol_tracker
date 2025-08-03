@@ -5,19 +5,26 @@ class PlayersController < ApplicationController
     @player = Player.find(params[:id])
     @results_count = { victories: 0, defeats: 0, draws: 0 }
 
-    # Query sin paginar para calcular estadísticas (victorias, derrotas, draws, win_rate)
-    participations_all = @player.participations.joins(:match).where('matches.date <= ?', Date.today).order('matches.date DESC')
+    # Mantener orden DESC para el historial (últimos partidos primero)
+    participations_all = @player.participations
+                                .joins(:match)
+                                .where('matches.date <= ?', Date.today)
+                                .order('matches.date DESC')
+
+    # Balance: trabajar con los mismos datos pero ordenados cronológicamente
+    participations_for_chart = participations_all.sort_by { |p| p.match.date }
 
     balance = 0
     dates = []
     balance_cumulative = []
 
-    participations_all.each do |participation|
+    participations_for_chart.each do |participation|
       match = participation.match
       next if match.win_id.nil?
 
       if match.win.name == 'Empate'
         @results_count[:draws] += 1
+        # El balance no cambia con un empate
       elsif match.win_id == participation.team_id
         @results_count[:victories] += 1
         balance += 1
@@ -38,9 +45,9 @@ class PlayersController < ApplicationController
       balance: balance_cumulative
     }
 
-    # Ahora paginar sólo las participaciones que mostrarás
     @participations = participations_all.page(params[:page]).per(PAGINATION_NUMBER)
   end
+
 
 
   def new
