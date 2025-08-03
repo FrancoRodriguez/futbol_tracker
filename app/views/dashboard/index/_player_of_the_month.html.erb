@@ -15,14 +15,26 @@
 end
   .sort_by { |player| [-player.victories.to_i, -player.mvp_count, -player.total_matches.to_i] } %>
 
-<% top_3 = sorted_players.first(3) %>
-<% max_victories = top_3.first&.victories.to_i %>
-<% top_group = sorted_players.select { |p| p.victories.to_i == max_victories } %>
-<% displayed_players = (top_group + top_3).uniq.first(3) %>
+<% grouped_by_stats = sorted_players
+  .group_by { |p| [p.victories.to_i, p.mvp_count.to_i, p.total_matches.to_i] }
+  .sort_by { |(wins, mvps, games), _| [-wins, -mvps, -games] } %>
 
-<% if displayed_players.any? %>
+<% ranked_players = [] %>
+<% grouped_by_stats.each_with_index do |(_, players), real_position| %>
+  <% break if ranked_players.size >= 3 %>
+  <% players.each do |player| %>
+    <% break if ranked_players.size >= 3 %>
+    <% ranked_players << { player: player, position: real_position + 1, tie: players.size > 1 } %>
+  <% end %>
+<% end %>
+
+<% if ranked_players.any? %>
   <div class="row">
-    <% displayed_players.each_with_index do |player, index| %>
+    <% ranked_players.each do |entry| %>
+      <% player = entry[:player] %>
+      <% position = entry[:position] %>
+      <% tie = entry[:tie] %>
+
       <% mvp_count = Match.where(date: last_month_range, mvp_id: player.id).count %>
       <% total_games = player.participations
                              .joins(:match)
@@ -55,8 +67,18 @@ end
               <!-- Título -->
               <h5 class="fw-bold text-warning mb-1">
                 <i class="fas fa-star me-2"></i>
-                <%= index == 0 ? "Jugador del Mes" : "Top #{index + 1}" %>
+                <% if position == 1 && tie %>
+                  Empatado en el primer lugar
+                <% elsif position == 2 && tie %>
+                  Empatado en el segundo lugar
+                <% elsif position == 3 && tie %>
+                  Empatado en el tercer lugar
+                <% else %>
+                  <%= position == 1 ? "Jugador del Mes" : "Top #{position}" %>
+                <% end %>
               </h5>
+
+              <!-- Nombre -->
               <p class="mb-1 text-light fw-semibold"><%= player.full_name %></p>
 
               <!-- Stats -->
