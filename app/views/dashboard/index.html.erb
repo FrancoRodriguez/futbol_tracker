@@ -1,0 +1,13 @@
+<div class="row text-center mb-5">
+  <%= render "dashboard/index/stats" %>
+
+  <%= render "dashboard/index/player_of_the_moth" %>
+
+  <% if user_signed_in? %>
+    <div class="d-flex justify-content-center mb-4">
+      <%= link_to '➕ Nuevo Partido', new_match_path, class: "btn btn-primary btn-lg" %>
+    </div>
+  <% end %>
+
+  <%= render "dashboard/index/next_match", next_match: @next_match %>
+</div>

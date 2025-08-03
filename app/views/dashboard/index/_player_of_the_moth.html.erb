@@ -36,38 +36,39 @@ end
       <% win_percentage = total_games > 0 ? (100.0 * wins / total_games).round : 0 %>
 
       <div class="col-md-4 mb-4">
-        <div class="card shadow-sm h-100 border border-warning bg-dark text-light card-gold">
-          <div class="card-body d-flex flex-column align-items-center text-center">
+        <%= link_to player_path(player), class: "text-decoration-none text-dark" do %>
+          <div class="card shadow-sm h-100 border border-warning bg-dark text-light card-gold">
+            <div class="card-body d-flex flex-column align-items-center text-center">
+              <!-- Foto -->
+              <div class="mb-3">
+                <% if player.profile_photo.attached? %>
+                  <%= image_tag player.profile_photo,
+                                class: "rounded-circle border border-3 border-warning",
+                                style: "width: 90px; height: 90px; object-fit: cover;" %>
+                <% else %>
+                  <%= image_tag "default_avatar.png",
+                                class: "rounded-circle border border-3 border-warning",
+                                width: 90, height: 90 %>
+                <% end %>
+              </div>
 
-            <!-- Foto -->
-            <div class="mb-3">
-              <% if player.profile_photo.attached? %>
-                <%= image_tag player.profile_photo,
-                              class: "rounded-circle border border-3 border-warning",
-                              style: "width: 90px; height: 90px; object-fit: cover;" %>
-              <% else %>
-                <%= image_tag "default_avatar.png",
-                              class: "rounded-circle border border-3 border-warning",
-                              width: 90, height: 90 %>
-              <% end %>
-            </div>
+              <!-- Título -->
+              <h5 class="fw-bold text-warning mb-1">
+                <i class="fas fa-star me-2"></i>
+                <%= index == 0 ? "Jugador del Mes" : "Top #{index + 1}" %>
+              </h5>
+              <p class="mb-1 text-light fw-semibold"><%= player.full_name %></p>
 
-            <!-- Título -->
-            <h5 class="fw-bold text-warning mb-1">
-              <i class="fas fa-star me-2"></i>
-              <%= index == 0 ? "Jugador del Mes" : "Top #{index + 1}" %>
-            </h5>
-            <p class="mb-1 text-light fw-semibold"><%= player.full_name %></p>
-
-            <!-- Stats -->
-            <div class="small text-light">
-              🏟️ Partidos: <strong><%= total_games %></strong><br>
-              🏆 Victorias: <strong><%= wins %></strong><br>
-              ✨ MVPs: <strong><%= mvp_count %></strong><br>
-              📈 <strong class="text-success"><%= win_percentage %>%</strong> victorias
+              <!-- Stats -->
+              <div class="small text-light">
+                🏟️ Partidos: <strong><%= total_games %></strong><br>
+                🏆 Victorias: <strong><%= wins %></strong><br>
+                ✨ MVPs: <strong><%= mvp_count %></strong><br>
+                📈 <strong class="text-success"><%= win_percentage %>%</strong> victorias
+              </div>
             </div>
           </div>
-        </div>
+        <% end %>
       </div>
     <% end %>
   </div>

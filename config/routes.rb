@@ -4,7 +4,6 @@ Rails.application.routes.draw do
   resources :matches do
     resources :participations, only: [:new, :create, :edit, :update, :destroy]
   end
-
   resources :players do
     collection do
       get :mvp_ranking
@@ -12,8 +11,8 @@ Rails.application.routes.draw do
     end
   end
   resources :teams, only: [:index]
-
   resources :participations, only: [:destroy]
+  resources :dashboard, only: [:index]
 
-  root 'matches#index'
+  root 'dashboard#index'
 end
