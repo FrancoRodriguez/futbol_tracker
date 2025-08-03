@@ -6,32 +6,30 @@ class MatchesController < ApplicationController
   include MatchesHelper
 
   def index
-    @matches = Match.order(date: :desc)
-    @next_match = @matches.where("date >= ?", Time.zone.today).first
-    @past_matches = @matches.where("date < ?", Time.zone.today).page(params[:page]).per(PAGINATION_NUMBER)
+    @next_match = Match
+                    .where("date >= ?", Time.zone.today)
+                    .order(date: :asc)
+                    .first
 
-    @match_results = @matches.map do |match|
-      participations = match.participations.includes(:player)
-      teams = participations.map(&:team).uniq
+    @past_matches = Match
+                      .includes(participations: [:player, :team])
+                      .where("date < ?", Time.zone.today)
+                      .order(date: :desc)
+                      .page(params[:page])
+                      .per(PAGINATION_NUMBER)
+
+    @match_results = @past_matches.map do |match|
+      teams = match.participations.map(&:team).uniq
       {
         match: match,
-        result_message: calculate_team_goals(teams, participations)
+        result_message: calculate_team_goals(teams, match.participations)
       }
     end
 
-    @top_mvp = Player.joins(:mvp_matches).group(:id).order('COUNT(matches.id) DESC').first
-
-    @top_players = Player
-                     .joins(participations: :match)
-                     .where.not('matches.result ~* ?', '^\s*(\d+)-\1\s*$')
-                     .select(
-                       'players.*,
-       COUNT(CASE WHEN participations.team_id = matches.win_id THEN 1 END) AS total_wins'
-                     )
-                     .group('players.id')
-                     .order('total_wins DESC')
-                     .limit(3)
+    @top_mvp = Player.top_mvp
+    @top_players = Player.top_winners
   end
+
 
   def show
     @participations = @match.participations.includes(:player)
