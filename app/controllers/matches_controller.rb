@@ -27,7 +27,7 @@ class MatchesController < ApplicationController
     end
 
     @top_mvp = Player.top_mvp
-    @top_players = Player.top_winners
+    @top_winners = Player.top_winners
   end
 
 

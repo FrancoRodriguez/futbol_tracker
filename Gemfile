@@ -61,4 +61,5 @@ gem 'kaminari' # used for pagination
 gem "image_processing"
 gem 'aws-sdk-s3', require: false
 gem 'dotenv-rails', groups: [:development, :test]
+gem 'redis'
 

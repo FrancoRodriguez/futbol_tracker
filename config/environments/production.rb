@@ -67,7 +67,14 @@ Rails.application.configure do
   # want to log everything, set the level to "debug".
   config.log_level = ENV.fetch("RAILS_LOG_LEVEL", "info")
 
-  config.cache_store = :memory_store, { size: 64.megabytes }
+  config.cache_store = :redis_cache_store, {
+    url: ENV.fetch("REDIS_URL") { "redis://localhost:6379/1" }, # Cambiá esto según tu entorno
+    expires_in: 12.hours,
+    reconnect_attempts: 1,
+    error_handler: -> (method:, returning:, exception:) {
+      Rails.logger.error "Redis cache error: #{exception.class} - #{exception.message}"
+    }
+  }
   config.action_controller.perform_caching = true
 
   # Use a real queuing backend for Active Job (and separate queues per environment).

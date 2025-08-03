@@ -13,8 +13,8 @@
     <div class="card-body">
       <i class="fas fa-trophy fa-2x text-warning mb-2"></i>
       <h5 class="card-title">MVP Más Frecuente</h5>
-      <% top_mvp = Player.joins(:mvp_matches).group(:id).order('COUNT(matches.id) DESC').first %>
-      <p class="fw-bold"><%= top_mvp&.full_name || "N/A" %></p>
+      <% @top_mvp %>
+      <p class="fw-bold"><%= @top_mvp&.full_name || "N/A" %></p>
     </div>
   </div>
 </div>
@@ -25,22 +25,7 @@
       <i class="fas fa-medal fa-2x text-success mb-2"></i>
       <h5 class="card-title">Top Ganadores</h5>
 
-      <% top_players = Player
-        .joins(participations: :match)
-        .where.not('matches.result ~* ?', '^\s*(\d+)-\1\s*$')
-        .select(
-          'players.*,
-           COUNT(CASE WHEN participations.team_id = matches.win_id THEN 1 END) AS total_wins,
-           COUNT(CASE WHEN participations.team_id != matches.win_id THEN 1 END) AS total_losses,
-           (COUNT(CASE WHEN participations.team_id = matches.win_id THEN 1 END) -
-            COUNT(CASE WHEN participations.team_id != matches.win_id THEN 1 END)) AS win_diff,
-           COUNT(*) AS total_matches'
-        )
-        .group('players.id')
-        .order('win_diff DESC, total_matches DESC')
-        .limit(3) %>
-
-      <% top_players.each_with_index do |player, i| %>
+      <% @top_winners.each_with_index do |player, i| %>
         <p>
           <%= ["🥇", "🥈", "🥉"][i] %> <%= player.full_name %> —
           <strong><%= player.win_diff %></strong> diferencia de victorias

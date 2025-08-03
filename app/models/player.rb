@@ -8,7 +8,7 @@ class Player < ApplicationRecord
 
   def clear_global_stats_cache
     Rails.cache.delete("stats:top_mvp")
-    Rails.cache.delete("stats:top_players")
+    Rails.cache.delete("stats:top_winners")
     (Player.all.pluck(:id)).compact.uniq.each do |id|
       Rails.cache.delete("player:#{id}:stats")
     end
@@ -75,13 +75,20 @@ class Player < ApplicationRecord
   end
 
   def self.top_winners(limit = 3)
-    Rails.cache.fetch("stats:top_players", expires_in: 12.hours) do
+    Rails.cache.fetch("stats:top_winners", expires_in: 12.hours) do
       joins(participations: :match)
-        .where.not('matches.result ~* ?', '^\s*(\d+)-\1\s*$') # excluye empates tipo "1-1"
-        .select('players.*, COUNT(CASE WHEN participations.team_id = matches.win_id THEN 1 END) AS total_wins')
-        .group('players.id')
-        .order('total_wins DESC')
-        .limit(limit)
+         .where.not('matches.result ~* ?', '^\s*(\d+)-\1\s*$')
+         .select(
+           'players.*,
+           COUNT(CASE WHEN participations.team_id = matches.win_id THEN 1 END) AS total_wins,
+           COUNT(CASE WHEN participations.team_id != matches.win_id THEN 1 END) AS total_losses,
+           (COUNT(CASE WHEN participations.team_id = matches.win_id THEN 1 END) -
+            COUNT(CASE WHEN participations.team_id != matches.win_id THEN 1 END)) AS win_diff,
+           COUNT(*) AS total_matches'
+         )
+         .group('players.id')
+         .order('win_diff DESC, total_matches DESC')
+         .limit(3)
     end
   end
 
