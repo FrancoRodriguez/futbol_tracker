@@ -9,8 +9,8 @@ class Player < ApplicationRecord
   def clear_global_stats_cache
     Rails.cache.delete("stats:top_mvp")
     Rails.cache.delete("stats:top_players")
-    (players + [mvp]).compact.uniq.each do |player|
-      Rails.cache.delete("player:#{player.id}:stats")
+    (Player.all.pluck(:id)).compact.uniq.each do |id|
+      Rails.cache.delete("player:#{id}:stats")
     end
   end
 
