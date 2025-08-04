@@ -5,6 +5,8 @@
 <%= render "matches/show/team_players", match: @match, teams: @teams, participations: @participations %>
 <%= render "matches/show/add_participation_button" %>
 <%= render "matches/show/video", match: @match %>
+
+<!--MODALS-->
 <%= render "modals/add_participation", match: @match, available_players: @available_players %>
 <%= render "modals/add_result", match: @match %>
 

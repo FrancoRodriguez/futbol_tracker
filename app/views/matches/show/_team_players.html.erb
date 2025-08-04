@@ -14,7 +14,7 @@
           <p class="text-center fst-italic text-muted mb-3">
             <%= pluralize(participations.where(team: team).count, 'jugador inscripto', 'jugadores inscriptos') %>
           </p>
-          <div class="list-group list-group-flush overflow-auto" style="max-height: 320px; background-color: transparent;">
+          <div class="list-group list-group-flush overflow-auto" style="background-color: transparent;">
             <% participations.where(team: team).includes(:player).order('players.rating DESC').each do |participation| %>
               <% player = participation.player %>
 
