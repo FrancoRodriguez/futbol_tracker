@@ -12,6 +12,7 @@
       <th>Jugador</th>
       <th>Apodo</th>
       <th>Contacto</th>
+      <th>Win rate</th>
       <th>Partidos</th>
       <% if user_signed_in? %>
         <th>Acciones</th>
@@ -55,6 +56,8 @@
             <span class="text-muted fst-italic">No disponible</span>
           <% end %>
         </td>
+
+        <td class="text-center"><%= player.win_rate %></td>
 
         <td class="text-center"><%= player.participations.count %></td>
 

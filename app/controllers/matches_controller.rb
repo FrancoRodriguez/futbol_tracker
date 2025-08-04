@@ -39,19 +39,21 @@ class MatchesController < ApplicationController
 
     @teams.each do |team|
       players = @participations.select { |p| p.team_id == team.id }.map(&:player)
-
       next if players.empty?
 
-      # Suma simple de porcentaje de victorias individuales
-      total = players.sum do |player|
-        player.total_matches.to_i > 0 ? (player.total_wins.to_f / player.total_matches) : 0
+      # Filtrar solo los jugadores con estadísticas válidas
+      eligible_players = players.select { |player| player.total_matches >= Player::MIN_MATCHES }
+
+      next if eligible_players.empty?
+
+      total = eligible_players.sum do |player|
+        player.total_wins.to_f / player.total_matches
       end
 
-      average = (total / players.size * 100).round(1)
+      average = (total / eligible_players.size * 100).round(1)
       @team_win_percentages[team.id] = average
     end
   end
-
 
   def new
     @match = Match.new

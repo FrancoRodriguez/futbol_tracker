@@ -6,6 +6,8 @@ class Player < ApplicationRecord
 
   after_save :clear_global_stats_cache
 
+  MIN_MATCHES = 5
+
   def clear_global_stats_cache
     Rails.cache.delete("stats:top_mvp")
     Rails.cache.delete("stats:top_winners")
@@ -21,7 +23,7 @@ class Player < ApplicationRecord
   end
 
   def full_name_with_win
-    "#{full_name} - #{win_rate}%"
+    "#{full_name} - #{win_rate}"
   end
 
   def total_matches
@@ -68,6 +70,8 @@ class Player < ApplicationRecord
   end
 
   def win_rate
+    return "#{stats_cache[:win_rate]} %" if stats_cache[:win_rate].is_a?(Integer)
+
     stats_cache[:win_rate]
   end
 
@@ -140,7 +144,7 @@ class Player < ApplicationRecord
     end
 
     total = results.values.sum
-    win_rate = total.zero? ? 0 : (results[:victories].to_f / total * 100).round(2)
+    win_rate = total >= MIN_MATCHES ? (results[:victories].to_f / total * 100).round(2) : "En evaluación"
 
     {
       results_count: results,

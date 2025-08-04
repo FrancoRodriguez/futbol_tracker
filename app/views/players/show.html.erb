@@ -1,7 +1,7 @@
 <div class="container my-5">
   <%= render 'players/show/profile_header', player: @player %>
   <%= render 'players/show/stats', player: @player %>
-  <%= render 'players/show/balance_chart', player: @player %>
+  <%= render 'players/show/balance_chart', player: @player if @player.total_matches > 0%>
   <%= render 'players/show/participation_history', player: @player %>
 </div>
 

@@ -11,7 +11,6 @@
 <%= render "modals/add_result", match: @match %>
 
 <script>
-    // Inicializar tooltips Bootstrap
     document.addEventListener('DOMContentLoaded', () => {
         const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
         tooltipTriggerList.map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));

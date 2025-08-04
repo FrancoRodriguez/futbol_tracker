@@ -6,7 +6,6 @@ class PlayersController < ApplicationController
   def show
     @results_count = @player.results_count
     @chart_data = @player.chart_data
-    @win_rate = @player.win_rate
     @participations = @player.past_participations.page(params[:page]).per(PAGINATION_NUMBER)
   end
 

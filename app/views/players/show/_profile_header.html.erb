@@ -43,15 +43,26 @@
       </div>
 
       <!-- Panel de porcentaje -->
-      <div class="text-center mt-4 mt-md-0">
-        <div class="bg-dark text-light rounded-pill px-4 py-3 shadow-sm border border-primary">
-          <h5 class="fw-bold mb-1 mb-0">
-            <i class="fas fa-trophy text-warning me-2"></i><%= @win_rate %>%
-          </h5>
-          <small class="text-muted">Porcentaje de victorias</small>
-        </div>
-      </div>
+      <% partidos_faltantes = 5 - @player.total_matches %>
 
-    </div>
+      <div class="text-center mt-4 mt-md-0">
+        <% if @player.win_rate.is_a?(String) %>
+          <div class="bg-light text-secondary rounded-pill px-4 py-3 shadow-sm border border-warning">
+            <h5 class="fw-normal mb-1 mb-0">
+              <i class="fas fa-hourglass-half text-muted me-2"></i><%= @player.win_rate %>
+            </h5>
+            <small class="text-muted">
+              Se necesitan <%= partidos_faltantes %> partido<%= 's' unless partidos_faltantes == 1 %> más para evaluar
+            </small>
+          </div>
+        <% else %>
+          <div class="bg-dark text-light rounded-pill px-4 py-3 shadow-sm border border-primary">
+            <h5 class="fw-bold mb-1 mb-0">
+              <i class="fas fa-trophy text-warning me-2"></i><%= @player.win_rate %>%
+            </h5>
+            <small class="text-muted">Porcentaje de victorias</small>
+          </div>
+        <% end %>
+      </div>
   </div>
 <% end %>
