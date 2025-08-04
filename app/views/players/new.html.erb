@@ -30,6 +30,17 @@
       <% end %>
     </div>
 
+    <div class="col-md-6 col-lg-4 mb-3">
+      <%= f.label :profile_photo %>
+      <%= f.file_field :profile_photo %>
+      <% if @player.errors[:profile_photo].any? %>
+        <div class="invalid-feedback">
+          <%= @player.errors[:profile_photo].join(", ") %>
+        </div>
+      <% end %>
+    </div>
+
+
     <div class="col-md-6 col-lg-4 d-grid gap-2">
       <%= f.submit 'Crear Jugador', class: "btn btn-primary btn-lg" %>
     </div>

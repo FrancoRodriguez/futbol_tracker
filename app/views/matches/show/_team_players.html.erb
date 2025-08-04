@@ -1,4 +1,4 @@
-<section class="px-3 px-md-5">
+<section>
   <h3 class="mb-4 fw-bold text-center text-light"><i class="fas fa-users"></i> Equipos y Jugadores</h3>
   <div class="row gy-4">
     <% teams.each do |team| %>
@@ -26,7 +26,7 @@
                 <% win_display = "N/A" %>
               <% end %>
 
-              <div class="list-group-item d-flex align-items-center justify-content-between gap-3 bg-dark text-light border-secondary">
+              <div class="list-group-item d-flex align-items-center justify-content-between gap-3 bg-dark text-light border-primary">
                 <div class="d-flex align-items-center gap-3">
                   <% if player.profile_photo.attached? %>
                     <%= image_tag player.profile_photo,

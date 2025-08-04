@@ -1,13 +1,18 @@
-<section class="d-flex justify-content-between align-items-center mb-4 px-3 px-md-5" style="min-height: 60px;">
+<section class="card-primary d-flex justify-content-between align-items-center mb-4 px-4 py-3 shadow-sm rounded bg-light" style="min-height: 70px;">
   <!-- Fecha y Lugar -->
-  <div class="text-muted" style="font-size: 0.9rem;">
-    <i class="fas fa-calendar-alt me-2"></i><%= date_in_spanish(match.date) %>
-    &nbsp;&nbsp;&nbsp;
-    <i class="fas fa-map-marker-alt me-2"></i><%= match.location.presence || "Ubicación no disponible" %>
+  <div class="d-flex align-items-center text-primary" style="font-size: 1rem; font-weight: 600;">
+    <i class="fas fa-calendar-alt me-3 fs-5"></i>
+    <div>
+      <div><%= date_in_spanish(match.date) %></div>
+      <small class="text-muted">
+        <i class="fas fa-map-marker-alt me-1"></i>
+        <%= match.location.presence || "Ubicación no disponible" %>
+      </small>
+    </div>
   </div>
 
   <!-- Resultado -->
-  <div class="text-success fw-bold" style="font-size: 1.1rem;">
+  <div class="text-success fw-bold fs-4 d-flex align-items-center">
     <% if match.result.present? %>
       <%= render "result", match: match %>
     <% else %>
@@ -16,7 +21,7 @@
           Agregar resultado
         </button>
       <% else %>
-        <span class="fst-italic text-muted">Resultado no disponible</span>
+        <span class="fst-italic text-muted fs-5">Resultado no disponible</span>
       <% end %>
     <% end %>
   </div>

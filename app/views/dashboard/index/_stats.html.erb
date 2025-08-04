@@ -1,6 +1,6 @@
 <div class="row">
   <div class="col-md-4 mb-3">
-    <div class="card card-stats shadow-sm border-0 h-100">
+    <div class="card card-primary shadow-sm border-0 h-100">
       <div class="card-body">
         <i class="fas fa-trophy fa-2x text-success mb-3"></i>
         <h5 class="card-title mb-4 text-center">Top Ganadores</h5>
@@ -41,7 +41,7 @@
 
   <div class="col-md-4 mb-3">
     <%= link_to player_path(@top_mvp), class: "text-decoration-none text-dark" do %>
-      <div class="card card-stats shadow-sm border-0 h-100">
+      <div class="card card-primary shadow-sm border-0 h-100">
         <div class="card-body text-center">
           <i class="fas fa-star fa-2x text-warning mb-2"></i>
           <h5 class="card-title mb-4">MVP Más Frecuente</h5>
@@ -64,7 +64,7 @@
 
   <div class="col-md-4 mb-3">
     <% if @next_match.present? %>
-      <div class="card card-stats shadow-sm border-0 h-100">
+      <div class="card card-primary shadow-sm border-0 h-100">
         <div class="card-body text-center">
           <i class="fas fa-calendar-alt fa-2x mb-3"></i>
           <h5 class="card-title">Próximo Partido</h5>
@@ -83,7 +83,7 @@
         </div>
       </div>
     <% else %>
-      <div class="card card-stats shadow-sm border-0 h-100">
+      <div class="card card-primary shadow-sm border-0 h-100">
         <div class="card-body text-center">
           <i class="fas fa-calendar-times fa-2x text-muted mb-3"></i>
           <h5 class="card-title">Próximo Partido</h5>

@@ -2,7 +2,7 @@
   <h3 class="mb-4 fw-bold text-center text-warning"><i class="fas fa-star"></i> Jugador MVP</h3>
   <% if match.mvp.present? %>
     <div class="d-flex justify-content-center">
-      <div class="card shadow-lg p-4 rounded bg-dark text-light" style="max-width: 600px; width: 100%;">
+      <div class="card card-gold shadow-lg p-4 rounded bg-dark text-light" style="max-width: 600px; width: 100%;">
         <div class="d-flex align-items-center gap-4">
           <% if match.mvp.profile_photo.attached? %>
             <%= image_tag match.mvp.profile_photo,
