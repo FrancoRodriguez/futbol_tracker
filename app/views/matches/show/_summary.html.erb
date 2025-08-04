@@ -1,6 +1,7 @@
 <section class="card-primary d-flex justify-content-between align-items-center mb-4 px-4 py-3 shadow-sm rounded bg-light" style="min-height: 70px;">
+
   <!-- Fecha y Lugar -->
-  <div class="d-flex align-items-center text-primary" style="font-size: 1rem; font-weight: 600;">
+  <div class="d-flex align-items-center text-primary" style="font-size: 1rem; font-weight: 600; min-width: 220px;">
     <i class="fas fa-calendar-alt me-3 fs-5"></i>
     <div>
       <div><%= date_in_spanish(match.date) %></div>
@@ -12,7 +13,7 @@
   </div>
 
   <!-- Resultado -->
-  <div class="text-success fw-bold fs-4 d-flex align-items-center">
+  <div class="text-success fw-bold fs-4 d-flex align-items-center justify-content-center flex-grow-1">
     <% if match.result.present? %>
       <%= render "result", match: match %>
     <% else %>
@@ -25,4 +26,20 @@
       <% end %>
     <% end %>
   </div>
+
+  <!-- Clima -->
+  <% if @match_weather.present? %>
+    <div class="d-flex align-items-center text-secondary" style="min-width: 180px; font-size: 0.9rem;">
+      <%= image_tag("https://openweathermap.org/img/wn/#{@match_weather[:icon]}@2x.png", alt: "Clima", width: 40, height: 40, class: "me-2") %>
+      <div>
+        <div class="fw-semibold" style="color: #0077cc;"><%= @match_weather[:weather] %></div>
+        <div><%= @match_weather[:temp] %>°C (sensación <%= @match_weather[:feels_like] %>°C)</div>
+      </div>
+    </div>
+  <% else %>
+    <div class="text-muted fst-italic" style="min-width: 180px; font-size: 0.9rem; text-align: center;">
+      Clima no disponible
+    </div>
+  <% end %>
+
 </section>

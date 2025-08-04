@@ -3,7 +3,7 @@
     <div class="card card-primary shadow-sm border-0 h-100">
       <div class="card-body">
         <i class="fas fa-trophy fa-2x text-success mb-3"></i>
-        <h5 class="card-title mb-4 text-center">Top Ganadores</h5>
+        <h5 class="card-title mb-4 fw-bold text-center">Top Ganadores</h5>
 
         <% @top_winners.each_with_index do |player, i| %>
           <%= link_to player_path(player), class: "text-decoration-none" do %>
@@ -44,7 +44,7 @@
       <div class="card card-primary shadow-sm border-0 h-100">
         <div class="card-body text-center">
           <i class="fas fa-star fa-2x text-warning mb-2"></i>
-          <h5 class="card-title mb-4">MVP Más Frecuente</h5>
+          <h5 class="card-title mb-4 fw-bold">MVP Más Frecuente</h5>
 
           <% if @top_mvp.profile_photo.attached? %>
             <%= image_tag @top_mvp.profile_photo,
@@ -63,34 +63,6 @@
   </div>
 
   <div class="col-md-4 mb-3">
-    <% if @next_match.present? %>
-      <div class="card card-primary shadow-sm border-0 h-100">
-        <div class="card-body text-center">
-          <i class="fas fa-calendar-alt fa-2x mb-3"></i>
-          <h5 class="card-title">Próximo Partido</h5>
-
-          <p class="mb-2">
-            <strong>📍 Ubicación:</strong><br>
-            <%= @next_match.location.presence || 'No especificada' %>
-          </p>
-
-          <p class="mb-3">
-            <strong>📅 Fecha:</strong><br>
-            <%= date_in_spanish(@next_match.date) %>
-          </p>
-
-          <%= link_to '👀 Ver', match_path(@next_match), class: 'btn btn-primary btn-sm' %>
-        </div>
-      </div>
-    <% else %>
-      <div class="card card-primary shadow-sm border-0 h-100">
-        <div class="card-body text-center">
-          <i class="fas fa-calendar-times fa-2x text-muted mb-3"></i>
-          <h5 class="card-title">Próximo Partido</h5>
-          <p class="text-muted mb-0">No hay partidos programados por ahora.</p>
-        </div>
-      </div>
-    <% end %>
+    <%= render "dashboard/index/next_match"%>
   </div>
-
 </div>

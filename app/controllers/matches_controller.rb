@@ -53,6 +53,9 @@ class MatchesController < ApplicationController
       average = (total / eligible_players.size * 100).round(1)
       @team_win_percentages[team.id] = average
     end
+
+    weather_service = WeatherService.new
+    @match_weather = weather_service.forecast_for(@match.date)
   end
 
   def new
