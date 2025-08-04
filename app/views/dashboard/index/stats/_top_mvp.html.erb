@@ -1,0 +1,22 @@
+<div class="col-md-4 mb-3">
+  <%= link_to player_path(@top_mvp), class: "text-decoration-none text-dark" do %>
+    <div class="card card-primary shadow-sm border-0 h-100">
+      <div class="card-body text-center">
+        <i class="fas fa-star fa-2x text-warning mb-2"></i>
+        <h5 class="card-title mb-4 fw-bold">MVP Más Frecuente</h5>
+
+        <% if @top_mvp.profile_photo.attached? %>
+          <%= image_tag @top_mvp.profile_photo,
+                        class: "rounded-circle border border-warning mb-4",
+                        style: "width: 100px; height: 100px; object-fit: cover;" %>
+        <% else %>
+          <%= image_tag "default_avatar.png",
+                        class: "rounded-circle border border-warning mb-4",
+                        width: 100, height: 100 %>
+        <% end %>
+
+        <p class="fw-bold"><%= @top_mvp&.full_name || "N/A" %></p>
+      </div>
+    </div>
+  <% end %>
+</div>
