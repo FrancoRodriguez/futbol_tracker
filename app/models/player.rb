@@ -20,6 +20,10 @@ class Player < ApplicationRecord
     nickname.present? ? "#{name} (#{nickname})" : name
   end
 
+  def full_name_with_win
+    "#{full_name} - #{win_rate}%"
+  end
+
   def total_matches
     participations.count
   end
