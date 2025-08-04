@@ -32,7 +32,7 @@
     <div class="d-flex align-items-center text-secondary" style="min-width: 180px; font-size: 0.9rem;">
       <%= image_tag("https://openweathermap.org/img/wn/#{@match_weather[:icon]}@2x.png", alt: "Clima", width: 40, height: 40, class: "me-2") %>
       <div>
-        <div class="fw-semibold" style="color: #0077cc;"><%= @match_weather[:weather] %></div>
+        <div class="fw-semibold text-primary"><%= @match_weather[:weather] %></div>
         <div><%= @match_weather[:temp] %>°C (sensación <%= @match_weather[:feels_like] %>°C)</div>
       </div>
     </div>
