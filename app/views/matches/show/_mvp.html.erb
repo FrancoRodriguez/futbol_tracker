@@ -23,7 +23,24 @@
     </div>
   <% else %>
     <% if user_signed_in? %>
-      <p class="text-center fst-italic text-muted">No se ha seleccionado un MVP aún.</p>
+      <div class="card shadow-lg mb-4">
+        <div class="card-header bg-primary text-white text-center">
+          <h2 class="mb-0">Seleccionar MVP</h2>
+        </div>
+        <div class="card-body bg-light">
+          <%= form_with(model: @match, url: match_path(@match), method: :patch, local: true) do |f| %>
+            <div class="mb-3">
+              <%= f.label :mvp_id, "Jugador MVP", class: "form-label fw-bold" %>
+              <%= f.collection_select :mvp_id, @available_players_mvp, :id, :name,
+                                      { prompt: "Selecciona un jugador" },
+                                      { class: "form-select shadow-sm" } %>
+            </div>
+            <div class="text-center">
+              <%= f.submit "Guardar MVP", class: "btn btn-primary btn-lg px-5 mt-3 shadow-sm" %>
+            </div>
+          <% end %>
+        </div>
+      </div>
     <% else %>
       <p class="text-center fst-italic text-muted">MVP no disponible.</p>
     <% end %>

@@ -36,24 +36,19 @@
         <td><%= render "result", match: match %></td>
         <td>
           <% if user_signed_in? %>
-            <div class="dropdown">
-              <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" id="dropdownMenuButton-<%= match.id %>" data-bs-toggle="dropdown" aria-expanded="false">
-                Acciones
-              </button>
-              <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton-<%= match.id %>">
-                <li><%= link_to '👀 Ver', match_path(match), class: 'dropdown-item' %></li>
-                <li>
-                  <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#addResultModal-<%= match.id %>">
-                    <i class="fas fa-pen"></i> Agregar resultado
-                  </button>
-                </li>
-                <li><%= link_to 'Editar', edit_match_path(match), class: 'dropdown-item' %></li>
-              </ul>
+            <div class="btn-group btn-group-sm" role="group">
+              <%= link_to match_path(match), class: 'btn btn-outline-primary' do %>
+                👀 Ver
+              <% end %>
+              <%= link_to edit_match_path(match), class: 'btn btn-outline-warning' do %>
+                ✏️ Editar
+              <% end %>
             </div>
           <% else %>
             <%= link_to '👀 Ver', match_path(match), class: 'btn btn-primary btn-sm' %>
           <% end %>
         </td>
+
       </tr>
 
       <%= render "modals/add_result", match: match %>
