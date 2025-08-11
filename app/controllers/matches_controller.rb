@@ -34,29 +34,37 @@ class MatchesController < ApplicationController
   def show
     @participations = @match.participations.includes(:player)
     @teams = [@match.home_team, @match.away_team].compact
-
     @team_win_percentages = {}
+
+    # 1) Fuerza por equipo
+    strengths = {}
 
     @teams.each do |team|
       players = @participations.select { |p| p.team_id == team.id }.map(&:player)
-      next if players.empty?
+      eligible = players.select { |pl| pl.total_matches >= Player::MIN_MATCHES }
+      next if eligible.empty?
 
-      # Filtrar solo los jugadores con estadísticas válidas
-      eligible_players = players.select { |player| player.total_matches >= Player::MIN_MATCHES }
+      strengths[team.id] = eligible.sum { |pl| pl.total_wins.to_f / pl.total_matches.to_f }
+    end
 
-      next if eligible_players.empty?
+    # 2) Normalizar para que sumen 100%
+    if strengths.size == 2
+      ids = strengths.keys
+      total_strength = strengths.values.sum
 
-      total = eligible_players.sum do |player|
-        player.total_wins.to_f / player.total_matches
+      if total_strength.positive?
+        a = ((strengths[ids[0]] / total_strength) * 100).round(1)
+        b = (100 - a).round(1) # asegura 100% total
+
+        @team_win_percentages[ids[0]] = a
+        @team_win_percentages[ids[1]] = b
       end
-
-      average = (total / eligible_players.size * 100).round(1)
-      @team_win_percentages[team.id] = average
     end
 
     weather_service = WeatherService.new
     @match_weather = weather_service.forecast_for(@match.date)
   end
+
 
   def new
     @match = Match.new
