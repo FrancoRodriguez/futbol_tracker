@@ -1,0 +1,60 @@
+<% if user_signed_in? %>
+  <%= link_to 'Previsualizar equipos parejos',
+              match_path(@match, preview_autobalance: 1),
+              class: 'btn btn-outline-info mb-3' %>
+  <% if @team_a && @team_b %>
+    <button id="toggle-preview" class="btn btn-outline-secondary mb-3">
+      Ocultar previsualización
+    </button>
+  <% end %>
+
+  <%= button_to 'Armar equipos automáticamente',
+                autobalance_match_path(@match),
+                method: :post,
+                class: 'btn btn-primary mb-3',
+                form: { data: { turbo_confirm: '¿Reemplazar equipos actuales?' } } %>
+
+  <% if @team_a && @team_b %>
+    <section id="preview-section" class="mb-4">
+      <h4 class="text-light">Sugerencia de equipos (sin guardar)</h4>
+      <div class="row gy-3">
+        <!-- equipo A -->
+        <div class="col-lg-6">
+          <div class="card p-3 bg-dark text-light">
+            <h5>Equipo A (sugerido)</h5>
+            <ul class="list-group list-group-flush">
+              <% @team_a.each do |player| %>
+                <li class="list-group-item bg-dark text-light border-secondary">
+                  <%= player.full_name %>
+                  <% if player.total_matches.to_i > 0 %>
+                    <small class="text-muted">
+                      — <%= ((player.total_wins.to_f/player.total_matches)*100).round(1) %>%
+                    </small>
+                  <% end %>
+                </li>
+              <% end %>
+            </ul>
+          </div>
+        </div>
+        <!-- equipo B -->
+        <div class="col-lg-6">
+          <div class="card p-3 bg-dark text-light">
+            <h5>Equipo B (sugerido)</h5>
+            <ul class="list-group list-group-flush">
+              <% @team_b.each do |player| %>
+                <li class="list-group-item bg-dark text-light border-secondary">
+                  <%= player.full_name %>
+                  <% if player.total_matches.to_i > 0 %>
+                    <small class="text-muted">
+                      — <%= ((player.total_wins.to_f/player.total_matches)*100).round(1) %>%
+                    </small>
+                  <% end %>
+                </li>
+              <% end %>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+  <% end %>
+<% end %>

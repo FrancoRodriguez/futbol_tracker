@@ -3,6 +3,9 @@ Rails.application.routes.draw do
 
   resources :matches do
     resources :participations, only: [:new, :create, :edit, :update, :destroy]
+    member do
+      post :autobalance  # guarda los equipos sugeridos
+    end
   end
   resources :players do
     collection do

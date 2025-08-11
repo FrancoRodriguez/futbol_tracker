@@ -1,5 +1,5 @@
 class MatchesController < ApplicationController
-  before_action :set_match, only: [:show, :edit, :update, :destroy]
+  before_action :set_match, only: [:show, :edit, :update, :destroy, :autobalance]
   before_action :set_teams, only: [:show]
   before_action :available_players, :available_players_mvp, only: [:show]
 
@@ -63,6 +63,32 @@ class MatchesController < ApplicationController
 
     weather_service = WeatherService.new
     @match_weather = weather_service.forecast_for(@match.date)
+
+    # (Opcional) Previsualizar sin guardar
+    if params[:preview_autobalance].present?
+      @team_a, @team_b = TeamBalancer.new(@participations.map(&:player)).call
+    end
+  end
+
+  def autobalance
+    parts   = @match.participations.includes(:player)
+    team_a, team_b = TeamBalancer.new(parts.map(&:player)).call
+
+    # Asegura equipos home/away
+    home = @match.home_team || @match.build_home_team(name: 'Equipo Blanco')
+    away = @match.away_team || @match.build_away_team(name: 'Equipo Negro')
+    @match.save! if @match.changed?
+
+    # Asignar team_id a las participaciones
+    parts.each do |p|
+      if team_a.include?(p.player)
+        p.update!(team: home)
+      elsif team_b.include?(p.player)
+        p.update!(team: away)
+      end
+    end
+
+    redirect_to @match, notice: 'Equipos balanceados automáticamente.'
   end
 
 
