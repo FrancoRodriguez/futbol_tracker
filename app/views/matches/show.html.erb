@@ -3,7 +3,7 @@
 <%= render "matches/show/summary", match: @match %>
 <%= render "matches/show/mvp", match: @match %>
 <%= render "matches/show/pre_visualization", match: @match %>
-<%= render "matches/show/vs_fight", match: @match, featured_by_team: @featured_by_team %>
+<%= render "matches/show/vs_fight", match: @match %>
 <%= render "matches/show/team_players", match: @match, teams: @teams, participations: @participations %>
 <% if user_signed_in? %>
   <%= render "matches/show/add_participation_button" %>
@@ -57,6 +57,64 @@
 
         document.addEventListener('DOMContentLoaded', bindMultiModalOpen);
         document.addEventListener('turbo:load', bindMultiModalOpen);
+    })();
+
+    (function() {
+        function bindDuelVoting(){
+            document.querySelectorAll(".duel-vote-btn").forEach(btn => {
+                if (btn.dataset.bound === "1") return;
+                btn.dataset.bound = "1";
+
+                btn.addEventListener("click", async function(e){
+                    e.preventDefault();
+                    const matchId  = this.dataset.matchId;
+                    const playerId = this.dataset.playerId;
+                    const token    = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+
+                    try {
+                        const res = await fetch(`/matches/${matchId}/duel_vote`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-Token': token
+                            },
+                            body: JSON.stringify({ player_id: playerId })
+                        });
+                        if (!res.ok) throw new Error("Error al votar");
+
+                        const data = await res.json();
+
+                        // IDs
+                        const barA   = document.getElementById(`duel-bar-a-${matchId}`);
+                        const barB   = document.getElementById(`duel-bar-b-${matchId}`);
+                        const pctA   = document.getElementById(`duel-pct-a-${matchId}`);
+                        const pctB   = document.getElementById(`duel-pct-b-${matchId}`);
+                        const cntA   = document.getElementById(`duel-count-a-${matchId}`);
+
+                        // Actualiza UI
+                        if (barA) barA.style.width = `${data.a_pct}%`;
+                        if (barB) barB.style.width = `${data.b_pct}%`;
+                        if (pctA) pctA.textContent = `${data.a_pct}%`;
+                        if (pctB) pctB.textContent = `${data.b_pct}%`;
+                        if (cntA) cntA.textContent = data.total > 0 ? `${data.total} votos` : "Sé el primero en votar";
+
+                        // Marcar "Tu voto"
+                        const btnA = document.getElementById(`duel-vote-a-${matchId}`);
+                        const btnB = document.getElementById(`duel-vote-b-${matchId}`);
+                        if (btnA && btnB) {
+                            btnA.textContent = (data.your_choice === data.a_player_id) ? "Tu voto" : "Votar";
+                            btnB.textContent = (data.your_choice === data.b_player_id) ? "Tu voto" : "Votar";
+                        }
+                    } catch (err) {
+                        console.error(err);
+                        alert("No se pudo registrar el voto. Intenta de nuevo.");
+                    }
+                });
+            });
+        }
+
+        document.addEventListener("DOMContentLoaded", bindDuelVoting);
+        document.addEventListener("turbo:load", bindDuelVoting);
     })();
 </script>
 

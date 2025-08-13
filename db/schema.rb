@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_08_03_101131) do
+ActiveRecord::Schema[7.2].define(version: 2025_08_13_150100) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -40,6 +40,19 @@ ActiveRecord::Schema[7.2].define(version: 2025_08_03_101131) do
     t.bigint "blob_id", null: false
     t.string "variation_digest", null: false
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
+  end
+
+  create_table "duel_votes", force: :cascade do |t|
+    t.bigint "match_id", null: false
+    t.bigint "player_id", null: false
+    t.string "voter_key", null: false
+    t.string "ip"
+    t.string "user_agent"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["match_id", "voter_key"], name: "index_duel_votes_on_match_id_and_voter_key", unique: true
+    t.index ["match_id"], name: "index_duel_votes_on_match_id"
+    t.index ["player_id"], name: "index_duel_votes_on_player_id"
   end
 
   create_table "matches", force: :cascade do |t|
@@ -108,6 +121,8 @@ ActiveRecord::Schema[7.2].define(version: 2025_08_03_101131) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "duel_votes", "matches"
+  add_foreign_key "duel_votes", "players"
   add_foreign_key "matches", "teams", column: "away_team_id"
   add_foreign_key "matches", "teams", column: "home_team_id"
   add_foreign_key "matches", "teams", column: "win_id"

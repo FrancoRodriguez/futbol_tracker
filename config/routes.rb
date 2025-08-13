@@ -5,6 +5,7 @@ Rails.application.routes.draw do
   resources :matches do
     member { post :autobalance }
 
+    resource :duel_vote, only: [:create], controller: "duel_votes"
     resources :participations, only: [:create, :update, :destroy] do
       collection { post :bulk_create }  # <-- AQUÍ va
     end
@@ -19,8 +20,6 @@ Rails.application.routes.draw do
 
   resources :teams, only: [:index]
 
-  # ⚠️ Este top-level suele ser innecesario y puede chocar con el anidado:
-  # resources :participations, only: [:destroy]
 
   resources :dashboard, only: [:index]
   root 'dashboard#index'
