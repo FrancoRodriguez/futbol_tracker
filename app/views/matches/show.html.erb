@@ -60,6 +60,28 @@
     })();
 
     (function() {
+        function showSpinner(btn){
+            const sp = btn.querySelector('.spinner-border');
+            if (sp) sp.classList.remove('d-none');
+            btn.disabled = true; // bloquea mientras envía
+        }
+        function hideSpinner(btn){
+            const sp = btn.querySelector('.spinner-border');
+            if (sp) sp.classList.add('d-none');
+            // NO cambiamos disabled aquí; lo decide el flujo (éxito = queda bloqueado, error = se re-habilita)
+        }
+        function lockBothButtons(matchId, choiceId) {
+            const btnA = document.getElementById(`duel-vote-a-${matchId}`);
+            const btnB = document.getElementById(`duel-vote-b-${matchId}`);
+            [btnA, btnB].forEach(b => {
+                if (!b) return;
+                hideSpinner(b);          // asegúrate de ocultar el spinner en ambos
+                b.disabled = true;       // bloqueo definitivo
+                const lb = b.querySelector('.label');
+                if (lb) lb.textContent = (parseInt(b.dataset.playerId,10) === choiceId) ? 'Tu voto' : 'Bloqueado';
+            });
+        }
+
         function bindDuelVoting(){
             document.querySelectorAll(".duel-vote-btn").forEach(btn => {
                 if (btn.dataset.bound === "1") return;
@@ -71,43 +93,66 @@
                     const playerId = this.dataset.playerId;
                     const token    = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
 
+                    const overlay = document.getElementById(`duel-overlay-${matchId}`);
+                    const otherId = this.id.includes('duel-vote-a-') ? `duel-vote-b-${matchId}` : `duel-vote-a-${matchId}`;
+                    const other   = document.getElementById(otherId);
+
+                    // UI: loading
+                    overlay && overlay.classList.remove('d-none');
+                    showSpinner(this);
+                    if (other) other.disabled = true;
+
                     try {
                         const res = await fetch(`/matches/${matchId}/duel_vote`, {
                             method: 'POST',
+                            credentials: 'same-origin',
                             headers: {
                                 'Content-Type': 'application/json',
+                                'Accept': 'application/json',
                                 'X-CSRF-Token': token
                             },
                             body: JSON.stringify({ player_id: playerId })
                         });
-                        if (!res.ok) throw new Error("Error al votar");
 
-                        const data = await res.json();
+                        // Intenta parsear JSON incluso en 409
+                        let data = {};
+                        try { data = await res.json(); } catch(_) {}
 
-                        // IDs
-                        const barA   = document.getElementById(`duel-bar-a-${matchId}`);
-                        const barB   = document.getElementById(`duel-bar-b-${matchId}`);
-                        const pctA   = document.getElementById(`duel-pct-a-${matchId}`);
-                        const pctB   = document.getElementById(`duel-pct-b-${matchId}`);
-                        const cntA   = document.getElementById(`duel-count-a-${matchId}`);
+                        // Actualiza barras/porcentajes si vino data
+                        const barA = document.getElementById(`duel-bar-a-${matchId}`);
+                        const barB = document.getElementById(`duel-bar-b-${matchId}`);
+                        const pctA = document.getElementById(`duel-pct-a-${matchId}`);
+                        const pctB = document.getElementById(`duel-pct-b-${matchId}`);
+                        const cntA = document.getElementById(`duel-count-a-${matchId}`);
 
-                        // Actualiza UI
-                        if (barA) barA.style.width = `${data.a_pct}%`;
-                        if (barB) barB.style.width = `${data.b_pct}%`;
-                        if (pctA) pctA.textContent = `${data.a_pct}%`;
-                        if (pctB) pctB.textContent = `${data.b_pct}%`;
-                        if (cntA) cntA.textContent = data.total > 0 ? `${data.total} votos` : "Sé el primero en votar";
+                        if (typeof data.a_pct !== 'undefined') {
+                            barA && (barA.style.width = `${data.a_pct}%`);
+                            barB && (barB.style.width = `${data.b_pct}%`);
+                            pctA && (pctA.textContent = `${data.a_pct}%`);
+                            pctB && (pctB.textContent = `${data.b_pct}%`);
+                        }
+                        if (typeof data.total !== 'undefined') {
+                            cntA && (cntA.textContent = data.total > 0 ? `${data.total} votos` : "Sé el primero en votar");
+                        }
 
-                        // Marcar "Tu voto"
-                        const btnA = document.getElementById(`duel-vote-a-${matchId}`);
-                        const btnB = document.getElementById(`duel-vote-b-${matchId}`);
-                        if (btnA && btnB) {
-                            btnA.textContent = (data.your_choice === data.a_player_id) ? "Tu voto" : "Votar";
-                            btnB.textContent = (data.your_choice === data.b_player_id) ? "Tu voto" : "Votar";
+                        // ÉXITO (200) o YA VOTÓ (409): ocultar spinner y bloquear ambos
+                        if (res.ok || res.status === 409) {
+                            const choice = data.your_choice ? parseInt(data.your_choice, 10) : parseInt(playerId, 10);
+                            lockBothButtons(parseInt(matchId,10), choice);
+                        } else {
+                            throw new Error(data.error || 'Error al votar');
                         }
                     } catch (err) {
                         console.error(err);
                         alert("No se pudo registrar el voto. Intenta de nuevo.");
+                        // Revertir estado
+                        hideSpinner(this);
+                        if (other) other.disabled = false;
+                        this.disabled = false;
+                        const lb = this.querySelector('.label');
+                        if (lb) lb.textContent = 'Votar';
+                    } finally {
+                        overlay && overlay.classList.add('d-none'); // SIEMPRE ocultar overlay
                     }
                 });
             });

@@ -1,7 +1,13 @@
 <%# app/views/matches/show/_duelo_fecha.html.erb %>
 <% if defined?(@duel_a) && defined?(@duel_b) && @duel_a && @duel_b %>
-  <section class="card shadow-sm border border-warning bg-dark text-light rounded-4 mb-4 p-3 p-md-4"
-           id="duelo-<%= match.id %>">
+  <section class="card shadow-sm border border-warning bg-dark text-light rounded-4 mb-4 p-3 p-md-4 position-relative"
+           id="duel-<%= match.id %>">
+
+    <!-- overlay de carga -->
+    <div id="duel-overlay-<%= match.id %>" class="duel-overlay d-none">
+      <div class="spinner-border" role="status" aria-hidden="true"></div>
+    </div>
+
     <h4 class="fw-bold text-center text-warning mb-3">
       <i class="fas fa-bolt me-2"></i>Duelo de la Fecha — ¿Quién gana?
     </h4>
@@ -38,11 +44,15 @@
             </div>
 
             <div class="ms-2">
-              <button class="btn btn-outline-warning btn-sm duel-vote-btn"
+              <button class="btn btn-outline-warning btn-sm duel-vote-btn d-inline-flex align-items-center"
                       data-match-id="<%= match.id %>"
                       data-player-id="<%= @duel_a.id %>"
-                      id="duel-vote-a-<%= match.id %>">
-                <%= @your_duel_choice == @duel_a.id ? "Tu voto" : "Votar" %>
+                      id="duel-vote-a-<%= match.id %>"
+                      <%= 'disabled' if @your_duel_choice.present? %>>
+                <span class="spinner-border spinner-border-sm me-2 d-none" aria-hidden="true"></span>
+                <span class="label">
+                  <%= @your_duel_choice == @duel_a.id ? "Tu voto" : (@your_duel_choice ? "Bloqueado" : "Votar") %>
+                </span>
               </button>
             </div>
           </div>
@@ -81,11 +91,15 @@
             </div>
 
             <div class="ms-2">
-              <button class="btn btn-outline-warning btn-sm duel-vote-btn"
+              <button class="btn btn-outline-warning btn-sm duel-vote-btn d-inline-flex align-items-center"
                       data-match-id="<%= match.id %>"
                       data-player-id="<%= @duel_b.id %>"
-                      id="duel-vote-b-<%= match.id %>">
-                <%= @your_duel_choice == @duel_b.id ? "Tu voto" : "Votar" %>
+                      id="duel-vote-b-<%= match.id %>"
+                      <%= 'disabled' if @your_duel_choice.present? %>>
+                <span class="spinner-border spinner-border-sm me-2 d-none" aria-hidden="true"></span>
+                <span class="label">
+                  <%= @your_duel_choice == @duel_b.id ? "Tu voto" : (@your_duel_choice ? "Bloqueado" : "Votar") %>
+                </span>
               </button>
             </div>
           </div>
