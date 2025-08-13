@@ -1,0 +1,19 @@
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-K9N7BZKNK5"></script>
+<script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    // No enviamos page_view automático para evitar duplicados con Turbo
+    gtag('config', 'G-K9N7BZKNK5', { send_page_view: false });
+
+    // Detectar navegación con Turbo y enviar page_view
+    document.addEventListener("turbo:load", function() {
+        gtag('event', 'page_view', {
+            page_path: location.pathname + location.search,
+            page_location: location.href,
+            page_title: document.title
+        });
+    });
+</script>

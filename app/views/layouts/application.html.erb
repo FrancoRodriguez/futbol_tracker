@@ -11,6 +11,8 @@
   <%= csrf_meta_tags %>
   <%= csp_meta_tag %>
 
+  <%= render "shared/ga" if Rails.env.production? %>
+
   <%= yield :head %>
 
   <link rel="icon" href="/tercer_tiempo_logo.JPG" type="image/png">
