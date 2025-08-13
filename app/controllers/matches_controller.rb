@@ -98,18 +98,32 @@ class MatchesController < ApplicationController
       @team_a, @team_b = TeamBalancer.new(@participations.map(&:player)).call
     end
 
-    # --- VS (Duelo de la Fecha) basado en mejor win rate ---
+    # --- VS (Duelo de la Fecha) basado en mejor win rate + votos reales ---
     home = @match.home_team
     away = @match.away_team
     if home && away && @featured_by_team[home.id] && @featured_by_team[away.id]
       @duel_a = @featured_by_team[home.id]
       @duel_b = @featured_by_team[away.id]
       @vs_label = "Mejor win rate (mín. #{Player::MIN_MATCHES} PJ)"
-      # place-holders hasta que actives la votación real
-      @duel_total = 0
-      @duel_a_pct = 50.0
-      @duel_b_pct = 50.0
-      @your_duel_choice = nil
+
+      # Lee votos reales solo de los dos jugadores del VS
+      counts = DuelVote.where(match_id: @match.id, player_id: [@duel_a.id, @duel_b.id])
+                       .group(:player_id).count
+
+      a_ct = counts.fetch(@duel_a.id, 0)
+      b_ct = counts.fetch(@duel_b.id, 0)
+      tot  = a_ct + b_ct
+
+      if tot.positive?
+        @duel_a_pct = (a_ct * 100.0 / tot).round(1)
+        @duel_b_pct = (100.0 - @duel_a_pct).round(1)  # asegura 100%
+      else
+        @duel_a_pct = 50.0
+        @duel_b_pct = 50.0
+      end
+
+      @duel_total       = tot
+      @your_duel_choice = (respond_to?(:duel_voter_key) ? DuelVote.find_by(match_id: @match.id, voter_key: duel_voter_key)&.player_id : nil)
     end
 
     # --- MVP (chips y modal) ---
