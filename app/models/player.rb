@@ -72,9 +72,9 @@ class Player < ApplicationRecord
   end
 
   def win_rate
-    return "#{stats_cache[:win_rate]} %" if stats_cache[:win_rate].is_a?(Integer)
+    return stats_cache[:win_rate].to_f if stats_cache[:win_rate].is_a?(Integer)
 
-    stats_cache[:win_rate]
+    stats_cache[:win_rate].to_f
   end
 
   def self.top_mvp
