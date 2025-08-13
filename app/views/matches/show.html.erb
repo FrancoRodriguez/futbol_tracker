@@ -4,7 +4,9 @@
 <%= render "matches/show/mvp", match: @match %>
 <%= render "matches/show/pre_visualization", match: @match %>
 <%= render "matches/show/team_players", match: @match, teams: @teams, participations: @participations %>
-<%= render "matches/show/add_participation_button" %>
+<% if user_signed_in? %>
+  <%= render "matches/show/add_participation_button" %>
+<% end %>
 <%= render "matches/show/video", match: @match %>
 
 <!--MODALS-->

@@ -1,85 +1,96 @@
 <section>
-  <h3 class="mb-4 fw-bold text-center text-light"><i class="fas fa-users"></i> Equipos y Jugadores</h3>
-  <div class="row gy-4">
+  <h3 class="mb-4 fw-bold text-center text-light">
+    <i class="fas fa-users"></i> Equipos y Jugadores
+  </h3>
+
+  <div class="row g-4">
     <% teams.each do |team| %>
-      <div class="col-lg-6">
-        <div class="card shadow-lg rounded p-3 h-100 bg-dark text-light">
-          <h4 class="text-center mb-1 fw-bold">Equipo <%= team.name %></h4>
-          <p class="text-center text-muted mb-2">
-            Probabilidad de victoria:
-            <span class="fw-semibold text-success">
-              <%= @team_win_percentages[team.id].present? ? "#{@team_win_percentages[team.id]}%" : "N/A" %>
-            </span>
-          </p>
-          <p class="text-center fst-italic text-muted mb-3">
-            <%= pluralize(participations.where(team: team).count, 'jugador inscripto', 'jugadores inscriptos') %>
-          </p>
-          <div class="list-group list-group-flush overflow-auto" style="background-color: transparent;">
+      <div class="col-12 col-lg-6">
+        <div class="card team-card shadow-lg rounded-4 bg-dark text-light h-100">
+          <div class="card-header bg-transparent border-0 text-center pt-4">
+            <h4 class="fw-bold mb-1">Equipo <%= team.name %></h4>
+            <p class="text-muted mb-0">
+              Probabilidad de victoria:
+              <span class="fw-semibold <%= @team_win_percentages[team.id].to_f >= 50 ? 'text-success' : 'text-warning' %>">
+                <%= @team_win_percentages[team.id].present? ? "#{@team_win_percentages[team.id]}%" : "N/A" %>
+              </span>
+              · <%= pluralize(participations.where(team: team).count, 'jugador inscripto', 'jugadores inscriptos') %>
+            </p>
+          </div>
+
+          <div class="list-group list-group-flush team-list">
             <% participations.where(team: team).includes(:player).order('players.rating DESC').each do |participation| %>
               <% player = participation.player %>
+              <% win_display, win_percentage = if player.total_matches.to_i > 0
+                                                 perc = ((player.total_wins.to_f / player.total_matches.to_f) * 100).round(1)
+                                                 ["#{perc}%", perc]
+                                               else
+                                                 ["N/A", 0]
+                                               end %>
 
-              <%# Calcular porcentaje de victorias %>
-              <% if player.total_matches.to_i > 0 %>
-                <% win_percentage = ((player.total_wins.to_f / player.total_matches.to_f) * 100).round(1) %>
-                <% win_display = "#{win_percentage}%" %>
-              <% else %>
-                <% win_display = "N/A" %>
-              <% end %>
+              <div class="list-group-item bg-dark text-light border-primary d-flex align-items-center gap-3">
+                <% if player.profile_photo.attached? %>
+                  <%= image_tag player.profile_photo, class: "rounded-circle border border-secondary flex-shrink-0",
+                                style: "width: 48px; height: 48px; object-fit: cover;" %>
+                <% else %>
+                  <%= image_tag "default_avatar.png", class: "rounded-circle border border-secondary flex-shrink-0",
+                                width: 48, height: 48 %>
+                <% end %>
 
-              <div class="list-group-item d-flex align-items-center justify-content-between gap-3 bg-dark text-light border-primary">
-                <div class="d-flex align-items-center gap-3">
-                  <% if player.profile_photo.attached? %>
-                    <%= image_tag player.profile_photo,
-                                  class: "rounded-circle border border-secondary",
-                                  style: "width: 50px; height: 50px; object-fit: cover;" %>
-                  <% else %>
-                    <%= image_tag "default_avatar.png",
-                                  class: "rounded-circle border border-secondary",
-                                  width: 50, height: 50 %>
-                  <% end %>
-                  <div>
-                    <%= link_to player.full_name, player_path(player), class: "fw-semibold text-decoration-none text-light" %><br>
+                <div class="flex-grow-1">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <%= link_to player.full_name, player_path(player), class: "fw-semibold text-decoration-none text-light" %>
                     <small class="text-muted">Victorias: <%= win_display %></small>
+                  </div>
+                  <!-- Mini barra (opcional) -->
+                  <div class="progress mt-2" style="height:6px;">
+                    <div class="progress-bar" role="progressbar"
+                         style="width:<%= win_percentage %>%;" aria-valuenow="<%= win_percentage.to_i %>"
+                         aria-valuemin="0" aria-valuemax="100"></div>
                   </div>
                 </div>
 
-                <div>
+                <div class="ms-2 d-none d-sm-flex">
                   <% if match.date > 3.days.ago || user_signed_in? %>
-                    <button type="button" class="btn btn-outline-warning btn-sm me-2" data-bs-toggle="modal" data-bs-target="#editParticipationModal-<%= participation.id %>">
-                      <i class="fas fa-edit"></i> Editar
-                    </button>
-                  <% else %>
-                    <button class="btn btn-outline-warning btn-sm me-2" disabled>
-                      <i class="fas fa-edit"></i> Editar
+                    <button type="button" class="btn btn-outline-warning btn-sm me-2"
+                            data-bs-toggle="modal" data-bs-target="#editParticipationModal-<%= participation.id %>">
+                      <i class="fas fa-edit"></i>
                     </button>
                   <% end %>
                   <% if user_signed_in? %>
-                    <%= button_to 'Eliminar', match_participation_path(match, participation), method: :delete,
-                                  data: { confirm: '¿Estás seguro?' },
+                    <%= button_to 'Eliminar', match_participation_path(match, participation),
+                                  method: :delete, data: { confirm: '¿Estás seguro?' },
                                   class: 'btn btn-outline-danger btn-sm' %>
                   <% end %>
                 </div>
+              </div>
 
-                <!-- Modal editar participación -->
-                <div class="modal fade" id="editParticipationModal-<%= participation.id %>" aria-labelledby="editParticipationModalLabel-<%= participation.id %>" tabindex="-1" aria-hidden="true">
-                  <div class="modal-dialog modal-dialog-centered modal-lg">
-                    <div class="modal-content">
-                      <div class="modal-header bg-primary text-white">
-                        <h5 class="modal-title" id="editParticipationModalLabel-<%= participation.id %>">Editar Participación de <b><%= player.full_name %></b></h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-                      </div>
-                      <div class="modal-body">
-                        <%= form_with(model: [match, participation], url: match_participation_path(match, participation), method: :patch, local: true) do |f| %>
-                          <div class="mb-3">
-                            <%= f.label :team_id, 'Equipo', class: "form-label" %>
-                            <%= f.collection_select :team_id, Team.all, :id, :name, { selected: participation.team_id, prompt: 'Selecciona un equipo' }, { class: 'form-select' } %>
-                          </div>
-                          <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                            <%= f.submit 'Guardar cambios', class: 'btn btn-primary', onclick: 'setTimeout(() => { location.reload(); }, 2000);' %>
-                          </div>
-                        <% end %>
-                      </div>
+              <!-- Modal editar -->
+              <div class="modal fade" id="editParticipationModal-<%= participation.id %>"
+                   aria-labelledby="editParticipationModalLabel-<%= participation.id %>" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered modal-lg">
+                  <div class="modal-content">
+                    <div class="modal-header bg-primary text-white">
+                      <h5 class="modal-title" id="editParticipationModalLabel-<%= participation.id %>">
+                        Editar Participación de <b><%= player.full_name %></b>
+                      </h5>
+                      <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body">
+                      <%= form_with(model: [match, participation], url: match_participation_path(match, participation),
+                                    method: :patch, local: true) do |f| %>
+                        <div class="mb-3">
+                          <%= f.label :team_id, 'Equipo', class: "form-label" %>
+                          <%= f.collection_select :team_id, Team.all, :id, :name,
+                                                  { selected: participation.team_id, prompt: 'Selecciona un equipo' },
+                                                  { class: 'form-select' } %>
+                        </div>
+                        <div class="modal-footer">
+                          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                          <%= f.submit 'Guardar cambios', class: 'btn btn-primary',
+                                       onclick: 'setTimeout(() => { location.reload(); }, 2000);' %>
+                        </div>
+                      <% end %>
                     </div>
                   </div>
                 </div>

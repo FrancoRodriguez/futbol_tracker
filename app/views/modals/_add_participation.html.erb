@@ -1,38 +1,73 @@
-<div class="modal fade" id="addParticipationModal" aria-labelledby="addParticipationModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered modal-xl">
-    <div class="modal-content">
-      <div class="modal-header bg-primary text-white">
-        <h5 class="modal-title" id="addParticipationModalLabel">Agregar Jugadores al Partido</h5>
+<div class="modal fade" id="addParticipationModal" tabindex="-1" aria-hidden="true"
+     aria-labelledby="addParticipationLabel-<%= match.id %>">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content border border-warning bg-dark text-light rounded-4">
+      <div class="modal-header bg-dark border-0 border-bottom border-warning">
+        <h5 class="modal-title text-warning" id="addParticipationLabel-<%= match.id %>">
+          <i class="fas fa-user-plus me-2"></i>Agregar jugadores al partido
+        </h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
       </div>
+
       <div class="modal-body">
         <%= form_with(model: Participation.new, url: match_participations_path(match), local: true) do |f| %>
           <%= f.hidden_field :match_id, value: match.id %>
-          <p><strong>Partido:</strong> <%= match.location %> - <%= date_in_spanish(match.date) %></p>
 
-          <div class="row">
-            <div class="col-md-6 mb-3">
-              <%= f.label :player_id, "Jugador", class: "form-label" %>
-              <%= f.collection_select :player_id, available_players, :id, :full_name_with_win,
+          <p class="small text-muted mb-4">
+            <i class="fas fa-location-dot me-1"></i>
+            <strong class="me-2"><%= match.location.presence || "Ubicación no disponible" %></strong> ·
+            <i class="fas fa-calendar-alt mx-2"></i>
+            <%= date_in_spanish(match.date) %>
+          </p>
+
+          <div class="row g-3">
+            <div class="col-md-6">
+              <%= f.label :player_id, "Jugador", class: "form-label fw-bold" %>
+              <%= f.collection_select :player_id,
+                                      (defined?(available_players) ? available_players : match.participations.includes(:player).map(&:player).uniq),
+                                      :id, :full_name,
                                       { prompt: "Selecciona un jugador" },
-                                      { class: "form-select" } %>
-              <div class="form-text">Si el jugador no aparece, ya está inscripto.</div>
+                                      { class: "form-select", required: true } %>
+              <div class="form-text">Si no aparece, ya está inscripto.</div>
             </div>
 
-            <div class="col-md-6 mb-3">
-              <%= f.label :team_id, "Equipo", class: "form-label" %>
+            <div class="col-md-6">
+              <%= f.label :team_id, "Equipo", class: "form-label fw-bold" %>
               <%= f.collection_select :team_id, Team.all, :id, :name,
                                       { prompt: "Selecciona un equipo" },
-                                      { class: "form-select" } %>
+                                      { class: "form-select", required: true } %>
             </div>
           </div>
 
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-            <%= f.submit "Agregar Participación", class: "btn btn-primary", disabled: true, id: "submitParticipationButton" %>
+          <div class="text-end mt-4">
+            <button type="button" class="btn btn-outline-light me-2" data-bs-dismiss="modal">Cancelar</button>
+            <%= f.submit "Agregar participación",
+                         class: "btn btn-warning",
+                         id: "submitParticipationButton",
+                         data: { disable_with: "Agregando..." } %>
           </div>
         <% end %>
       </div>
     </div>
   </div>
 </div>
+
+<script>
+    // Habilita el botón sólo cuando hay jugador y equipo seleccionados
+    document.addEventListener("DOMContentLoaded", function () {
+        const player = document.getElementById("participation_player_id");
+        const team   = document.getElementById("participation_team_id");
+        const btn    = document.getElementById("submitParticipationButton");
+
+        function toggle() {
+            if (!player || !team || !btn) return;
+            btn.disabled = !(player.value && team.value);
+        }
+
+        if (player && team && btn) {
+            toggle();
+            player.addEventListener("change", toggle);
+            team.addEventListener("change", toggle);
+        }
+    });
+</script>

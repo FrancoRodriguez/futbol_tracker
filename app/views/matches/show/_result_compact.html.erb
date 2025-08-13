@@ -1,0 +1,50 @@
+<%# === Compact Score === %>
+<% home_name  = match.home_team&.name || "Local" %>
+<% away_name  = match.away_team&.name || "Visita" %>
+
+<%# Obtiene scores desde atributos o desde match.result "3-1" %>
+<%
+  hs = match.respond_to?(:home_score) ? match.home_score : nil
+  as = match.respond_to?(:away_score) ? match.away_score : nil
+
+  if (hs.blank? || as.blank?) && match.result.present?
+    if match.result.to_s.strip =~ /\A\s*(\d+)\s*-\s*(\d+)\s*\z/
+      hs = $1.to_i
+      as = $2.to_i
+    end
+  end
+
+  hs = hs.to_i
+  as = as.to_i
+
+  winner =
+    if hs > as
+      home_name
+    elsif as > hs
+      away_name
+    else
+      nil
+    end
+%>
+
+<div class="result-compact text-center text-md-start">
+  <div class="d-flex align-items-center justify-content-center justify-content-md-start gap-2">
+    <span class="team-name <%= hs > as ? 'text-warning' : '' %>" title="<%= home_name %>"><%= home_name.upcase %></span>
+
+    <span class="score-pill">
+      <span class="score-num"><%= hs %></span>
+      <span class="mx-1">-</span>
+      <span class="score-num"><%= as %></span>
+    </span>
+
+    <span class="team-name <%= as > hs ? 'text-warning' : '' %>" title="<%= away_name %>"><%= away_name.upcase %></span>
+  </div>
+
+  <div class="meta small text-muted mt-1 pt-1 border-top border-secondary-subtle">
+    <% if winner.present? %>
+      Ganó: <span class="fw-semibold"><%= winner %></span>
+    <% else %>
+      Empate
+    <% end %>
+  </div>
+</div>

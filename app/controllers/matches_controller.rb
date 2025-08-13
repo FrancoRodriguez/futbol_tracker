@@ -36,37 +36,51 @@ class MatchesController < ApplicationController
     @teams = [@match.home_team, @match.away_team].compact
     @team_win_percentages = {}
 
-    # 1) Fuerza por equipo
+    # --- Probabilidad por equipo (normalizada a 100%) ---
     strengths = {}
-
     @teams.each do |team|
-      players = @participations.select { |p| p.team_id == team.id }.map(&:player)
-      eligible = players.select { |pl| pl.total_matches >= Player::MIN_MATCHES }
+      players   = @participations.select { |p| p.team_id == team.id }.map(&:player)
+      eligible  = players.select { |pl| pl.total_matches.to_i >= Player::MIN_MATCHES }
       next if eligible.empty?
 
       strengths[team.id] = eligible.sum { |pl| pl.total_wins.to_f / pl.total_matches.to_f }
     end
 
-    # 2) Normalizar para que sumen 100%
-    if strengths.size == 2
+    case strengths.size
+    when 2
       ids = strengths.keys
-      total_strength = strengths.values.sum
-
-      if total_strength.positive?
-        a = ((strengths[ids[0]] / total_strength) * 100).round(1)
-        b = (100 - a).round(1) # asegura 100% total
-
+      total = strengths.values.sum
+      if total.positive?
+        a = ((strengths[ids[0]] / total) * 100).round(1)
+        b = (100 - a).round(1)
         @team_win_percentages[ids[0]] = a
         @team_win_percentages[ids[1]] = b
       end
+    when 1
+      # Fallback amistoso si solo un lado tiene elegibles
+      only_id = strengths.keys.first
+      other_id = (@teams.map(&:id) - [only_id]).first
+      @team_win_percentages[only_id] = 50.0
+      @team_win_percentages[other_id] = 50.0 if other_id
     end
 
+    # --- Clima ---
     weather_service = WeatherService.new
     @match_weather = weather_service.forecast_for(@match.date)
 
-    # (Opcional) Previsualizar sin guardar
+    # --- Previsualización (autobalancer) ---
     if params[:preview_autobalance].present?
       @team_a, @team_b = TeamBalancer.new(@participations.map(&:player)).call
+    end
+
+    # --- Datos para el bloque MVP mejorado ---
+    # Lista para el modal de selección (participantes del partido)
+    @available_players_mvp = @participations.map(&:player).sort_by(&:full_name)
+
+    if @match.mvp.present?
+      p = @match.mvp
+      @mvp_total_awards = Match.where(mvp_id: p.id).count
+      @mvp_win_rate = p.total_matches.to_i > 0 ? ((p.total_wins.to_f / p.total_matches) * 100).round(1) : nil
     end
   end
 

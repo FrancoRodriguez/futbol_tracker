@@ -1,48 +1,112 @@
-<section class="mb-5 px-3 px-md-5">
-  <h3 class="mb-4 fw-bold text-center text-warning"><i class="fas fa-star"></i> Jugador MVP</h3>
-  <% if match.mvp.present? %>
-    <div class="d-flex justify-content-center">
-      <div class="card card-gold shadow-lg p-4 rounded bg-dark text-light" style="max-width: 600px; width: 100%;">
-        <div class="d-flex align-items-center gap-4">
-          <% if match.mvp.profile_photo.attached? %>
-            <%= image_tag match.mvp.profile_photo,
-                          class: "rounded-circle border border-warning",
-                          style: "width: 100px; height: 100px; object-fit: cover;" %>
-          <% else %>
-            <%= image_tag "default_avatar.png",
-                          class: "rounded-circle border border-warning",
-                          width: 100, height: 100 %>
-          <% end %>
-          <div>
-            <h4 class="fw-bold mb-1"><%= match.mvp.full_name %></h4>
-            <p class="mb-1 fs-6">Destacado como MVP en este partido</p>
-            <%= link_to "Ver perfil", player_path(match.mvp), class: "btn btn-warning btn-sm mt-2" %>
+<%# app/views/matches/show/_mvp.html.erb %>
+<% hide_for_visitors = !user_signed_in? && match.mvp.blank? %>
+<% unless hide_for_visitors %>
+  <section class="mb-5">
+
+    <% if match.mvp.present? %>
+      <div class="d-flex justify-content-center">
+        <div class="card mvp-card shadow-lg border border-warning bg-dark text-light rounded-4 w-100">
+          <div class="card-body d-flex flex-column flex-md-row align-items-center gap-4">
+
+            <!-- Avatar + insignia -->
+            <div class="position-relative">
+              <% if match.mvp.profile_photo.attached? %>
+                <%= image_tag match.mvp.profile_photo,
+                              class: "rounded-circle border border-warning",
+                              style: "width: 96px; height: 96px; object-fit: cover;" %>
+              <% else %>
+                <%= image_tag "default_avatar.png",
+                              class: "rounded-circle border border-warning",
+                              width: 96, height: 96 %>
+              <% end %>
+              <span class="mvp-badge"><i class="fas fa-trophy"></i></span>
+            </div>
+
+            <!-- Texto + chips -->
+            <div class="flex-grow-1 text-center text-md-start">
+              <h4 class="fw-bold mb-1"><%= match.mvp.full_name %></h4>
+              <p class="mb-3 text-muted">MVP del partido</p>
+
+              <%# Stats: usa @mvp_total_awards/@mvp_win_rate si existen; si no, calcula rápido aquí %>
+              <% mvp_player = match.mvp %>
+              <% total_awards = defined?(@mvp_total_awards) ? @mvp_total_awards : Match.where(mvp_id: mvp_player.id).count %>
+              <% win_rate = defined?(@mvp_win_rate) ? @mvp_win_rate :
+                              (mvp_player.total_matches.to_i > 0 ? ((mvp_player.total_wins.to_f / mvp_player.total_matches) * 100).round(1) : nil) %>
+
+              <div class="d-flex flex-wrap gap-2 justify-content-center justify-content-md-start">
+                <span class="chip"><i class="fas fa-star me-1"></i> <%= total_awards %> MVPs totales</span>
+                <% if win_rate %>
+                  <span class="chip"><i class="fas fa-percentage me-1"></i> Win rate <%= win_rate %>%</span>
+                <% end %>
+                <% if mvp_player.respond_to?(:rating) && mvp_player.rating.present? %>
+                  <span class="chip"><i class="fas fa-chart-line me-1"></i> Rating <%= mvp_player.rating %></span>
+                <% end %>
+              </div>
+            </div>
+
+            <!-- Acciones -->
+            <div class="d-flex flex-column align-items-center gap-2">
+              <%= link_to "Ver perfil", player_path(match.mvp), class: "btn btn-warning btn-sm" %>
+              <% if user_signed_in? %>
+                <button class="btn btn-outline-warning btn-sm" data-bs-toggle="modal"
+                        data-bs-target="#selectMvpModal-<%= match.id %>">
+                  Cambiar MVP
+                </button>
+              <% end %>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    <% elsif user_signed_in? %>
+      <!-- Sin MVP aún: botón compacto que abre el modal -->
+      <div class="text-center">
+        <button class="btn btn-primary" data-bs-toggle="modal"
+                data-bs-target="#selectMvpModal-<%= match.id %>">
+          Seleccionar MVP
+        </button>
+      </div>
+    <% end %>
+
+  </section>
+
+  <%# Modal de selección (crear/cambiar MVP) %>
+  <% if user_signed_in? %>
+    <% available_players_mvp =
+         if defined?(@available_players_mvp) && @available_players_mvp.present?
+           @available_players_mvp
+         elsif defined?(@participations) && @participations.present?
+           @participations.map(&:player).uniq.sort_by(&:full_name)
+         else
+           match.participations.includes(:player).map(&:player).uniq.sort_by(&:full_name)
+         end %>
+
+    <div class="modal fade" id="selectMvpModal-<%= match.id %>" tabindex="-1" aria-hidden="true"
+         aria-labelledby="selectMvpLabel-<%= match.id %>">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border border-warning bg-dark text-light rounded-4">
+          <div class="modal-header bg-dark border-0 border-bottom border-warning">
+            <h5 class="modal-title text-warning" id="selectMvpLabel-<%= match.id %>">
+              <i class="fas fa-star me-2"></i>Seleccionar MVP
+            </h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+          </div>
+          <div class="modal-body">
+            <%= form_with(model: match, url: match_path(match), method: :patch, local: true) do |f| %>
+              <div class="mb-3">
+                <%= f.label :mvp_id, "Jugador MVP", class: "form-label fw-bold" %>
+                <%= f.collection_select :mvp_id, available_players_mvp, :id, :name,
+                                        { prompt: "Selecciona un jugador", selected: match.mvp_id },
+                                        { class: "form-select" } %>
+              </div>
+              <div class="text-end">
+                <%= f.submit "Guardar", class: "btn btn-warning", data: { disable_with: "Guardando..." } %>
+              </div>
+            <% end %>
           </div>
         </div>
       </div>
     </div>
-  <% else %>
-    <% if user_signed_in? %>
-      <div class="card shadow-lg mb-4">
-        <div class="card-header bg-primary text-white text-center">
-          <h2 class="mb-0">Seleccionar MVP</h2>
-        </div>
-        <div class="card-body bg-light">
-          <%= form_with(model: @match, url: match_path(@match), method: :patch, local: true) do |f| %>
-            <div class="mb-3">
-              <%= f.label :mvp_id, "Jugador MVP", class: "form-label fw-bold" %>
-              <%= f.collection_select :mvp_id, @available_players_mvp, :id, :name,
-                                      { prompt: "Selecciona un jugador" },
-                                      { class: "form-select shadow-sm" } %>
-            </div>
-            <div class="text-center">
-              <%= f.submit "Guardar MVP", class: "btn btn-primary btn-lg px-5 mt-3 shadow-sm" %>
-            </div>
-          <% end %>
-        </div>
-      </div>
-    <% else %>
-      <p class="text-center fst-italic text-muted">MVP no disponible.</p>
-    <% end %>
   <% end %>
-</section>
+<% end %>
