@@ -1,0 +1,203 @@
+<%# app/views/matches/show/_add_participation.html.erb %>
+<% available = defined?(available_players) ? available_players : Player.where.not(id: match.participations.select(:player_id)) %>
+
+<div class="modal fade" id="addParticipationsModal" tabindex="-1" aria-hidden="true"
+     aria-labelledby="addParticipationsLabel-<%= match.id %>">
+  <div class="modal-dialog modal-dialog-centered modal-xl">
+    <div class="modal-content border border-warning bg-dark text-light rounded-4">
+
+      <div class="modal-header bg-dark border-0 border-bottom border-warning">
+        <h5 class="modal-title text-warning" id="addParticipationsLabel-<%= match.id %>">
+          <i class="fas fa-users me-2"></i>Agregar jugadores al partido
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+
+      <div class="modal-body">
+        <% if available.blank? %>
+          <p class="text-center text-muted mb-0">No hay jugadores disponibles para inscribir.</p>
+        <% else %>
+          <%= form_with url: bulk_create_match_participations_path(match), method: :post, local: true do %>
+
+            <p class="small text-muted mb-3">
+              <i class="fas fa-location-dot me-1"></i>
+              <strong class="me-2"><%= match.location.presence || "Ubicación no disponible" %></strong> ·
+              <i class="fas fa-calendar-alt mx-2"></i><%= date_in_spanish(match.date) %>
+            </p>
+
+            <div class="row g-3">
+              <!-- Columna Equipo Home -->
+              <div class="col-12 col-lg-6">
+                <div class="card shadow-sm border border-warning bg-dark rounded-3 h-100">
+                  <div class="card-header bg-transparent border-0 d-flex flex-wrap align-items-center gap-2">
+                    <span class="fw-bold text-warning">
+                      <i class="fas fa-shirt me-1"></i><%= match.home_team&.name || 'Equipo Blanco' %>
+                    </span>
+                    <span class="ms-auto small">
+                      <span id="home-count">0</span> seleccionados
+                    </span>
+                  </div>
+                  <div class="card-body pt-2">
+                    <div class="input-group input-group-sm mb-2">
+                      <span class="input-group-text bg-dark text-warning border-warning"><i class="fas fa-search"></i></span>
+                      <input type="text" class="form-control bg-dark text-light border-warning" id="home-filter"
+                             placeholder="Buscar jugador...">
+                      <button class="btn btn-outline-warning" type="button" id="home-clear">Limpiar</button>
+                    </div>
+
+                    <ul class="list-group list-group-flush" id="home-list" style="max-height: 380px; overflow-y:auto;">
+                      <% available.each do |pl| %>
+                        <li class="list-group-item bg-dark text-light border-secondary d-flex align-items-center justify-content-between"
+                            data-name="<%= pl.full_name.downcase %>" data-player-id="<%= pl.id %>">
+                          <div class="d-flex align-items-center gap-2">
+                            <% if pl.profile_photo.attached? %>
+                              <%= image_tag pl.profile_photo, class: "rounded-circle border border-warning", style: "width:36px;height:36px;object-fit:cover;" %>
+                            <% else %>
+                              <%= image_tag "default_avatar.png", class: "rounded-circle border border-warning", width: 36, height: 36 %>
+                            <% end %>
+                            <span class="small fw-semibold"><%= pl.full_name %></span>
+                          </div>
+                          <div class="form-check m-0">
+                            <input class="form-check-input home-checkbox" type="checkbox"
+                                   value="<%= pl.id %>" id="home_<%= pl.id %>" name="home_player_ids[]">
+                          </div>
+                        </li>
+                      <% end %>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Columna Equipo Away -->
+              <div class="col-12 col-lg-6">
+                <div class="card shadow-sm border border-warning bg-dark rounded-3 h-100">
+                  <div class="card-header bg-transparent border-0 d-flex flex-wrap align-items-center gap-2">
+                    <span class="fw-bold text-warning">
+                      <i class="fas fa-shirt me-1"></i><%= match.away_team&.name || 'Equipo Negro' %>
+                    </span>
+                    <span class="ms-auto small">
+                      <span id="away-count">0</span> seleccionados
+                    </span>
+                  </div>
+                  <div class="card-body pt-2">
+                    <div class="input-group input-group-sm mb-2">
+                      <span class="input-group-text bg-dark text-warning border-warning"><i class="fas fa-search"></i></span>
+                      <input type="text" class="form-control bg-dark text-light border-warning" id="away-filter"
+                             placeholder="Buscar jugador...">
+                      <button class="btn btn-outline-warning" type="button" id="away-clear">Limpiar</button>
+                    </div>
+
+                    <ul class="list-group list-group-flush" id="away-list" style="max-height: 380px; overflow-y:auto;">
+                      <% available.each do |pl| %>
+                        <li class="list-group-item bg-dark text-light border-secondary d-flex align-items-center justify-content-between"
+                            data-name="<%= pl.full_name.downcase %>" data-player-id="<%= pl.id %>">
+                          <div class="d-flex align-items-center gap-2">
+                            <% if pl.profile_photo.attached? %>
+                              <%= image_tag pl.profile_photo, class: "rounded-circle border border-warning", style: "width:36px;height:36px;object-fit:cover;" %>
+                            <% else %>
+                              <%= image_tag "default_avatar.png", class: "rounded-circle border border-warning", width: 36, height: 36 %>
+                            <% end %>
+                            <span class="small fw-semibold"><%= pl.full_name %></span>
+                          </div>
+                          <div class="form-check m-0">
+                            <input class="form-check-input away-checkbox" type="checkbox"
+                                   value="<%= pl.id %>" id="away_<%= pl.id %>" name="away_player_ids[]">
+                          </div>
+                        </li>
+                      <% end %>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="text-end mt-4">
+              <button type="button" class="btn btn-outline-light me-2" data-bs-dismiss="modal">Cancelar</button>
+              <button type="submit" class="btn btn-warning" id="bulkSubmit" disabled>Agregar seleccionados</button>
+            </div>
+
+          <% end %>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const homeList = document.getElementById("home-list");
+        const awayList = document.getElementById("away-list");
+        if (!homeList || !awayList) return;
+
+        const homeCount = document.getElementById("home-count");
+        const awayCount = document.getElementById("away-count");
+        const bulkSubmit = document.getElementById("bulkSubmit");
+
+        const homeBoxes = () => homeList.querySelectorAll(".home-checkbox");
+        const awayBoxes  = () => awayList.querySelectorAll(".away-checkbox");
+
+        // Filtrado por nombre (no elimina nodos, solo oculta <li>)
+        function bindFilter(inputId, listEl, clearBtnId){
+            const input = document.getElementById(inputId);
+            const clear = document.getElementById(clearBtnId);
+            if (!input) return;
+
+            function apply(){
+                const q = input.value.trim().toLowerCase();
+                listEl.querySelectorAll("li").forEach(li => {
+                    const name = li.getAttribute("data-name") || "";
+                    li.style.display = name.includes(q) ? "" : "none";
+                });
+            }
+            input.addEventListener("input", apply);
+            if (clear) clear.addEventListener("click", () => { input.value = ""; apply(); input.focus(); });
+            apply();
+        }
+
+        bindFilter("home-filter", homeList, "home-clear");
+        bindFilter("away-filter", awayList, "away-clear");
+
+        // Exclusión mutua: si marco en Home, deshabilita el mismo jugador en Away, y viceversa.
+        function syncExclusion(changedBox, counterpartSelector, prefix){
+            const id = changedBox.value;
+            const counterpart = document.querySelector(`#${counterpartSelector}_${id}`);
+            if (!counterpart) return;
+            if (changedBox.checked) {
+                counterpart.checked = false;
+                counterpart.disabled = true;
+                // Visual: atenuar el <li> en la lista opuesta
+                const li = counterpart.closest("li");
+                if (li) li.classList.add("opacity-50");
+            } else {
+                counterpart.disabled = false;
+                const li = counterpart.closest("li");
+                if (li) li.classList.remove("opacity-50");
+            }
+        }
+
+        function updateCountsAndSubmit(){
+            const hc = Array.from(homeBoxes()).filter(b => b.checked).length;
+            const ac = Array.from(awayBoxes()).filter(b => b.checked).length;
+            if (homeCount) homeCount.textContent = hc;
+            if (awayCount) awayCount.textContent = ac;
+            if (bulkSubmit) bulkSubmit.disabled = (hc + ac === 0);
+        }
+
+        homeList.addEventListener("change", (e) => {
+            if (e.target.classList.contains("home-checkbox")) {
+                syncExclusion(e.target, "away", "home");
+                updateCountsAndSubmit();
+            }
+        });
+
+        awayList.addEventListener("change", (e) => {
+            if (e.target.classList.contains("away-checkbox")) {
+                syncExclusion(e.target, "home", "away");
+                updateCountsAndSubmit();
+            }
+        });
+
+        // Inicializar estados por si hay defaults
+        updateCountsAndSubmit();
+    });
+</script>

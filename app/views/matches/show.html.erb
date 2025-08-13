@@ -11,6 +11,7 @@
 
 <!--MODALS-->
 <%= render "modals/add_participation", match: @match, available_players: @available_players %>
+<%= render "modals/add_participations", match: @match, available_players: @available_players %>
 <%= render "modals/add_result", match: @match %>
 
 <script>
@@ -35,7 +36,27 @@
   }
   });
 
+    (function() {
+        function bindMultiModalOpen() {
+            const btn   = document.getElementById('open-multi-participations');
+            const modal = document.getElementById('addParticipationsModal');
+            if (!btn || !modal || !window.bootstrap) return;
 
+            // Evita múltiples listeners si Turbo vuelve a cargar la vista
+            btn.dataset.bound = btn.dataset.bound || "0";
+            if (btn.dataset.bound === "1") return;
+            btn.dataset.bound = "1";
+
+            btn.addEventListener('click', function (e) {
+                e.preventDefault();
+                const instance = bootstrap.Modal.getOrCreateInstance(modal);
+                instance.show();
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', bindMultiModalOpen);
+        document.addEventListener('turbo:load', bindMultiModalOpen);
+    })();
 </script>
 
 

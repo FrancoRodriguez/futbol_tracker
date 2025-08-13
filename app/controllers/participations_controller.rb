@@ -32,6 +32,40 @@ class ParticipationsController < ApplicationController
     redirect_to @participation.match, notice: 'Participación eliminada con éxito.'
   end
 
+  def bulk_create
+    match = Match.find(params[:match_id])
+
+    # Asegura equipos
+    home = match.home_team || match.build_home_team(name: 'Equipo Blanco')
+    away = match.away_team || match.build_away_team(name: 'Equipo Negro')
+    match.save! if match.changed?
+
+    home_ids = Array(params[:home_player_ids]).reject(&:blank?).map!(&:to_i)
+    away_ids = Array(params[:away_player_ids]).reject(&:blank?).map!(&:to_i)
+
+    # Evitar duplicados entre listas y existentes
+    existing = match.participations.pluck(:player_id)
+    overlap  = home_ids & away_ids
+    home_ids -= overlap
+    away_ids -= overlap
+
+    to_create = []
+    now = Time.current
+
+    (home_ids - existing).each do |pid|
+      to_create << { match_id: match.id, team_id: home.id, player_id: pid, created_at: now, updated_at: now }
+    end
+    (away_ids - existing).each do |pid|
+      to_create << { match_id: match.id, team_id: away.id, player_id: pid, created_at: now, updated_at: now }
+    end
+
+    Participation.insert_all(to_create) if to_create.any?
+
+    added = to_create.size
+    msg = added.positive? ? "#{added} jugador#{'es' if added != 1} agregado#{'s' if added != 1}." : "No se agregaron jugadores."
+    redirect_to match_path(match), notice: msg
+  end
+
   private
 
   def set_match
