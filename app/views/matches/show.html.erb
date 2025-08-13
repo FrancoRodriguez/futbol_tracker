@@ -3,6 +3,7 @@
 <%= render "matches/show/summary", match: @match %>
 <%= render "matches/show/mvp", match: @match %>
 <%= render "matches/show/pre_visualization", match: @match %>
+<%= render "matches/show/vs_fight", match: @match, featured_by_team: @featured_by_team %>
 <%= render "matches/show/team_players", match: @match, teams: @teams, participations: @participations %>
 <% if user_signed_in? %>
   <%= render "matches/show/add_participation_button" %>

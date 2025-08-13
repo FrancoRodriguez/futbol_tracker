@@ -25,7 +25,7 @@
               <%= f.label :player_id, "Jugador", class: "form-label fw-bold" %>
               <%= f.collection_select :player_id,
                                       (defined?(available_players) ? available_players : match.participations.includes(:player).map(&:player).uniq),
-                                      :id, :full_name,
+                                      :id, :full_name_with_win,
                                       { prompt: "Selecciona un jugador" },
                                       { class: "form-select", required: true } %>
               <div class="form-text">Si no aparece, ya está inscripto.</div>
