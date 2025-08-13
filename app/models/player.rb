@@ -118,6 +118,28 @@ class Player < ApplicationRecord
     end
   end
 
+  # 1 = win, 0 = loss (empates excluidos)
+  def last_results(limit = 8)
+    rows = Match.joins(:participations)
+                .where(participations: { player_id: id })
+                .where.not("matches.result ~* ?", '^\\s*(\\d+)-\\1\\s*$') # excluye empates
+                .order(date: :desc)
+                .limit(limit)
+                .select("matches.win_id, participations.team_id")
+
+    rows.map { |r| r.win_id == r.team_id ? 1 : 0 }
+  end
+
+
+  # positivo: racha de victorias; negativo: racha de derrotas
+  def current_streak
+    series = last_results(100) # 100 para cubrir rachas largas
+    return 0 if series.empty?
+    first = series.first
+    run   = series.take_while { |x| x == first }.size
+    first == 1 ? run : -run
+  end
+
   private
 
   def compute_stats

@@ -1,14 +1,14 @@
 <h1 class="text-center mb-4">🏆 Ranking de Victorias 🏆</h1>
 
 <div class="table-responsive shadow-lg rounded bg-light">
-  <table class="table table-hover align-middle mb-0">
+  <table class="table table-hover align-middle mb-0 ranking-table">
     <thead class="table-dark text-center">
     <tr>
       <th>Posición</th>
       <th>Jugador</th>
-      <th>Prom. Victorias</th>
-      <th>Victorias</th>
-      <th>Derrotas</th>
+      <th>Balance</th>
+      <th>Win Rate</th>
+      <th>Racha</th>
     </tr>
     </thead>
     <tbody class="table-dark">
@@ -21,9 +21,12 @@
                         end %>
 
       <tr class="bg-dark text-light <%= border_class %>">
+        <!-- Posición -->
         <td class="text-center fs-4">
           <%= render "tables/top_three", index: %>
         </td>
+
+        <!-- Jugador -->
         <td class="text-start d-flex align-items-center gap-3 px-3 py-2">
           <% if player.profile_photo.attached? %>
             <%= image_tag player.profile_photo,
@@ -38,12 +41,42 @@
           <%= link_to player.name, player_path(player),
                       class: "text-decoration-none text-light fw-semibold" %>
         </td>
-        <td class="text-center text-success fw-bold"><%= player.win_diff %></td>
-        <td class="text-center text-success fw-bold"><%= player.total_wins %></td>
-        <td class="text-center text-danger fw-bold"><%= player.total_losses %></td>
+
+        <!-- Balance -->
+        <td class="text-center balance-mobile">
+          <div class="d-inline-flex align-items-center gap-2 flex-wrap justify-content-center">
+              <span class="badge <%= player.win_diff.to_i >= 0 ? 'bg-success' : 'bg-danger' %>">
+                <%= player.win_diff.to_i >= 0 ? '+' : '−' %><%= player.win_diff.to_i.abs %>
+              </span>
+            <span class="badge bg-dark border">
+                <span class="text-success fw-bold"><%= player.total_wins %>W</span>
+                <span class="text-muted">·</span>
+                <span class="text-danger fw-bold"><%= player.total_losses %>L</span>
+              </span>
+          </div>
+        </td>
+
+        <!-- Win Rate -->
+        <td class="text-center">
+          <div class="small fw-semibold"><%= player.win_rate %>%</div>
+          <div class="progress" style="height:8px">
+            <div class="progress-bar bg-success" style="width:<%= player.win_rate %>%"></div>
+            <div class="progress-bar bg-danger" style="width:<%= 100 - player.win_rate %>%"></div>
+          </div>
+        </td>
+
+        <!-- Racha -->
+        <td class="text-center racha-mobile">
+          <% if player.current_streak.positive? %>
+            <span class="badge bg-warning text-dark">🔥 <%= player.current_streak %>W</span>
+          <% elsif player.current_streak.negative? %>
+            <span class="badge bg-secondary">❄️ <%= player.current_streak.abs %>L</span>
+          <% else %>
+            <span class="badge bg-light text-dark">—</span>
+          <% end %>
+        </td>
       </tr>
     <% end %>
     </tbody>
   </table>
-
 </div>

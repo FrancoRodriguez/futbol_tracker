@@ -52,7 +52,11 @@
 
         <td class="text-center">
           <% if player.total_matches >= Player::MIN_MATCHES %>
-            <%= number_to_percentage((player.total_wins.to_f / player.total_matches) * 100, precision: 1) %>
+            <div class="small fw-semibold"><%= player.win_rate.to_i %>%</div>
+            <div class="progress" style="height:8px">
+              <div class="progress-bar bg-success" style="width:<%= player.win_rate.to_i %>%"></div>>
+              <div class="progress-bar bg-danger" style="width:<%= 100 - player.win_rate.to_i %>%"></div>
+            </div>
           <% else %>
             <span class="text-muted fst-italic">En evaluación</span>
           <% end %>
