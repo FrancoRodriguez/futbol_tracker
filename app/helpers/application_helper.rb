@@ -16,5 +16,4 @@ module ApplicationHelper
     nombre_mes = meses[fecha.month - 1].capitalize
     "#{nombre_mes} #{fecha.year}"
   end
-
 end

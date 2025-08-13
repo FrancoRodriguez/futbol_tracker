@@ -1,22 +1,66 @@
-<div class="col-md-4 mb-3">
-  <%= link_to player_path(@top_mvp), class: "text-decoration-none text-dark" do %>
-    <div class="card card-primary shadow-sm border-0 h-100">
-      <div class="card-body text-center">
+<% if @top_mvp.present? %>
+  <% mvp_count   = defined?(@top_mvp_count) ? @top_mvp_count.to_i : Match.where(mvp_id: @top_mvp.id).count %>
+  <% games_total = defined?(@top_mvp_games) ? @top_mvp_games.to_i : Participation.where(player_id: @top_mvp.id).count %>
+  <% mvp_rate    = games_total.positive? ? ((100.0 * mvp_count / games_total).round) : 0 %>
+  <% last_mvp_at = defined?(@top_mvp_last_date) ? @top_mvp_last_date : Match.where(mvp_id: @top_mvp.id).order(date: :desc).limit(1).pick(:date) %>
+
+  <style>
+      .mvp-card { position: relative; overflow: hidden; }
+      .mvp-card:hover { border-color: rgba(255,193,7,.9); box-shadow: 0 0 0 .15rem rgba(255,193,7,.15); transform: translateY(-2px); transition: all .15s ease; }
+      .ribbon { position: absolute; top: 12px; left: -10px; background: #ffc107; color: #1a1a1a; font-weight: 700; padding: .3rem .75rem; border-radius: 0 .5rem .5rem 0; box-shadow: 0 6px 16px rgba(0,0,0,.25); display: inline-flex; align-items: center; gap: .4rem; font-size: .85rem; }
+      .stat-row { display: flex; gap: .5rem; flex-wrap: wrap; justify-content: center; }
+      .stat-pill { display: inline-flex; align-items: center; gap: .4rem; background: rgba(255,193,7,.08); border: 1px solid rgba(255,193,7,.35); color: #f8f9fa; border-radius: 12px; padding: .3rem .6rem; font-size: .85rem; font-weight: 600; }
+      .subtle { color: #adb5bd; font-size: .85rem; }
+  </style>
+
+  <div class="col-md-4 mb-3">
+    <div class="card shadow-sm h-100 border border-warning bg-dark text-light rounded-4 p-3 mvp-card d-flex flex-column">
+      <div class="ribbon">
+        <i class="fas fa-crown"></i> MVP
+      </div>
+      <div class="card-body d-flex flex-column align-items-center text-center flex-grow-1">
+
         <i class="fas fa-star fa-2x text-warning mb-2"></i>
-        <h5 class="card-title mb-4 fw-bold">MVP Más Frecuente</h5>
+        <h5 class="fw-bold text-warning mb-3">MVP Más Frecuente</h5>
 
-        <% if @top_mvp.profile_photo.attached? %>
-          <%= image_tag @top_mvp.profile_photo,
-                        class: "rounded-circle border border-warning mb-4",
-                        style: "width: 100px; height: 100px; object-fit: cover;" %>
-        <% else %>
-          <%= image_tag "default_avatar.png",
-                        class: "rounded-circle border border-warning mb-4",
-                        width: 100, height: 100 %>
+        <div class="mb-3 d-flex justify-content-center">
+          <% if @top_mvp.profile_photo.attached? %>
+            <%= image_tag @top_mvp.profile_photo,
+                          class: "rounded-circle border border-3 border-warning",
+                          style: "width: 100px; height: 100px; object-fit: cover;" %>
+          <% else %>
+            <%= image_tag "default_avatar.png",
+                          class: "rounded-circle border border-3 border-warning",
+                          width: 100, height: 100 %>
+          <% end %>
+        </div>
+
+        <p class="fw-semibold mb-2"><%= @top_mvp.full_name %></p>
+
+        <div class="stat-row mb-2">
+          <span class="stat-pill"><i class="fas fa-sparkles"></i> <%= mvp_count %> MVPs</span>
+          <span class="stat-pill"><i class="far fa-futbol"></i> <%= games_total %> partidos</span>
+          <span class="stat-pill"><i class="fas fa-percent"></i> <%= mvp_rate %>% tasa MVP</span>
+        </div>
+
+        <% if last_mvp_at.present? %>
+          <div class="subtle">Último MVP: <%= l(last_mvp_at, format: :long) rescue last_mvp_at.to_s %></div>
         <% end %>
+      </div>
 
-        <p class="fw-bold"><%= @top_mvp&.full_name || "N/A" %></p>
+      <!-- Botón unificado -->
+      <div class="mt-auto w-100 p-3 pt-0">
+        <%= link_to 'Ver perfil', player_path(@top_mvp),
+                    class: 'btn btn-outline-primary w-100 fw-bold py-2' %>
       </div>
     </div>
-  <% end %>
-</div>
+  </div>
+<% else %>
+  <div class="col-md-4 mb-3">
+    <div class="card bg-dark text-light border border-secondary rounded-4 shadow-sm p-5 text-center">
+      <i class="fas fa-user-times fa-3x text-secondary mb-3"></i>
+      <h5 class="fw-semibold mb-2">MVP Más Frecuente</h5>
+      <p class="text-muted mb-0">No hay datos disponibles.</p>
+    </div>
+  </div>
+<% end %>

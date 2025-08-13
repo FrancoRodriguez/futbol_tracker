@@ -1,39 +1,40 @@
 <div class="col-md-4 mb-3">
-  <div class="card card-primary shadow-sm border-0 h-100">
-    <div class="card-body">
-      <i class="fas fa-trophy fa-2x text-success mb-3"></i>
-      <h5 class="card-title mb-4 fw-bold text-center">Top Ganadores</h5>
+  <div class="card shadow-sm h-100 border border-warning bg-dark text-light rounded-4 d-flex flex-column">
+    <div class="card-body flex-grow-1">
 
-      <% @top_winners.each_with_index do |player, i| %>
-        <%= link_to player_path(player), class: "text-decoration-none" do %>
-          <div class="d-flex align-items-center justify-content-start mb-3 pb-2 border-bottom">
-            <div class="me-3 fs-3">
-              <%= ["🥇", "🥈", "🥉"][i] %>
-            </div>
+      <div class="text-center mb-3">
+        <i class="fas fa-trophy fa-2x text-warning"></i>
+      </div>
+      <h5 class="fw-bold text-warning text-center mb-4">Top Ganadores</h5>
+      <div class="d-flex flex-column gap-3">
+        <% @top_winners.each_with_index do |player, i| %>
+          <%= link_to player_path(player), class: "text-decoration-none text-light" do %>
+            <div class="winner-card">
+              <div class="medal"><%= ["🥇", "🥈", "🥉"][i] || "🏅" %></div>
 
-            <% if player.profile_photo.attached? %>
-              <%= image_tag player.profile_photo,
-                            class: "rounded-circle me-3 border border-warning",
-                            style: "width: 50px; height: 50px; object-fit: cover;" %>
-            <% else %>
-              <%= image_tag "default_avatar.png",
-                            class: "rounded-circle me-3 border border-warning",
-                            width: 50, height: 50 %>
-            <% end %>
+              <% if player.profile_photo.attached? %>
+                <%= image_tag player.profile_photo, class: "avatar" %>
+              <% else %>
+                <%= image_tag "default_avatar.png", class: "avatar" %>
+              <% end %>
 
-            <div>
-              <div class="fw-bold mb-0"><%= player.full_name %></div>
-              <div class="text-muted small">
-                +<%= player.win_diff %> victoria<%= 's' unless player.win_diff == 1 %> de diferencia
-              </div>
-              <div class="text-muted small">
-                <i class="fas fa-futbol me-1"></i>
-                <%= pluralize(player.total_matches, "partido") %> jugado<%= 's' unless player.total_matches == 1 %>
+              <div class="winner-info">
+                <div class="winner-name"><%= player.full_name %></div>
+                <div class="winner-meta">
+                  +<%= player.win_diff %> victoria<%= 's' unless player.win_diff == 1 %> •
+                  <%= pluralize(player.total_matches, "partido") %>
+                </div>
               </div>
             </div>
-          </div>
+          <% end %>
         <% end %>
-      <% end %>
+      </div>
+    </div>
+
+    <!-- Botón unificado (ajusta la ruta si tu path es otro) -->
+    <div class="mt-auto w-100 p-3 pt-0">
+      <%= link_to 'Ver ranking completo', win_ranking_players_path,
+                  class: 'btn btn-outline-primary w-100 fw-bold py-2' %>
     </div>
   </div>
 </div>

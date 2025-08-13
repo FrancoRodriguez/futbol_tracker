@@ -1,4 +1,6 @@
 class Player < ApplicationRecord
+  include PlayerRankings
+
   has_many :participations, dependent: :destroy
   has_many :matches, through: :participations
   has_many :mvp_matches, class_name: 'Match', foreign_key: 'mvp_id'

@@ -1,57 +1,52 @@
-<% last_month = Date.today.last_month %>
-<% last_month_range = last_month.beginning_of_month..last_month.end_of_month %>
+<%# =========================
+    PERIODO (solo para mostrar el label)
+   ========================= %>
+<% last_month = Time.zone.today.last_month %>
+<% period_label = l(last_month, format: "%B %Y") %>
 
-<% sorted_players = Player
-  .joins(participations: :match)
-  .where(matches: { date: last_month_range })
-  .group(:id)
-  .select('players.*,
-           COUNT(*) AS total_matches,
-           COUNT(CASE WHEN participations.team_id = matches.win_id THEN 1 END) AS victories')
-  .map do |player|
-  mvp_count = Match.where(date: last_month_range, mvp_id: player.id).count
-  player.define_singleton_method(:mvp_count) { mvp_count }
-  player
-end
-  .sort_by { |player| [-player.victories.to_i, -player.mvp_count, -player.total_matches.to_i] } %>
+<div class="d-flex align-items-center justify-content-between mb-2 mt-3">
+  <h5 class="text-light mb-0 d-flex align-items-center">
+    <i class="fas fa-trophy text-warning me-2"></i> Top del mes pasado
+  </h5>
+  <span class="badge rounded-pill text-warning border border-warning bg-transparent">
+    <i class="far fa-calendar me-1"></i><%= mes_anio_espanol(period_label.to_date) %>
+  </span>
+</div>
 
-<% grouped_by_stats = sorted_players
-  .group_by { |p| [p.victories.to_i, p.mvp_count.to_i, p.total_matches.to_i] }
-  .sort_by { |(wins, mvps, games), _| [-wins, -mvps, -games] } %>
+<div class="note-muted mb-3">
+  <i class="far fa-info-circle me-2 text-warning"></i>
+  Este ranking usa solo los partidos de <strong><%= mes_anio_espanol(period_label.to_date) %></strong>.
+</div>
 
-<% ranked_players = [] %>
-<% grouped_by_stats.each_with_index do |(_, players), real_position| %>
-  <% break if ranked_players.size >= 3 %>
-  <% players.each do |player| %>
-    <% break if ranked_players.size >= 3 %>
-    <% ranked_players << { player: player, position: real_position + 1, tie: players.size > 1 } %>
-  <% end %>
-<% end %>
-
-<% if ranked_players.any? %>
+<% if @top_last_month.present? %>
   <div class="row">
-    <% ranked_players.each do |entry| %>
-      <% player = entry[:player] %>
-      <% position = entry[:position] %>
-      <% tie = entry[:tie] %>
-
-      <% mvp_count = Match.where(date: last_month_range, mvp_id: player.id).count %>
-      <% total_games = player.participations
-                             .joins(:match)
-                             .where(matches: { date: last_month_range })
-                             .count %>
-      <% wins = player.participations
-                      .joins(:match)
-                      .where(matches: { date: last_month_range })
-                      .where('participations.team_id = matches.win_id')
-                      .count %>
-      <% win_percentage = total_games > 0 ? (100.0 * wins / total_games).round : 0 %>
+    <% @top_last_month.each do |result| %>
+      <% player      = result.player %>
+      <% position    = result.position %>
+      <% tie         = result.tie %>
+      <% wins        = result.victories %>
+      <% mvp_count   = result.mvp_count %>
+      <% total_games = result.total_matches %>
+      <% win_percentage = total_games.positive? ? (100.0 * wins / total_games).round : 0 %>
 
       <div class="col-md-4 mb-4">
-        <%= link_to player_path(player), class: "text-decoration-none text-dark" do %>
+        <%= link_to player_path(player), class: "text-decoration-none text-light" do %>
           <div class="card shadow-sm h-100 border border-warning bg-dark text-light card-gold">
             <div class="card-body d-flex flex-column align-items-center text-center">
-              <!-- Foto -->
+
+              <%# Badges posición + empate, manteniendo tu paleta %>
+              <div class="w-100 d-flex justify-content-between mb-2">
+                <span class="badge bg-warning text-dark fw-bold">
+                  <% if position == 1 %>#1<% elsif position == 2 %>#2<% else %>#3<% end %>
+                </span>
+                <% if tie %>
+                  <span class="chip">
+                    <i class="fas fa-equals"></i> empatado
+                  </span>
+                <% end %>
+              </div>
+
+              <%# Foto %>
               <div class="mb-3">
                 <% if player.profile_photo.attached? %>
                   <%= image_tag player.profile_photo,
@@ -64,8 +59,8 @@ end
                 <% end %>
               </div>
 
-              <!-- Título -->
-              <h5 class="fw-bold text-warning mb-1">
+              <%# Título conservando tu estilo %>
+              <h6 class="fw-bold text-warning mb-1 d-flex align-items-center">
                 <i class="fas fa-star me-2"></i>
                 <% if position == 1 && tie %>
                   Empatado en el primer lugar
@@ -76,22 +71,28 @@ end
                 <% else %>
                   <%= position == 1 ? "Jugador del Mes" : "Top #{position}" %>
                 <% end %>
-              </h5>
+              </h6>
 
-              <!-- Nombre -->
-              <p class="mb-1 text-light fw-semibold"><%= player.full_name %></p>
+              <%# Nombre %>
+              <p class="mb-2 text-light fw-semibold"><%= player.full_name %></p>
 
-              <!-- Stats -->
+              <%# Stats (sin recálculos ni queries extra) %>
               <div class="small text-light">
                 🏟️ Partidos: <strong><%= total_games %></strong><br>
                 🏆 Victorias: <strong><%= wins %></strong><br>
                 ✨ MVPs: <strong><%= mvp_count %></strong><br>
                 📈 <strong class="text-success"><%= win_percentage %>%</strong> victorias
               </div>
+
             </div>
           </div>
         <% end %>
       </div>
     <% end %>
+  </div>
+<% else %>
+  <div class="bg-dark text-light border border-secondary rounded p-3 text-center">
+    <i class="far fa-inbox me-2"></i>
+    No hay datos para <strong><%= period_label %></strong> todavía.
   </div>
 <% end %>

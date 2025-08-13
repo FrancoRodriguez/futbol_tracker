@@ -456,6 +456,43 @@
     .border-bottom {
         border-color: #08a6fe !important;
     }
+
+    /* Nota discreta sin fondo amarillo */
+    .note-muted {
+        border: 1px dashed rgba(255, 193, 7, .35); /* warning soft */
+        color: rgba(255, 255, 255, .8);
+        background: rgba(0,0,0,.15);
+        border-radius: .5rem;
+        padding: .5rem .75rem;
+        font-size: .875rem;
+    }
+    /* Detalle hover leve en la tarjeta dorada */
+    .card-gold:hover {
+        border-color: rgba(255, 193, 7, .9);
+        box-shadow: 0 0 0 .15rem rgba(255,193,7,.15);
+        transform: translateY(-2px);
+        transition: all .15s ease;
+    }
+    .chip {
+        display: inline-flex;
+        align-items: center;
+        gap: .35rem;
+        padding: .2rem .5rem;
+        border-radius: 999px;
+        border: 1px solid rgba(255,193,7,.5);
+        color: #ffc107;
+        background: rgba(255,193,7,.08);
+        font-size: .75rem;
+        font-weight: 600;
+    }
+
+    .winner-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,193,7,.4); border-radius: 1rem; padding: .75rem; display: flex; align-items: center; gap: .75rem; transition: transform .15s ease, box-shadow .15s ease; }
+    .winner-card:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(255,193,7,0.15); }
+    .medal { font-size: 1.5rem; width: 2rem; text-align: center; }
+    .avatar { flex-shrink: 0; width: 48px; height: 48px; border-radius: 50%; border: 3px solid #ffc107; object-fit: cover; }
+    .winner-info { flex-grow: 1; }
+    .winner-name { font-weight: 600; font-size: .95rem; margin-bottom: .15rem; }
+    .winner-meta { font-size: .8rem; color: #adb5bd; }
 </style>
 </body>
 </html>
