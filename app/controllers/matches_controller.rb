@@ -123,7 +123,7 @@ class MatchesController < ApplicationController
       end
 
       @duel_total       = tot
-      @your_duel_choice = (respond_to?(:duel_voter_key) ? DuelVote.find_by(match_id: @match.id, voter_key: duel_voter_key)&.player_id : nil)
+      @your_duel_choice = DuelVote.where(match_id: @match.id, voter_key: duel_voter_key).pick(:player_id)
     end
 
     # --- MVP (chips y modal) ---
