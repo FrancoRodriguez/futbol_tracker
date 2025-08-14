@@ -1,4 +1,7 @@
-<h1 class="text-center mb-4">🏆 Ranking de Victorias 🏆</h1>
+<h1 class="text-center mb-2">🏆 Ranking de Victorias 🏆</h1>
+<p class="text-center text-muted small mb-4">
+  El Win Rate se muestra a partir de <%= Player::MIN_MATCHES %> partidos. Los que aún no llegan verán un “modo pretemporada”. 😉
+</p>
 
 <div class="table-responsive shadow-lg rounded bg-light">
   <table class="table table-hover align-middle mb-0 ranking-table">
@@ -11,6 +14,7 @@
       <th>Racha</th>
     </tr>
     </thead>
+
     <tbody class="table-dark">
     <% @top_players.each_with_index do |player, index| %>
       <% border_class = case index
@@ -19,6 +23,22 @@
                         when 2 then 'bronze-border'
                         else ''
                         end %>
+
+      <% min_pj   = Player::MIN_MATCHES %>
+      <% jugados  = player.total_matches.to_i %>
+      <% faltan   = [min_pj - jugados, 0].max %>
+      <% progreso = ((jugados.to_f / min_pj) * 100).clamp(0, 100).round %>
+      <% eligible = jugados >= min_pj %>
+
+      <% # Calcula WR solo si es elegible; respeta win_rate_pct si existe, si no calcula %>
+      <% wr_pct = nil %>
+      <% if eligible %>
+        <% wr_pct = if player.respond_to?(:win_rate_pct) && player.win_rate_pct.present?
+                      player.win_rate_pct
+                    elsif player.total_matches.to_i > 0
+                      ((player.total_wins.to_f / player.total_matches.to_f) * 100).round(1)
+                    end %>
+      <% end %>
 
       <tr class="bg-dark text-light <%= border_class %>">
         <!-- Posición -->
@@ -58,12 +78,27 @@
 
         <!-- Win Rate -->
         <td class="text-center">
-          <div class="small fw-semibold"><%= player.win_rate %>%</div>
-          <div class="progress" style="height:8px">
-            <div class="progress-bar bg-success" style="width:<%= player.win_rate %>%"></div>
-            <div class="progress-bar bg-danger" style="width:<%= 100 - player.win_rate %>%"></div>
-          </div>
+          <% min_pj   = Player::MIN_MATCHES %>
+          <% jugados  = player.total_matches.to_i %>
+          <% eligible = jugados >= min_pj %>
+
+          <% if eligible && player.total_matches.to_i > 0 %>
+            <% wr_pct = if player.respond_to?(:win_rate_pct) && player.win_rate_pct.present?
+                          player.win_rate_pct
+                        else
+                          ((player.total_wins.to_f / player.total_matches.to_f) * 100).round(1)
+                        end %>
+
+            <div class="small fw-semibold"><%= wr_pct %>%</div>
+            <div class="progress" style="height:8px">
+              <div class="progress-bar bg-success" style="width:<%= wr_pct %>%"></div>
+              <div class="progress-bar bg-danger"  style="width:<%= (100 - wr_pct).round(1) %>%"></div>
+            </div>
+          <% else %>
+            <div class="small text-muted fw-semibold">5 PJ y hablamos 😉</div>
+          <% end %>
         </td>
+
 
         <!-- Racha -->
         <td class="text-center racha-mobile">
