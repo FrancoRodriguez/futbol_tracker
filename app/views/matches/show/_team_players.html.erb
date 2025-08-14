@@ -5,34 +5,43 @@
 
   <div class="row g-4">
     <% teams.each do |team| %>
+      <% team_players = participations.where(team: team).includes(:player) %>
+      <% team_pct     = @team_win_percentages[team.id] %>
+      <% featured     = @featured_by_team[team.id] %>
+
       <div class="col-12 col-lg-6">
         <div class="card shadow-lg rounded p-3 h-100 bg-dark text-light">
           <div class="card-header bg-transparent border-0 text-center pt-4">
             <h4 class="fw-bold mb-1">Equipo <%= team.name %></h4>
-            <p class="text-muted mb-0">
-              Probabilidad de victoria:
-              <span class="fw-semibold <%= @team_win_percentages[team.id].to_f >= 50 ? 'text-success' : 'text-warning' %>">
-                <%= @team_win_percentages[team.id].present? ? "#{@team_win_percentages[team.id]}%" : "N/A" %>
-              </span>
-              · <%= pluralize(participations.where(team: team).count, 'jugador inscripto', 'jugadores inscriptos') %>
-            </p>
+
+            <%# Probabilidad de victoria: solo si fue calculada (hay jugadores elegibles con >= MIN_MATCHES) %>
+            <% if team_pct.present? %>
+              <p class="text-muted mb-0">
+                Probabilidad de victoria:
+                <span class="fw-semibold <%= team_pct.to_f >= 50 ? 'text-success' : 'text-warning' %>">
+                  <%= "#{team_pct}%" %>
+                </span>
+                · <%= pluralize(team_players.count, 'jugador inscripto', 'jugadores inscriptos') %>
+              </p>
+            <% else %>
+              <p class="text-muted mb-0">
+                Probabilidad de victoria: <span class="fw-semibold text-secondary">Sin datos</span>
+                <small class="ms-1">(requiere mínimo <%= Player::MIN_MATCHES %> PJ elegibles)</small>
+                · <%= pluralize(team_players.count, 'jugador inscripto', 'jugadores inscriptos') %>
+              </p>
+            <% end %>
           </div>
 
-          <% featured = @featured_by_team[team.id] %>
-
           <div class="list-group list-group-flush team-list">
-            <% participations.where(team: team).includes(:player).order('players.rating DESC').each do |participation| %>
-              <% player = participation.player %>
+            <% team_players
+                 .order('players.rating DESC') # orden visible por rating
+                 .each do |participation| %>
+              <% player      = participation.player %>
               <% is_featured = (featured && featured.id == player.id) %>
-
-              <% win_display, win_percentage = if player.total_matches.to_i > 0
-                                                 perc = ((player.total_wins.to_f / player.total_matches.to_f) * 100).round(1)
-                                                 ["#{perc}%", perc]
-                                               else
-                                                 ["N/A", 0]
-                                               end %>
+              <% wr_pct      = @win_rate_pct_by_player[player.id] %> <%# nil si < MIN_MATCHES %>
 
               <div class="list-group-item bg-dark text-light border-primary d-flex align-items-center gap-3 <%= is_featured ? 'featured-glow' : '' %>">
+                <%# Avatar %>
                 <% if player.profile_photo.attached? %>
                   <%= image_tag player.profile_photo, class: "rounded-circle border border-warning flex-shrink-0",
                                 style: "width: 48px; height: 48px; object-fit: cover;" %>
@@ -49,13 +58,25 @@
                         <span class="badge bg-warning text-dark fw-bold">Destacado</span>
                       <% end %>
                     </div>
-                    <small class="text-muted">Victorias: <%= win_display %></small>
+
+                    <%# Texto de victorias/WR visible, explícito con mínimo %>
+                    <small class="text-muted">
+                      <% if wr_pct.present? %>
+                        Victorias <span class="text-light fw-semibold"><%= wr_pct %>%</span>
+                      <% else %>
+                        <small class="text-muted">5 PJ y hablamos</small>
+                    <% end %>
+                    </small>
                   </div>
-                  <div class="progress mt-2" style="height:6px;">
-                    <div class="progress-bar" role="progressbar"
-                         style="width:<%= win_percentage %>%;" aria-valuenow="<%= win_percentage.to_i %>"
-                         aria-valuemin="0" aria-valuemax="100"></div>
-                  </div>
+
+                  <%# Barra solo si hay WR válido (cumple mínimo) %>
+                  <% if wr_pct.present? %>
+                    <div class="progress mt-2" style="height:6px;">
+                      <div class="progress-bar" role="progressbar"
+                           style="width:<%= wr_pct %>%;" aria-valuenow="<%= wr_pct.to_i %>"
+                           aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                  <% end %>
                 </div>
 
                 <div class="ms-2 d-none d-sm-flex">

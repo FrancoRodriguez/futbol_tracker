@@ -32,44 +32,73 @@ class MatchesController < ApplicationController
 
 
   def show
-    # Pre-carga para evitar N+1 (incluye avatar)
     @participations = @match.participations.includes(player: { profile_photo_attachment: :blob })
     @teams = [@match.home_team, @match.away_team].compact
 
     @team_win_percentages = {}
     @featured_by_team     = {}
 
-    # Helpers locales
-    wr = ->(pl) { pl.total_matches.to_i > 0 ? (pl.total_wins.to_f / pl.total_matches.to_f) : nil }
+    # --- Helpers de conteo ajustados (excluyen el match actual si no está finalizado) ---
+    current_unfinished = if @match.respond_to?(:finished?)
+                           !@match.finished?
+                         elsif @match.respond_to?(:winner_team_id)
+                           @match.winner_team_id.nil?
+                         else
+                           true # fallback conservador
+                         end
+
+    in_current = ->(pl) { @participations.any? { |p| p.player_id == pl.id } }
+
+    adj_counts = lambda do |pl|
+      tm = pl.total_matches.to_i
+      tw = pl.total_wins.to_i
+      if current_unfinished && in_current.call(pl)
+        [[tm - 1, 0].max, tw] # restamos el PJ en curso, nunca restamos victoria
+      else
+        [tm, tw]
+      end
+    end
+
+    wr = lambda do |pl|
+      tm, tw = adj_counts.call(pl)
+      tm.positive? ? (tw.to_f / tm) : nil
+    end
+
+    eligible_min = ->(pl) { adj_counts.call(pl).first >= Player::MIN_MATCHES } # MIN_MATCHES = 5
+
     rt = ->(pl) { (pl.respond_to?(:rating) && pl.rating.present?) ? pl.rating.to_f : 0.0 }
 
     pick_best_by_wr = lambda do |players|
       return nil if players.blank?
 
-      # 1) elegibles por mínimo de partidos
-      eligible = players.select { |pl| pl.total_matches.to_i >= Player::MIN_MATCHES && wr.call(pl) }
-      # 2) si no hay elegibles, tomar los que tengan al menos un partido
+      eligibles    = players.select { |pl| eligible_min.call(pl) && wr.call(pl) }
       with_matches = players.select { |pl| wr.call(pl) }
 
-      pool = eligible.presence || with_matches.presence || players
-      # Orden: win rate desc, luego partidos desc, luego rating desc
-      pool.max_by { |pl| [wr.call(pl) || -1.0, pl.total_matches.to_i, rt.call(pl)] }
+      pool = eligibles.presence || with_matches.presence || players
+      pool.max_by do |pl|
+        tm, = adj_counts.call(pl)
+        [wr.call(pl) || -1.0, tm, rt.call(pl)]
+      end
     end
 
-    # --- Destacado por equipo (para listas y VS) => mejor win rate ---
+    # --- Destacado por equipo (mejor WR) ---
     @teams.each do |team|
       players = @participations.select { |p| p.team_id == team.id }.map(&:player)
       next if players.empty?
       @featured_by_team[team.id] = pick_best_by_wr.call(players)
     end
 
-    # --- Probabilidad por equipo (normalizada a 100%) ---
+    # --- Probabilidad por equipo (solo jugadores con >= MIN_MATCHES) ---
     strengths = {}
     @teams.each do |team|
       players  = @participations.select { |p| p.team_id == team.id }.map(&:player)
-      eligible = players.select { |pl| pl.total_matches.to_i >= Player::MIN_MATCHES }
+      eligible = players.select { |pl| eligible_min.call(pl) }
       next if eligible.empty?
-      strengths[team.id] = eligible.sum { |pl| pl.total_wins.to_f / pl.total_matches.to_f }
+
+      strengths[team.id] = eligible.sum do |pl|
+        ratio = wr.call(pl)
+        ratio.nil? ? 0.0 : ratio
+      end
     end
 
     case strengths.size
@@ -98,7 +127,7 @@ class MatchesController < ApplicationController
       @team_a, @team_b = TeamBalancer.new(@participations.map(&:player)).call
     end
 
-    # --- VS (Duelo de la Fecha) basado en mejor win rate + votos reales ---
+    # --- VS (Duelo) mantiene el rótulo de mínimo PJ ---
     home = @match.home_team
     away = @match.away_team
     if home && away && @featured_by_team[home.id] && @featured_by_team[away.id]
@@ -106,17 +135,15 @@ class MatchesController < ApplicationController
       @duel_b = @featured_by_team[away.id]
       @vs_label = "Mejor win rate (mín. #{Player::MIN_MATCHES} PJ)"
 
-      # Lee votos reales solo de los dos jugadores del VS
       counts = DuelVote.where(match_id: @match.id, player_id: [@duel_a.id, @duel_b.id])
                        .group(:player_id).count
-
       a_ct = counts.fetch(@duel_a.id, 0)
       b_ct = counts.fetch(@duel_b.id, 0)
       tot  = a_ct + b_ct
 
       if tot.positive?
         @duel_a_pct = (a_ct * 100.0 / tot).round(1)
-        @duel_b_pct = (100.0 - @duel_a_pct).round(1)  # asegura 100%
+        @duel_b_pct = (100.0 - @duel_a_pct).round(1)
       else
         @duel_a_pct = 50.0
         @duel_b_pct = 50.0
@@ -126,24 +153,37 @@ class MatchesController < ApplicationController
       @your_duel_choice = DuelVote.where(match_id: @match.id, voter_key: duel_voter_key).pick(:player_id)
     end
 
-    # --- MVP (chips y modal) ---
-    players_in_match       = @participations.map(&:player).uniq
-    @available_players_mvp = players_in_match.sort_by(&:full_name)
+    # --- MVP: oculta % si < MIN_MATCHES (y ajusta por match actual) ---
     if @match.mvp.present?
       mvp_p = @match.mvp
       @mvp_total_awards = Match.where(mvp_id: mvp_p.id).count
-      @mvp_win_rate     = mvp_p.total_matches.to_i > 0 ?
-                            ((mvp_p.total_wins.to_f / mvp_p.total_matches) * 100).round(1) : nil
+      tm, tw = adj_counts.call(mvp_p)
+      @mvp_win_rate = tm >= Player::MIN_MATCHES && tm.positive? ? ((tw.to_f / tm) * 100).round(1) : nil
     end
 
-    # --- Disponibles para alta (simple / múltiple), ordenados por rendimiento ---
+    # --- Disponibles para alta (ordenados por rendimiento) ---
+    players_in_match       = @participations.map(&:player).uniq
+    @available_players_mvp = players_in_match.sort_by(&:full_name)
+
     @available_players = Player.where.not(id: players_in_match.map(&:id))
                                .includes(profile_photo_attachment: :blob)
                                .to_a
 
-    # Orden: win rate (o 50 si N/A), luego partidos, luego nombre
-    wr_val = ->(pl) { pl.respond_to?(:win_rate_pct) ? (pl.win_rate_pct || 50.0) : (wr.call(pl) ? (wr.call(pl) * 100).round(1) : 50.0) }
-    @available_players.sort_by! { |pl| [-wr_val.call(pl), -pl.total_matches.to_i, pl.full_name] }
+    # Orden: usa WR solo si cumple mínimo; para mostrar % en la vista, chequea nil
+    wr_pct_if_eligible = lambda do |pl|
+      return nil unless eligible_min.call(pl)
+      ratio = wr.call(pl)
+      ratio ? (ratio * 100).round(1) : nil
+    end
+
+    sort_wr = ->(pl) { wr_pct_if_eligible.call(pl) || 50.0 }
+    @available_players.sort_by! { |pl| [-sort_wr.call(pl), -adj_counts.call(pl).first, pl.full_name] }
+
+    # Para que la vista pueda esconder el %: mapa {player_id => wr_pct_or_nil}
+    @win_rate_pct_by_player = {}
+    (players_in_match + @available_players).uniq.each do |pl|
+      @win_rate_pct_by_player[pl.id] = wr_pct_if_eligible.call(pl) # nil si < MIN_MATCHES
+    end
   end
 
   def autobalance
