@@ -20,22 +20,23 @@
         const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
         tooltipTriggerList.map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
     });
-    document.addEventListener("DOMContentLoaded", function() {
-      const toggleBtn = document.getElementById("toggle-preview");
-      const previewSection = document.getElementById("preview-section");
 
-      if (toggleBtn && previewSection) {
-      toggleBtn.addEventListener("click", function() {
-      if (previewSection.style.display === "none") {
-      previewSection.style.display = "";
-      toggleBtn.textContent = "Ocultar previsualización";
-  } else {
-      previewSection.style.display = "none";
-      toggleBtn.textContent = "Mostrar previsualización";
-  }
-  });
-  }
-  });
+    document.addEventListener("DOMContentLoaded", function() {
+        const toggleBtn = document.getElementById("toggle-preview");
+        const previewSection = document.getElementById("preview-section");
+
+        if (toggleBtn && previewSection) {
+            toggleBtn.addEventListener("click", function() {
+                if (previewSection.style.display === "none") {
+                    previewSection.style.display = "";
+                    toggleBtn.textContent = "Ocultar previsualización";
+                } else {
+                    previewSection.style.display = "none";
+                    toggleBtn.textContent = "Mostrar previsualización";
+                }
+            });
+        }
+    });
 
     (function() {
         function bindMultiModalOpen() {
@@ -63,20 +64,19 @@
         function showSpinner(btn){
             const sp = btn.querySelector('.spinner-border');
             if (sp) sp.classList.remove('d-none');
-            btn.disabled = true; // bloquea mientras envía
+            btn.disabled = true;
         }
         function hideSpinner(btn){
             const sp = btn.querySelector('.spinner-border');
             if (sp) sp.classList.add('d-none');
-            // NO cambiamos disabled aquí; lo decide el flujo (éxito = queda bloqueado, error = se re-habilita)
         }
         function lockBothButtons(matchId, choiceId) {
             const btnA = document.getElementById(`duel-vote-a-${matchId}`);
             const btnB = document.getElementById(`duel-vote-b-${matchId}`);
             [btnA, btnB].forEach(b => {
                 if (!b) return;
-                hideSpinner(b);          // asegúrate de ocultar el spinner en ambos
-                b.disabled = true;       // bloqueo definitivo
+                hideSpinner(b);
+                b.disabled = true;
                 const lb = b.querySelector('.label');
                 if (lb) lb.textContent = (parseInt(b.dataset.playerId,10) === choiceId) ? 'Tu voto' : 'Bloqueado';
             });
@@ -97,7 +97,6 @@
                     const otherId = this.id.includes('duel-vote-a-') ? `duel-vote-b-${matchId}` : `duel-vote-a-${matchId}`;
                     const other   = document.getElementById(otherId);
 
-                    // UI: loading
                     overlay && overlay.classList.remove('d-none');
                     showSpinner(this);
                     if (other) other.disabled = true;
@@ -114,11 +113,9 @@
                             body: JSON.stringify({ player_id: playerId })
                         });
 
-                        // Intenta parsear JSON incluso en 409
                         let data = {};
                         try { data = await res.json(); } catch(_) {}
 
-                        // Actualiza barras/porcentajes si vino data
                         const barA = document.getElementById(`duel-bar-a-${matchId}`);
                         const barB = document.getElementById(`duel-bar-b-${matchId}`);
                         const pctA = document.getElementById(`duel-pct-a-${matchId}`);
@@ -135,7 +132,6 @@
                             cntA && (cntA.textContent = data.total > 0 ? `${data.total} votos` : "Sé el primero en votar");
                         }
 
-                        // ÉXITO (200) o YA VOTÓ (409): ocultar spinner y bloquear ambos
                         if (res.ok || res.status === 409) {
                             const choice = data.your_choice ? parseInt(data.your_choice, 10) : parseInt(playerId, 10);
                             lockBothButtons(parseInt(matchId,10), choice);
@@ -145,14 +141,13 @@
                     } catch (err) {
                         console.error(err);
                         alert("No se pudo registrar el voto. Intenta de nuevo.");
-                        // Revertir estado
                         hideSpinner(this);
                         if (other) other.disabled = false;
                         this.disabled = false;
                         const lb = this.querySelector('.label');
                         if (lb) lb.textContent = 'Votar';
                     } finally {
-                        overlay && overlay.classList.add('d-none'); // SIEMPRE ocultar overlay
+                        overlay && overlay.classList.add('d-none');
                     }
                 });
             });
@@ -162,5 +157,3 @@
         document.addEventListener("turbo:load", bindDuelVoting);
     })();
 </script>
-
-

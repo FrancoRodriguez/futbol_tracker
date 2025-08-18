@@ -1,4 +1,3 @@
-<%# app/views/matches/show/_add_participation.html.erb %>
 <% available = defined?(available_players) ? available_players : Player.where.not(id: match.participations.select(:player_id)) %>
 
 <div class="modal fade" id="addParticipationsModal" tabindex="-1" aria-hidden="true"
@@ -73,7 +72,7 @@
                 <div class="card shadow-sm border border-warning bg-dark rounded-3 h-100">
                   <div class="card-header bg-transparent border-0 d-flex flex-wrap align-items-center gap-2">
                     <span class="fw-bold text-warning">
-                      <i class="fas fa-shirt me-1"></i><%= match.away_team&.name || 'Equipo Negro' %>
+                      <i class="fas a-shirt me-1"></i><%= match.away_team&.name || 'Equipo Negro' %>
                     </span>
                     <span class="ms-auto small">
                       <span id="away-count">0</span> seleccionados
@@ -113,7 +112,7 @@
 
             <div class="text-end mt-4">
               <button type="button" class="btn btn-outline-light me-2" data-bs-dismiss="modal">Cancelar</button>
-              <button type="submit" class="btn btn-warning" id="bulkSubmit" disabled>Agregar seleccionados</button>
+              <button type="submit" class="btn btn-warning" id="bulkSubmitMulti" disabled>Agregar seleccionados</button>
             </div>
 
           <% end %>
@@ -124,80 +123,94 @@
 </div>
 
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const homeList = document.getElementById("home-list");
-        const awayList = document.getElementById("away-list");
-        if (!homeList || !awayList) return;
-
-        const homeCount = document.getElementById("home-count");
-        const awayCount = document.getElementById("away-count");
-        const bulkSubmit = document.getElementById("bulkSubmit");
-
-        const homeBoxes = () => homeList.querySelectorAll(".home-checkbox");
-        const awayBoxes  = () => awayList.querySelectorAll(".away-checkbox");
-
-        // Filtrado por nombre (no elimina nodos, solo oculta <li>)
-        function bindFilter(inputId, listEl, clearBtnId){
-            const input = document.getElementById(inputId);
-            const clear = document.getElementById(clearBtnId);
-            if (!input) return;
-
-            function apply(){
-                const q = input.value.trim().toLowerCase();
-                listEl.querySelectorAll("li").forEach(li => {
-                    const name = li.getAttribute("data-name") || "";
-                    li.style.display = name.includes(q) ? "" : "none";
-                });
-            }
-            input.addEventListener("input", apply);
-            if (clear) clear.addEventListener("click", () => { input.value = ""; apply(); input.focus(); });
-            apply();
+    /* ----- LÓGICA ROBUSTA CON EVENT DELEGATION ----- */
+    (function () {
+        function modalEl() {
+            return document.getElementById('addParticipationsModal');
         }
 
-        bindFilter("home-filter", homeList, "home-clear");
-        bindFilter("away-filter", awayList, "away-clear");
+        function updateCounts(modal) {
+            const homeChecked = modal.querySelectorAll('.home-checkbox:checked').length;
+            const awayChecked = modal.querySelectorAll('.away-checkbox:checked').length;
+            const homeCount   = modal.querySelector('#home-count');
+            const awayCount   = modal.querySelector('#away-count');
+            const submitBtn   = modal.querySelector('#bulkSubmitMulti');
 
-        // Exclusión mutua: si marco en Home, deshabilita el mismo jugador en Away, y viceversa.
-        function syncExclusion(changedBox, counterpartSelector, prefix){
+            if (homeCount) homeCount.textContent = homeChecked;
+            if (awayCount) awayCount.textContent = awayChecked;
+            if (submitBtn) submitBtn.disabled = (homeChecked + awayChecked === 0);
+        }
+
+        function toggleCounterpart(modal, changedBox) {
             const id = changedBox.value;
-            const counterpart = document.querySelector(`#${counterpartSelector}_${id}`);
+            const isHome = changedBox.classList.contains('home-checkbox');
+            const counterpart = modal.querySelector(isHome ? `#away_${id}` : `#home_${id}`);
             if (!counterpart) return;
+
+            const li = counterpart.closest('li');
+
             if (changedBox.checked) {
-                counterpart.checked = false;
+                counterpart.checked  = false;
                 counterpart.disabled = true;
-                // Visual: atenuar el <li> en la lista opuesta
-                const li = counterpart.closest("li");
-                if (li) li.classList.add("opacity-50");
+                li && li.classList.add('opacity-50');
             } else {
                 counterpart.disabled = false;
-                const li = counterpart.closest("li");
-                if (li) li.classList.remove("opacity-50");
+                li && li.classList.remove('opacity-50');
             }
         }
 
-        function updateCountsAndSubmit(){
-            const hc = Array.from(homeBoxes()).filter(b => b.checked).length;
-            const ac = Array.from(awayBoxes()).filter(b => b.checked).length;
-            if (homeCount) homeCount.textContent = hc;
-            if (awayCount) awayCount.textContent = ac;
-            if (bulkSubmit) bulkSubmit.disabled = (hc + ac === 0);
+        // Change en cualquier checkbox dentro del modal
+        function onChange(e) {
+            const modal = modalEl();
+            if (!modal || !modal.contains(e.target)) return;
+
+            if (e.target.classList.contains('home-checkbox') || e.target.classList.contains('away-checkbox')) {
+                toggleCounterpart(modal, e.target);
+                updateCounts(modal);
+            }
         }
 
-        homeList.addEventListener("change", (e) => {
-            if (e.target.classList.contains("home-checkbox")) {
-                syncExclusion(e.target, "away", "home");
-                updateCountsAndSubmit();
-            }
-        });
+        // Filtros
+        function onInput(e) {
+            const modal = modalEl();
+            if (!modal || !modal.contains(e.target)) return;
 
-        awayList.addEventListener("change", (e) => {
-            if (e.target.classList.contains("away-checkbox")) {
-                syncExclusion(e.target, "home", "away");
-                updateCountsAndSubmit();
+            if (e.target.id === 'home-filter' || e.target.id === 'away-filter') {
+                const list = modal.querySelector(e.target.id === 'home-filter' ? '#home-list' : '#away-list');
+                const q = e.target.value.trim().toLowerCase();
+                list?.querySelectorAll('li').forEach(li => {
+                    const name = li.getAttribute('data-name') || '';
+                    li.style.display = name.includes(q) ? '' : 'none';
+                });
             }
-        });
+        }
 
-        // Inicializar estados por si hay defaults
-        updateCountsAndSubmit();
-    });
+        // Botones limpiar
+        function onClick(e) {
+            const modal = modalEl();
+            if (!modal || !modal.contains(e.target)) return;
+
+            if (e.target.id === 'home-clear') {
+                const input = modal.querySelector('#home-filter');
+                if (input) { input.value = ''; input.dispatchEvent(new Event('input')); input.focus(); }
+            } else if (e.target.id === 'away-clear') {
+                const input = modal.querySelector('#away-filter');
+                if (input) { input.value = ''; input.dispatchEvent(new Event('input')); input.focus(); }
+            }
+        }
+
+        // Recalcular al mostrar el modal (soporta Bootstrap + Turbo)
+        function onModalShown(e) {
+            if (e.target && e.target.id === 'addParticipationsModal') {
+                updateCounts(e.target);
+            }
+        }
+
+        document.addEventListener('change', onChange);
+        document.addEventListener('input', onInput);
+        document.addEventListener('click', onClick);
+        document.addEventListener('DOMContentLoaded', () => { const m = modalEl(); if (m) updateCounts(m); });
+        document.addEventListener('turbo:load',   () => { const m = modalEl(); if (m) updateCounts(m); });
+        document.addEventListener('shown.bs.modal', onModalShown);
+    })();
 </script>

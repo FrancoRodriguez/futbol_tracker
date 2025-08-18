@@ -17,19 +17,57 @@
                 form: { data: { turbo_confirm: '¿Reemplazar equipos actuales?' } } %>
 
   <% if @team_a && @team_b %>
+    <%# --- Cálculo de promedios de win rate por equipo --- %>
+    <% team_a_rates = @team_a.map { |p| p.total_matches.to_i > 0 ? (p.total_wins.to_f / p.total_matches) * 100.0 : nil }.compact %>
+    <% team_b_rates = @team_b.map { |p| p.total_matches.to_i > 0 ? (p.total_wins.to_f / p.total_matches) * 100.0 : nil }.compact %>
+
+    <% team_a_avg = team_a_rates.any? ? (team_a_rates.sum / team_a_rates.size).round(1) : nil %>
+    <% team_b_avg = team_b_rates.any? ? (team_b_rates.sum / team_b_rates.size).round(1) : nil %>
+    <% diff = (team_a_avg && team_b_avg) ? (team_a_avg - team_b_avg).abs.round(1) : nil %>
+    <% diff_badge =
+         if diff.nil?
+           nil
+         elsif diff <= 5
+           'success'
+         elsif diff <= 10
+           'warning'
+         else
+           'danger'
+         end %>
+
     <section id="preview-section" class="mb-4">
-      <h4 class="text-light">Sugerencia de equipos (sin guardar)</h4>
+      <h4 class="text-light d-flex align-items-center gap-3 flex-wrap">
+        Sugerencia de equipos (sin guardar)
+        <% if team_a_avg || team_b_avg %>
+          <span class="badge bg-info text-dark">
+            Promedio A: <%= team_a_avg ? "#{team_a_avg}%" : "s/d" %>
+          </span>
+          <span class="badge bg-info text-dark">
+            Promedio B: <%= team_b_avg ? "#{team_b_avg}%" : "s/d" %>
+          </span>
+          <% if diff %>
+            <span class="badge bg-<%= diff_badge %>">
+              Diferencia: <%= diff %> pts
+            </span>
+          <% end %>
+        <% end %>
+      </h4>
+
       <div class="row gy-3">
         <div class="col-12 col-lg-6">
           <div class="card p-3 bg-dark text-light h-100">
-            <h5>Equipo A (sugerido)</h5>
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <h5 class="mb-0">Equipo A (sugerido)</h5>
+              <% if team_a_avg %>
+                <span class="badge bg-secondary">Promedio: <%= team_a_avg %>%</span>
+              <% end %>
+            </div>
             <ul class="list-group list-group-flush">
               <% @team_a.each do |player| %>
+                <% pct = player.total_matches.to_i > 0 ? ((player.total_wins.to_f / player.total_matches) * 100).round(1) : nil %>
                 <li class="list-group-item bg-dark text-light border-secondary d-flex justify-content-between">
                   <span><%= player.full_name %></span>
-                  <% if player.total_matches.to_i > 0 %>
-                    <small class="text-muted"><%= ((player.total_wins.to_f/player.total_matches)*100).round(1) %>%</small>
-                  <% end %>
+                  <small class="text-muted"><%= pct ? "#{pct}%" : "s/d" %></small>
                 </li>
               <% end %>
             </ul>
@@ -38,14 +76,18 @@
 
         <div class="col-12 col-lg-6">
           <div class="card p-3 bg-dark text-light h-100">
-            <h5>Equipo B (sugerido)</h5>
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <h5 class="mb-0">Equipo B (sugerido)</h5>
+              <% if team_b_avg %>
+                <span class="badge bg-secondary">Promedio: <%= team_b_avg %>%</span>
+              <% end %>
+            </div>
             <ul class="list-group list-group-flush">
               <% @team_b.each do |player| %>
+                <% pct = player.total_matches.to_i > 0 ? ((player.total_wins.to_f / player.total_matches) * 100).round(1) : nil %>
                 <li class="list-group-item bg-dark text-light border-secondary d-flex justify-content-between">
                   <span><%= player.full_name %></span>
-                  <% if player.total_matches.to_i > 0 %>
-                    <small class="text-muted"><%= ((player.total_wins.to_f/player.total_matches)*100).round(1) %>%</small>
-                  <% end %>
+                  <small class="text-muted"><%= pct ? "#{pct}%" : "s/d" %></small>
                 </li>
               <% end %>
             </ul>
