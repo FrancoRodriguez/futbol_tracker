@@ -80,13 +80,11 @@
                 </div>
 
                 <div class="ms-2 d-none d-sm-flex">
-                  <% if match.date > 3.days.ago || user_signed_in? %>
+                  <% if user_signed_in? %>
                     <button type="button" class="btn btn-outline-warning btn-sm me-2"
                             data-bs-toggle="modal" data-bs-target="#editParticipationModal-<%= participation.id %>">
                       <i class="fas fa-edit"></i>
                     </button>
-                  <% end %>
-                  <% if user_signed_in? %>
                     <%= button_to 'Eliminar', match_participation_path(match, participation),
                                   method: :delete, data: { confirm: '¿Estás seguro?' },
                                   class: 'btn btn-outline-danger btn-sm' %>
