@@ -1,0 +1,21 @@
+<%= form_with url: request.path, method: :get, local: true, class: "d-inline" do %>
+  <%# preserva otros params de la página si existieran (paginado, filtros, etc.) %>
+  <% params.except(:controller, :action, :season_id).each do |k, v| %>
+    <%= hidden_field_tag k, v %>
+  <% end %>
+
+  <div class="input-group" style="max-width: 360px;">
+    <span class="input-group-text"><i class="fas fa-trophy"></i></span>
+    <%= select_tag :season_id,
+                   options_from_collection_for_select(@seasons, :id, :name, @selected_season&.id),
+                   include_blank: false,
+                   class: "form-select",
+                   onchange: "this.form.requestSubmit()" %>
+  </div>
+
+  <% if @selected_season&.active? %>
+    <span class="badge bg-success ms-2">Activa</span>
+  <% else %>
+    <span class="badge bg-secondary ms-2">Histórica</span>
+  <% end %>
+<% end %>

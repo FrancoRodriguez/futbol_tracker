@@ -29,10 +29,14 @@ class Player < ApplicationRecord
   end
 
   def total_matches
+    return self[:total_matches].to_i if has_attribute?(:total_matches)
+
     participations.count
   end
 
   def total_wins
+    return self[:total_wins].to_i if has_attribute?(:total_wins)
+
     participations
       .joins(:match)
       .where("participations.team_id = matches.win_id")
@@ -86,22 +90,37 @@ class Player < ApplicationRecord
     end
   end
 
-  def self.win_ranking
-    Rails.cache.fetch("stats:win_ranking", expires_in: 12.hours) do
-      joins(participations: :match)
-        .where.not("matches.result ~* ?", '^\s*(\d+)-\1\s*$') # Excluir empates
-        .select(
-          <<~SQL.squish
-          players.*,
-          COUNT(CASE WHEN participations.team_id = matches.win_id THEN 1 END) AS total_wins,
-          COUNT(CASE WHEN participations.team_id != matches.win_id THEN 1 END) AS total_losses,
-          (COUNT(CASE WHEN participations.team_id = matches.win_id THEN 1 END) -
-           COUNT(CASE WHEN participations.team_id != matches.win_id THEN 1 END)) AS win_diff,
-          COUNT(*) AS total_matches
-        SQL
-      )
-        .group("players.id")
-        .order("win_diff DESC, total_matches DESC")
+  def self.win_ranking(season: nil)
+    cache_key = "stats:win_ranking:#{season&.id || 'global'}"
+
+    Rails.cache.fetch(cache_key, expires_in: 12.hours) do
+      sid_sql =
+        if season
+          sanitize_sql_array([ "player_stats.season_id = ?", season.id ])
+        else
+          "player_stats.season_id IS NULL"
+        end
+
+      select_sql = <<~SQL.squish
+      players.*,
+      COALESCE(player_stats.total_matches, 0) AS stat_total_matches,
+      COALESCE(player_stats.total_wins,    0) AS stat_total_wins,
+      GREATEST(COALESCE(player_stats.total_matches,0) - COALESCE(player_stats.total_wins,0), 0) AS stat_total_losses,
+      (COALESCE(player_stats.total_wins,0) * 2 - COALESCE(player_stats.total_matches,0)) AS stat_win_diff,
+      CASE
+        WHEN COALESCE(player_stats.total_matches,0) >= #{Player::MIN_MATCHES}
+             AND player_stats.win_rate_cached IS NOT NULL
+        THEN ROUND(player_stats.win_rate_cached * 100.0, 1)
+        ELSE NULL
+      END AS stat_win_rate_pct
+    SQL
+
+      joins("LEFT JOIN player_stats ON player_stats.player_id = players.id AND #{sid_sql}")
+        .select(select_sql)
+        .where("COALESCE(player_stats.total_matches, 0) > 0")
+        .includes(profile_photo_attachment: :blob)
+        .order(Arel.sql("stat_win_diff DESC, stat_total_matches DESC, players.name ASC"))
+        .to_a
     end
   end
 

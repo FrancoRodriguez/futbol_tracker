@@ -11,7 +11,7 @@ RSpec.describe Stats::RebuildForMatchJob, type: :job do
     create(:participation, player: player, match: match, team_id: home_team.id)
 
     # Define ganador y dispara el job manualmente
-    match.update!(win_id: home_team.id, result: "Home")
+    match.update!(win_id: home_team.id, result: "1-0")
 
     # Ejecuta el job (sin cola)
     described_class.perform_now(match.id)

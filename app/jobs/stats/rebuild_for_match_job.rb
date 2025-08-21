@@ -3,7 +3,7 @@ class Stats::RebuildForMatchJob < ApplicationJob
   def perform(match_id)
     match = Match.find(match_id)
     players = match.participants
-    seasons = Season.for_date!(match.date).to_a
+    seasons = Season.for_date!(match.date)
     [ nil, *seasons ].each do |season|
       players.each do |pl|
         attrs = Stats::Calculator.new(player: pl, season: season).call

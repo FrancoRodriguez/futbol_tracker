@@ -48,8 +48,17 @@ class PlayersController < ApplicationController
   end
 
   def win_ranking
-    @top_players = Player.win_ranking
+    @selected_season =
+      if params[:season_id].present?
+        Season.find_by(id: params[:season_id])
+      else
+        Season.active.first
+      end
+
+    @top_players = Player.win_ranking(season: @selected_season)
+    @seasons     = Season.order(starts_on: :desc) # para el dropdown
   end
+
 
   private
 
