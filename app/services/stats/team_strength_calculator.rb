@@ -2,7 +2,7 @@
 module Stats
   class TeamStrengthCalculator
     def call(match:, winrate_map:)
-      teams = [match.home_team, match.away_team].compact
+      teams = [ match.home_team, match.away_team ].compact
       teams.each_with_object({}) do |team, h|
         players = match.participations.includes(:player)
                        .where(team_id: team.id).map(&:player)

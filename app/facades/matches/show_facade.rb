@@ -18,7 +18,7 @@ class Matches::ShowFacade
   def build!(preview_autobalance:, voter_key:)
     # Participaciones + equipos
     @participations = @match.participations.includes(player: { profile_photo_attachment: :blob })
-    @teams          = [@match.home_team, @match.away_team].compact
+    @teams          = [ @match.home_team, @match.away_team ].compact
     players_in_match = @participations.map(&:player).uniq
 
     # --- Win rates para jugadores del partido (lee de player_stats y hace fallback a participations)
@@ -95,7 +95,7 @@ class Matches::ShowFacade
     pool = eligibles.presence || with_wr.presence || players
     pool.max_by do |pl|
       st = wr_map[pl.id] || {}
-      [st[:wr] || -1.0, st[:tm] || 0, (pl.rating || 0).to_f]
+      [ st[:wr] || -1.0, st[:tm] || 0, (pl.rating || 0).to_f ]
     end
   end
 
@@ -108,7 +108,7 @@ class Matches::ShowFacade
     @duel_b  = @featured_by_team[away.id]
     @vs_label = "Mejor win rate (mín. #{Player::MIN_MATCHES} PJ)"
 
-    counts = DuelVote.where(match_id: @match.id, player_id: [@duel_a.id, @duel_b.id])
+    counts = DuelVote.where(match_id: @match.id, player_id: [ @duel_a.id, @duel_b.id ])
                      .group(:player_id).count
     a_ct = counts.fetch(@duel_a.id, 0)
     b_ct = counts.fetch(@duel_b.id, 0)
@@ -137,7 +137,7 @@ class Matches::ShowFacade
 
     # WR del MVP (si el MVP no está en el partido, léelo aparte)
     wr_map = wr_map_match[mvp_player.id] ? wr_map_match :
-               Stats::WinRateReader.new(season: @season, exclude_match: @match).call(players: [mvp_player])
+               Stats::WinRateReader.new(season: @season, exclude_match: @match).call(players: [ mvp_player ])
 
     tm = wr_map[mvp_player.id][:tm]
     tw = wr_map[mvp_player.id][:tw]
@@ -169,7 +169,7 @@ class Matches::ShowFacade
     sort_wr = ->(pl) { wr_pct_if_eligible.call(pl) || 50.0 }
     @available_players.sort_by! do |pl|
       st = wr_map_all[pl.id]
-      [-sort_wr.call(pl), -(st[:tm] || 0), display_name(pl)]
+      [ -sort_wr.call(pl), -(st[:tm] || 0), display_name(pl) ]
     end
 
     # Para que la vista pueda esconder el % si es nil
