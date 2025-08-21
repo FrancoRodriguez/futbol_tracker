@@ -5,7 +5,7 @@ class Matches::ShowFacade
               :duel_a, :duel_b, :vs_label, :duel_a_pct, :duel_b_pct, :duel_total, :your_duel_choice,
               :mvp_total_awards, :mvp_win_rate,
               :available_players_mvp, :available_players, :win_rate_pct_by_player,
-              :team_a, :team_b, :weather
+              :team_a, :team_b, :weather, :eligibles_by_team, :win_prob_source
 
   def initialize(match:, preview_autobalance: false, voter_key: nil, season: nil)
     @match  = match
@@ -34,9 +34,38 @@ class Matches::ShowFacade
       @featured_by_team[team.id] = pick_featured(team_players, wr_map_match)
     end
 
-    # --- Probabilidades por equipo
+    # --- Probabilidades por equipo (SEASON) + conteo de elegibles
+    @eligibles_by_team = {}
+    @teams.each do |team|
+      team_players = @participations.select { |p| p.team_id == team.id }.map(&:player)
+      @eligibles_by_team[team.id] = team_players.count do |pl|
+        s = wr_map_match[pl.id]
+        s && s[:eligible] && s[:wr]
+      end
+    end
+
     strengths = Stats::TeamStrengthCalculator.new.call(match: @match, winrate_map: wr_map_match)
     @team_win_percentages = Stats::WinProbabilityCalculator.new.call(strengths)
+    @win_prob_source = :season
+
+    # --- Fallback a GLOBAL si no hay datos con la season seleccionada ---
+    if @team_win_percentages.blank? && @season.present?
+      wr_map_global = Stats::WinRateReader.new(season: nil, exclude_match: @match).call(players: players_in_match)
+
+      # Recalcula elegibles por equipo con GLOBAL para diagnóstico
+      @eligibles_by_team = {}
+      @teams.each do |team|
+        team_players = @participations.select { |p| p.team_id == team.id }.map(&:player)
+        @eligibles_by_team[team.id] = team_players.count do |pl|
+          s = wr_map_global[pl.id]
+          s && s[:eligible] && s[:wr]
+        end
+      end
+
+      strengths_global = Stats::TeamStrengthCalculator.new.call(match: @match, winrate_map: wr_map_global)
+      @team_win_percentages = Stats::WinProbabilityCalculator.new.call(strengths_global)
+      @win_prob_source = (@team_win_percentages.present? ? :global : :none)
+    end
 
     # --- Duelo (VS)
     build_duel!(voter_key)

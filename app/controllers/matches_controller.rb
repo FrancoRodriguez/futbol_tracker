@@ -31,15 +31,22 @@ class MatchesController < ApplicationController
   end
 
 
+  # app/controllers/matches_controller.rb
   def show
+    @selected_season =
+      if params[:season_id].present?
+        Season.find_by(id: params[:season_id])
+      else
+        Season.active.first   # por defecto, la temporada activa
+      end
+
     vm = Matches::ShowFacade.new(
       match: @match,
+      season: @selected_season,                       # <<< importante
       preview_autobalance: params[:preview_autobalance].present?,
       voter_key: (respond_to?(:duel_voter_key) ? duel_voter_key : nil)
-    # season: Season.active.first # if you want to filter by active season
     )
 
-    # Maintain compatibility with the current view:
     @participations          = vm.participations
     @teams                   = vm.teams
     @team_win_percentages    = vm.team_win_percentages
@@ -56,8 +63,8 @@ class MatchesController < ApplicationController
     @win_rate_pct_by_player  = vm.win_rate_pct_by_player
     @team_a, @team_b         = vm.team_a, vm.team_b
     @match_weather           = vm.weather
-
-    p vm
+    @eligibles_by_team       = vm.eligibles_by_team   # <<< para la vista
+    @win_prob_source         = vm.win_prob_source     # :season, :global o :none
   end
 
   def autobalance
