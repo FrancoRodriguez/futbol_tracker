@@ -37,7 +37,7 @@ class DuelVotesController < ApplicationController
     a    = featured_for_team(match, home)
     b    = featured_for_team(match, away)
 
-    counts = DuelVote.where(match_id: match.id, player_id: [a&.id, b&.id]).group(:player_id).count
+    counts = DuelVote.where(match_id: match.id, player_id: [ a&.id, b&.id ]).group(:player_id).count
     a_ct   = a ? counts[a.id].to_i : 0
     b_ct   = b ? counts[b.id].to_i : 0
     tot    = a_ct + b_ct
@@ -62,6 +62,6 @@ class DuelVotesController < ApplicationController
     eligible    = players.select { |pl| pl.total_matches.to_i >= min_matches && wr.call(pl) }
     with_match  = players.select { |pl| wr.call(pl) }
     pool        = eligible.presence || with_match.presence || players
-    pool.max_by { |pl| [wr.call(pl) || -1.0, pl.total_matches.to_i] }
+    pool.max_by { |pl| [ wr.call(pl) || -1.0, pl.total_matches.to_i ] }
   end
 end

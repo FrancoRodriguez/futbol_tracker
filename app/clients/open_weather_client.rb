@@ -1,5 +1,5 @@
-require 'net/http'
-require 'json'
+require "net/http"
+require "json"
 
 class OpenWeatherClient
   BASE_URL = "https://api.openweathermap.org/data/2.5/forecast"
@@ -14,13 +14,13 @@ class OpenWeatherClient
   attr_reader :lat, :lon, :api_key, :uri
 
   def forecast
-    uri.query = URI.encode_www_form({ lat: , lon: , appid: api_key , units: 'metric', lang: 'es' })
+    uri.query = URI.encode_www_form({ lat:, lon:, appid: api_key, units: "metric", lang: "es" })
 
     http = Net::HTTP.new(uri.host, uri.port)
     http.use_ssl = true
 
     request = Net::HTTP::Get.new(uri)
-    request['User-Agent'] = 'futbol-tracker-app'
+    request["User-Agent"] = "futbol-tracker-app"
 
     response = Net::HTTP.get(uri)
     JSON.parse(response)

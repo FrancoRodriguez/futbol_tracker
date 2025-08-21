@@ -1,18 +1,18 @@
 class MatchParticipationsController < ApplicationController
   before_action :set_match
-  before_action :set_participation, only: [:destroy]
+  before_action :set_participation, only: [ :destroy ]
 
   def destroy
     @participation.destroy
-    redirect_to match_path(@match), notice: 'Participación eliminada exitosamente.'
+    redirect_to match_path(@match), notice: "Participación eliminada exitosamente."
   end
 
   def update
     if @participation.update(participation_params)
-      flash[:notice] = 'Participación actualizada con éxito.'
+      flash[:notice] = "Participación actualizada con éxito."
       redirect_to match_path(@match)
     else
-      flash[:alert] = 'No se pudo actualizar la participación.'
+      flash[:alert] = "No se pudo actualizar la participación."
       render :edit, status: :unprocessable_entity
     end
   end

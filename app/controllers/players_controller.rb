@@ -1,5 +1,5 @@
 class PlayersController < ApplicationController
-  before_action :set_player, only: [:show, :edit, :update, :destroy]
+  before_action :set_player, only: [ :show, :edit, :update, :destroy ]
 
   include PlayersHelper
 
@@ -14,7 +14,7 @@ class PlayersController < ApplicationController
   end
 
   def index
-    @players = Player.left_joins(:participations).group('players.id').order('COUNT(participations.id) DESC')
+    @players = Player.left_joins(:participations).group("players.id").order("COUNT(participations.id) DESC")
   end
 
   def create

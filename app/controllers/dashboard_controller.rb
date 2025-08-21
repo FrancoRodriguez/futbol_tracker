@@ -2,7 +2,7 @@ class DashboardController < ApplicationController
   def index
     @next_match = Match.where("date >= ?", Time.zone.today).order(date: :asc).first
     if @next_match
-      @next_match_weather = Rails.cache.fetch(["weather_forecast", @next_match.date], expires_in: 1.hour) do
+      @next_match_weather = Rails.cache.fetch([ "weather_forecast", @next_match.date ], expires_in: 1.hour) do
         WeatherService.new.forecast_for(@next_match.date)
       end
     end

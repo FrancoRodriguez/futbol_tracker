@@ -5,15 +5,15 @@ module PlayerRankings
 
   class_methods do
     def top_for_period(range, positions: 3, cache: Rails.cache)
-      cache.fetch(["players:top_for_period", range.begin.to_date, range.end.to_date, "pos:#{positions}"], expires_in: 12.hours) do
-        rows = find_by_sql([SQL_RANKED, range.begin, range.end, range.begin, range.end])
+      cache.fetch([ "players:top_for_period", range.begin.to_date, range.end.to_date, "pos:#{positions}" ], expires_in: 12.hours) do
+        rows = find_by_sql([ SQL_RANKED, range.begin, range.end, range.begin, range.end ])
 
-        rows.select { |r| r.read_attribute('position').to_i <= positions }
+        rows.select { |r| r.read_attribute("position").to_i <= positions }
             .sort_by { |r| [
-              r.read_attribute('position').to_i,
-              -r.read_attribute('victories').to_i,
-              -r.read_attribute('mvp_count').to_i,
-              -r.read_attribute('total_matches').to_i,
+              r.read_attribute("position").to_i,
+              -r.read_attribute("victories").to_i,
+              -r.read_attribute("mvp_count").to_i,
+              -r.read_attribute("total_matches").to_i,
               r.id
             ] }
             .map { |r| to_result(r) }
@@ -58,11 +58,11 @@ module PlayerRankings
     def to_result(row)
       Result.new(
         player:        row,
-        total_matches: row.read_attribute('total_matches').to_i,
-        victories:     row.read_attribute('victories').to_i,
-        mvp_count:     row.read_attribute('mvp_count').to_i,
-        position:      row.read_attribute('position').to_i,
-        tie:           ActiveModel::Type::Boolean.new.cast(row.read_attribute('tie'))
+        total_matches: row.read_attribute("total_matches").to_i,
+        victories:     row.read_attribute("victories").to_i,
+        mvp_count:     row.read_attribute("mvp_count").to_i,
+        position:      row.read_attribute("position").to_i,
+        tie:           ActiveModel::Type::Boolean.new.cast(row.read_attribute("tie"))
       )
     end
   end

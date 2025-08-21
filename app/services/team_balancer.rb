@@ -8,7 +8,7 @@ class TeamBalancer
 
   def call
     pool  = @players # <- sin filtrar
-    return [pool, []] if pool.size <= 2
+    return [ pool, [] ] if pool.size <= 2
 
     sizes = team_sizes(pool.size)
     best_split_for_sizes(pool, sizes)
@@ -23,7 +23,7 @@ class TeamBalancer
     if matches.zero?
       0.5 * LOW_CONF_WEIGHT
     else
-      weight = [matches, CAP_MATCHES].min
+      weight = [ matches, CAP_MATCHES ].min
       (p.total_wins.to_f / matches.to_f) * weight
     end
   end
@@ -31,11 +31,11 @@ class TeamBalancer
   def team_sizes(n)
     a = n / 2
     b = n - a
-    [a, b].sort
+    [ a, b ].sort
   end
 
   def best_split_for_sizes(pool, sizes)
-    weights = pool.map { |p| [p, strength(p)] }
+    weights = pool.map { |p| [ p, strength(p) ] }
     candidates = sizes.map { |k| best_subset_of_size(weights, k) }
     candidates.min_by { |c| c[:diff] }.values_at(:team_a, :team_b)
   end

@@ -10,6 +10,6 @@ class CreateDuelVotes < ActiveRecord::Migration[7.0]
       t.timestamps
     end
 
-    add_index :duel_votes, [:match_id, :voter_key], unique: true
+    add_index :duel_votes, [ :match_id, :voter_key ], unique: true
   end
 end

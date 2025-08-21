@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_08_13_150100) do
+ActiveRecord::Schema[7.2].define(version: 2025_08_20_201038) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -66,10 +66,12 @@ ActiveRecord::Schema[7.2].define(version: 2025_08_13_150100) do
     t.bigint "away_team_id"
     t.bigint "mvp_id"
     t.bigint "win_id"
+    t.bigint "season_id"
     t.index ["away_team_id"], name: "index_matches_on_away_team_id"
     t.index ["date"], name: "index_matches_on_date"
     t.index ["home_team_id"], name: "index_matches_on_home_team_id"
     t.index ["result"], name: "index_matches_on_result"
+    t.index ["season_id"], name: "index_matches_on_season_id"
     t.index ["win_id"], name: "index_matches_on_win_id"
   end
 
@@ -92,6 +94,23 @@ ActiveRecord::Schema[7.2].define(version: 2025_08_13_150100) do
     t.index ["team_id"], name: "index_participations_on_team_id"
   end
 
+  create_table "player_stats", force: :cascade do |t|
+    t.bigint "player_id", null: false
+    t.bigint "season_id"
+    t.integer "total_matches", default: 0, null: false
+    t.integer "total_wins", default: 0, null: false
+    t.decimal "win_rate_cached", precision: 6, scale: 4
+    t.integer "streak_current", default: 0, null: false
+    t.integer "streak_best_win", default: 0, null: false
+    t.integer "streak_best_loss", default: 0, null: false
+    t.integer "mvp_awards_count", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["player_id", "season_id"], name: "idx_player_stats_player_season", unique: true
+    t.index ["player_id"], name: "index_player_stats_on_player_id"
+    t.index ["season_id"], name: "index_player_stats_on_season_id"
+  end
+
   create_table "players", force: :cascade do |t|
     t.string "name"
     t.string "nickname"
@@ -99,6 +118,22 @@ ActiveRecord::Schema[7.2].define(version: 2025_08_13_150100) do
     t.decimal "rating", default: "0.0"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "current_win_streak", default: 0, null: false
+    t.integer "current_loss_streak", default: 0, null: false
+    t.integer "best_win_streak", default: 0, null: false
+    t.integer "best_loss_streak", default: 0, null: false
+    t.datetime "streaks_updated_at"
+  end
+
+  create_table "seasons", force: :cascade do |t|
+    t.string "name", null: false
+    t.date "starts_on", null: false
+    t.date "ends_on", null: false
+    t.boolean "active", default: false, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["active"], name: "index_seasons_on_active"
+    t.index ["starts_on", "ends_on"], name: "index_seasons_on_starts_on_and_ends_on"
   end
 
   create_table "teams", force: :cascade do |t|
@@ -123,9 +158,12 @@ ActiveRecord::Schema[7.2].define(version: 2025_08_13_150100) do
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "duel_votes", "matches"
   add_foreign_key "duel_votes", "players"
+  add_foreign_key "matches", "seasons"
   add_foreign_key "matches", "teams", column: "away_team_id"
   add_foreign_key "matches", "teams", column: "home_team_id"
   add_foreign_key "matches", "teams", column: "win_id"
   add_foreign_key "participations", "matches"
   add_foreign_key "participations", "players"
+  add_foreign_key "player_stats", "players"
+  add_foreign_key "player_stats", "seasons"
 end

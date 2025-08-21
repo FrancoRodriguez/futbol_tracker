@@ -1,7 +1,7 @@
 class ParticipationsController < ApplicationController
   before_action :set_match
-  before_action :set_participation, only: [:edit, :update, :destroy]
-  before_action :available_players, only: [:new]
+  before_action :set_participation, only: [ :edit, :update, :destroy ]
+  before_action :available_players, only: [ :new ]
 
   def new
     @participation = Participation.new
@@ -11,7 +11,7 @@ class ParticipationsController < ApplicationController
 
   def update
     if @participation.update(participation_params)
-      redirect_to match_path(@match), notice: 'Participación actualizada con éxito.'
+      redirect_to match_path(@match), notice: "Participación actualizada con éxito."
     else
       render :edit
     end
@@ -29,15 +29,15 @@ class ParticipationsController < ApplicationController
 
   def destroy
     @participation.destroy
-    redirect_to @participation.match, notice: 'Participación eliminada con éxito.'
+    redirect_to @participation.match, notice: "Participación eliminada con éxito."
   end
 
   def bulk_create
     match = Match.find(params[:match_id])
 
     # Asegura equipos
-    home = match.home_team || match.build_home_team(name: 'Equipo Blanco')
-    away = match.away_team || match.build_away_team(name: 'Equipo Negro')
+    home = match.home_team || match.build_home_team(name: "Equipo Blanco")
+    away = match.away_team || match.build_away_team(name: "Equipo Negro")
     match.save! if match.changed?
 
     home_ids = Array(params[:home_player_ids]).reject(&:blank?).map!(&:to_i)

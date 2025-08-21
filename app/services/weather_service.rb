@@ -1,6 +1,6 @@
 class WeatherService
   def initialize(lat: 40.3536054, lon: -3.5310879)
-    #Rivas Vaciamadrid default lat, lon
+    # Rivas Vaciamadrid default lat, lon
     @client = OpenWeatherClient.new(lat: lat, lon: lon)
   end
 

@@ -8,7 +8,7 @@ module PlayersHelper
       match = participation.match
       next if match.win_id.nil?
 
-      if match.win.name == 'Empate'
+      if match.win.name == "Empate"
         # empate: no cambia el balance
       elsif match.win_id == participation.team_id
         balance += 1
@@ -22,5 +22,4 @@ module PlayersHelper
 
     { dates: dates, balance: balance_cumulative }
   end
-
 end

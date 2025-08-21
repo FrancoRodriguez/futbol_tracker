@@ -38,8 +38,8 @@ class CreateActiveStorageTables < ActiveRecord::Migration[7.0]
       end
     end
 
-    unless index_exists?(:active_storage_attachments, [:record_type, :record_id, :name, :blob_id], name: :index_active_storage_attachments_uniqueness)
-      add_index :active_storage_attachments, [:record_type, :record_id, :name, :blob_id], name: :index_active_storage_attachments_uniqueness, unique: true
+    unless index_exists?(:active_storage_attachments, [ :record_type, :record_id, :name, :blob_id ], name: :index_active_storage_attachments_uniqueness)
+      add_index :active_storage_attachments, [ :record_type, :record_id, :name, :blob_id ], name: :index_active_storage_attachments_uniqueness, unique: true
     end
 
     unless foreign_key_exists?(:active_storage_attachments, :active_storage_blobs, column: :blob_id)
@@ -53,8 +53,8 @@ class CreateActiveStorageTables < ActiveRecord::Migration[7.0]
       end
     end
 
-    unless index_exists?(:active_storage_variant_records, [:blob_id, :variation_digest], name: :index_active_storage_variant_records_uniqueness)
-      add_index :active_storage_variant_records, [:blob_id, :variation_digest], name: :index_active_storage_variant_records_uniqueness, unique: true
+    unless index_exists?(:active_storage_variant_records, [ :blob_id, :variation_digest ], name: :index_active_storage_variant_records_uniqueness)
+      add_index :active_storage_variant_records, [ :blob_id, :variation_digest ], name: :index_active_storage_variant_records_uniqueness, unique: true
     end
 
     unless foreign_key_exists?(:active_storage_variant_records, :active_storage_blobs, column: :blob_id)
@@ -69,6 +69,6 @@ class CreateActiveStorageTables < ActiveRecord::Migration[7.0]
     setting = config.options[config.orm][:primary_key_type]
     primary_key_type = setting || :primary_key
     foreign_key_type = setting || :bigint
-    [primary_key_type, foreign_key_type]
+    [ primary_key_type, foreign_key_type ]
   end
 end

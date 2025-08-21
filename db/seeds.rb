@@ -45,11 +45,11 @@ players = [
 
   winner = if goals_home > goals_away
              home_team
-           elsif goals_away > goals_home
+  elsif goals_away > goals_home
              away_team
-           else
+  else
              nil # empate
-           end
+  end
 
   # Seleccionar jugadores aleatoriamente para el partido (4 a 6 jugadores)
   match_players = players.sample(rand(4..6))
@@ -67,7 +67,7 @@ players = [
   # Asignar equipo y stats a cada participación
   match.participations.each do |p|
     # Aseguramos que la participación pertenezca a uno de los equipos del partido
-    team = [home_team, away_team].sample
+    team = [ home_team, away_team ].sample
     p.update!(
       goals: rand(0..3),
       assists: rand(0..2),

@@ -1,0 +1,13 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  name: MyString
+  starts_on: 2025-08-20
+  ends_on: 2025-08-20
+  active: false
+
+two:
+  name: MyString
+  starts_on: 2025-08-20
+  ends_on: 2025-08-20
+  active: false

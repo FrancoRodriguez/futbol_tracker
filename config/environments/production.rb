@@ -71,7 +71,7 @@ Rails.application.configure do
     url: ENV.fetch("REDIS_URL") { "redis://localhost:6379/1" }, # Cambiá esto según tu entorno
     expires_in: 12.hours,
     reconnect_attempts: 1,
-    error_handler: -> (method:, returning:, exception:) {
+    error_handler: ->(method:, returning:, exception:) {
       Rails.logger.error "Redis cache error: #{exception.class} - #{exception.message}"
     }
   }

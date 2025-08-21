@@ -5,7 +5,7 @@ gem "rails", "~> 7.2.2"
 # The original asset pipeline for Rails [https://github.com/rails/sprockets-rails]
 gem "sprockets-rails"
 # Use postgresql as the database for Active Record
-gem 'pg', '>= 1.2.3'
+gem "pg", ">= 1.2.3"
 # Use the Puma web server [https://github.com/puma/puma]
 gem "puma", ">= 5.0"
 # Use JavaScript with ESM import maps [https://github.com/rails/importmap-rails]
@@ -43,6 +43,9 @@ group :development, :test do
 
   # Omakase Ruby styling [https://github.com/rails/rubocop-rails-omakase/]
   gem "rubocop-rails-omakase", require: false
+
+  gem "rspec-rails"
+  gem "factory_bot_rails"
 end
 
 group :development do
@@ -57,9 +60,8 @@ group :test do
 end
 
 gem "devise", "~> 4.9"
-gem 'kaminari' # used for pagination
+gem "kaminari" # used for pagination
 gem "image_processing"
-gem 'aws-sdk-s3', require: false
-gem 'dotenv-rails', groups: [:development, :test]
-gem 'redis'
-
+gem "aws-sdk-s3", require: false
+gem "dotenv-rails", groups: [ :development, :test ]
+gem "redis"
