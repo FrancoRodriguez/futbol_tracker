@@ -4,10 +4,23 @@ class PlayersController < ApplicationController
   include PlayersHelper
 
   def show
-    @results_count = @player.results_count
-    @chart_data = @player.chart_data
-    @participations = @player.past_participations.page(params[:page]).per(PAGINATION_NUMBER)
+    # Season seleccionada (Global si llega season_id vacío; si no llega el param, usa la activa)
+    @selected_season =
+      if params.key?(:season_id)
+        params[:season_id].present? ? Season.find_by(id: params[:season_id]) : nil
+      else
+        Season.active.first
+      end
+
+    @seasons = Season.order(starts_on: :desc)
+
+    @season = @selected_season
+    @stat   = @player.stats_for(season: @season)
+    @results_count = { victories: @stat.total_wins, defeats: @stat.total_losses, draws: @stat.total_draws }
+    @chart_data    = @player.chart_data_for(season: @season)
+    @participations = @player.participations_in(season: @season).page(params[:page]).per(PAGINATION_NUMBER)
   end
+
 
   def new
     @player = Player.new
@@ -44,7 +57,15 @@ class PlayersController < ApplicationController
   end
 
   def mvp_ranking
-    @players = Player.mvp_ranking
+    @seasons = Season.order(starts_on: :desc)
+    @selected_season =
+      if params.key?(:season_id)
+        params[:season_id].present? ? Season.find_by(id: params[:season_id]) : nil
+      else
+        Season.active.first
+      end
+
+    @players = Player.mvp_ranking(season: @selected_season)
   end
 
   def win_ranking

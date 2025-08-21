@@ -1,4 +1,11 @@
-<h1 class="text-center mb-4">🏆 Ranking de MVPs 🏆</h1>
+<div class="d-md-flex align-items-center justify-content-between mb-3 gap-3">
+  <h1 class="mb-2 mb-md-0 text-center text-md-start">🏆 Ranking de MVPs 🏆</h1>
+  <%= render "season_selector" %>
+</div>
+
+<p class="text-center text-muted small mb-4">
+  Mostrando <strong><%= @selected_season ? @selected_season.name : "Global (histórico)" %></strong>.
+</p>
 
 <div class="table-responsive shadow-lg rounded bg-light">
   <table class="table table-hover align-middle mb-0">
@@ -9,35 +16,45 @@
       <th>Veces MVP</th>
     </tr>
     </thead>
-    <tbody class="table-dark">
-    <% @players.each_with_index do |player, index| %>
-      <% border_class = case index
-                        when 0 then 'gold-border'
-                        when 1 then 'silver-border'
-                        when 2 then 'bronze-border'
-                        else ''
-                        end %>
 
-      <tr class="bg-dark text-light <%= border_class %>">
-        <td class="text-center fs-4">
-          <%= render "tables/top_three", index: %>
-        </td>
-        <td class="text-start d-flex align-items-center gap-3 px-3 py-2">
-          <% if player.profile_photo.attached? %>
-            <%= image_tag player.profile_photo,
-                          class: "rounded-circle border border-light",
-                          width: 40, height: 40,
-                          style: "object-fit: cover;" %>
-          <% else %>
-            <%= image_tag "default_avatar.png",
-                          class: "rounded-circle border border-light",
-                          width: 40, height: 40 %>
-          <% end %>
-          <%= link_to player.name, player_path(player),
-                      class: "text-decoration-none text-light fw-semibold" %>
-        </td>
-        <td class="text-center text-success fw-bold"><%= player.mvp_matches.count %></td>
+    <tbody class="table-dark">
+    <% if @players.blank? %>
+      <tr class="bg-dark text-light">
+        <td colspan="3" class="text-center py-4">Sin datos para este alcance.</td>
       </tr>
+    <% else %>
+      <% @players.each_with_index do |player, index| %>
+        <% border_class =
+             case index
+             when 0 then 'gold-border'
+             when 1 then 'silver-border'
+             when 2 then 'bronze-border'
+             else ''
+             end %>
+
+        <tr class="bg-dark text-light <%= border_class %>">
+          <td class="text-center fs-4">
+            <%= render "tables/top_three", index: %>
+          </td>
+
+          <td class="text-start d-flex align-items-center gap-3 px-3 py-2">
+            <% if player.profile_photo.attached? %>
+              <%= image_tag player.profile_photo, class: "rounded-circle border border-light",
+                            width: 40, height: 40, style: "object-fit: cover;" %>
+            <% else %>
+              <%= image_tag "default_avatar.png", class: "rounded-circle border border-light",
+                            width: 40, height: 40 %>
+            <% end %>
+            <%= link_to player.name, player_path(player),
+                        class: "text-decoration-none text-light fw-semibold" %>
+          </td>
+
+          <!-- ✅ Usar la columna proyectada desde la query -->
+          <td class="text-center text-success fw-bold">
+            <%= player.respond_to?(:mvp_count) ? player.mvp_count : player[:mvp_count] || 0 %>
+          </td>
+        </tr>
+      <% end %>
     <% end %>
     </tbody>
   </table>

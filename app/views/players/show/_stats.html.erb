@@ -14,11 +14,11 @@
         </thead>
         <tbody class="table-dark">
         <tr>
-          <td><%= @player.participations.joins(:match).where('matches.date < ?', Date.today).count %></td>
-          <td><%= @results_count[:victories] %></td>
-          <td><%= @results_count[:defeats] %></td>
-          <td><%= @results_count[:draws] %></td>
-          <td><%= @player.mvp_matches.count %></td>
+          <td><%= @stat.total_matches %></td>
+          <td><%= @stat.total_wins %></td>
+          <td><%= @stat.total_losses %></td>
+          <td><%= @stat.total_draws %></td>
+          <td><%= @stat.mvp_count %></td>
         </tr>
         </tbody>
       </table>

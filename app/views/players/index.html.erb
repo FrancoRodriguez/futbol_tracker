@@ -52,10 +52,10 @@
 
         <td class="text-center">
           <% if player.total_matches >= Player::MIN_MATCHES %>
-            <div class="small fw-semibold"><%= player.win_rate.to_i %>%</div>
+            <div class="small fw-semibold"><%= player.win_rate %>%</div>
             <div class="progress" style="height:8px">
-              <div class="progress-bar bg-success" style="width:<%= player.win_rate.to_i %>%"></div>>
-              <div class="progress-bar bg-danger" style="width:<%= 100 - player.win_rate.to_i %>%"></div>
+              <div class="progress-bar bg-success" style="width:<%= player.win_rate %>%"></div>>
+              <div class="progress-bar bg-danger" style="width:<%= 100 - player.win_rate %>%"></div>
             </div>
           <% else %>
             <span class="text-muted fst-italic">En evaluación</span>

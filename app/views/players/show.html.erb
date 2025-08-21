@@ -1,7 +1,10 @@
+<div class="d-flex justify-content-end mb-2">
+  <%= render "season_selector" %>
+</div>
 <div class="container my-5">
   <%= render 'players/show/profile_header', player: @player %>
   <%= render 'players/show/stats', player: @player %>
-  <%= render 'players/show/balance_chart', player: @player if @player.total_matches > 0%>
+  <%= render 'players/show/balance_chart', player: @player if @stat.total_matches > 0 %>
   <%= render 'players/show/participation_history', player: @player %>
 </div>
 
