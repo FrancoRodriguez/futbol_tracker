@@ -1,6 +1,7 @@
 class Player < ApplicationRecord
   include PlayerRankings
 
+  has_many :player_stats, dependent: :destroy
   has_many :participations, dependent: :destroy
   has_many :matches, through: :participations
   has_many :mvp_matches, class_name: "Match", foreign_key: "mvp_id"
@@ -9,6 +10,9 @@ class Player < ApplicationRecord
   after_save :clear_global_stats_cache
 
   MIN_MATCHES = 5
+
+  # Estructura para el widget "Jugador del mes"
+  ResultRow = Struct.new(:player, :wins, :total_matches, :mvp_count, :position, :tie, keyword_init: true)
 
   def clear_global_stats_cache
     Rails.cache.delete("stats:top_mvp")
@@ -81,13 +85,85 @@ class Player < ApplicationRecord
     stats_cache[:win_rate].to_f
   end
 
-  def self.top_mvp
-    Rails.cache.fetch("stats:top_mvp", expires_in: 12.hours) do
+  # Top MVP de la temporada (usa player_stats.mvp_awards_count)
+  def self.top_mvp(season: nil)
+    if season
+      Player.joins(:player_stats)
+            .where(player_stats: { season_id: season.id })
+            .select("players.*, player_stats.mvp_awards_count AS mvp_count")
+            .order("player_stats.mvp_awards_count DESC, players.name ASC")
+            .first
+    else
+      # Fallback global (si alguna vez lo usas fuera de dashboard)
       joins(:mvp_matches)
         .group("players.id")
-        .order("COUNT(matches.id) DESC")
+        .order(Arel.sql("COUNT(matches.id) DESC"))
+        .select("players.*, COUNT(matches.id) AS mvp_count")
         .first
     end
+  end
+
+  # Top del último mes dentro de la temporada dada (season ACTIVA)
+  # Devuelve array de ResultRow con: player, wins, total_matches, mvp_count, position, tie
+  def self.top_last_month(positions: 3, season:)
+    return [] unless season
+
+    from = [ 30.days.ago.to_date, season.starts_on ].max
+    to   = [ Date.current,        season.ends_on ].min
+    return [] if from > to
+
+    # Ganados por jugador en la ventana (solo finalizados)
+    wins_by_player = Participation.joins(:match)
+                                  .where(matches: { date: from..to })
+                                  .where("participations.team_id = matches.win_id")
+                                  .group(:player_id)
+                                  .order(Arel.sql("COUNT(*) DESC"))
+                                  .limit(positions)
+                                  .count # => { player_id => wins }
+
+    return [] if wins_by_player.empty?
+
+    player_ids       = wins_by_player.keys
+    players_by_id    = Player.where(id: player_ids).index_by(&:id)
+    stats_by_player  = PlayerStat.where(player_id: player_ids, season_id: season.id).index_by(&:player_id)
+
+    # Construimos filas base
+    rows = wins_by_player.map do |pid, wins|
+      ps = stats_by_player[pid]
+      ResultRow.new(
+        player:        players_by_id[pid],
+        wins:          wins.to_i,
+        total_matches: ps&.total_matches.to_i,
+        mvp_count:     ps&.mvp_awards_count.to_i,
+        position:      nil,   # se completa abajo
+        tie:           false  # se completa abajo
+      )
+    end
+
+    # Orden estable: más wins primero, luego nombre
+    rows.sort_by! { |r| [ -r.wins, r.player.name.to_s ] }
+
+    # Asignar posición con empates (misma cantidad de wins comparten posición)
+    last_wins = nil
+    last_pos  = 0
+    rows.each_with_index do |r, idx|
+      if r.wins == last_wins
+        r.position = last_pos
+      else
+        r.position = idx + 1
+        last_pos   = r.position
+        last_wins  = r.wins
+      end
+    end
+
+    # Marcar empate si comparte wins con vecino anterior o siguiente
+    rows.each_with_index do |r, idx|
+      prev_same = idx > 0              && rows[idx - 1].wins == r.wins
+      next_same = idx < rows.size - 1  && rows[idx + 1].wins == r.wins
+      r.tie = prev_same || next_same
+    end
+
+    rows
   end
 
   def self.win_ranking(season: nil)
@@ -102,18 +178,18 @@ class Player < ApplicationRecord
         end
 
       select_sql = <<~SQL.squish
-      players.*,
-      COALESCE(player_stats.total_matches, 0) AS stat_total_matches,
-      COALESCE(player_stats.total_wins,    0) AS stat_total_wins,
-      GREATEST(COALESCE(player_stats.total_matches,0) - COALESCE(player_stats.total_wins,0), 0) AS stat_total_losses,
-      (COALESCE(player_stats.total_wins,0) * 2 - COALESCE(player_stats.total_matches,0)) AS stat_win_diff,
-      CASE
-        WHEN COALESCE(player_stats.total_matches,0) >= #{Player::MIN_MATCHES}
-             AND player_stats.win_rate_cached IS NOT NULL
-        THEN ROUND(player_stats.win_rate_cached * 100.0, 1)
-        ELSE NULL
-      END AS stat_win_rate_pct
-    SQL
+        players.*,
+        COALESCE(player_stats.total_matches, 0) AS stat_total_matches,
+        COALESCE(player_stats.total_wins,    0) AS stat_total_wins,
+        GREATEST(COALESCE(player_stats.total_matches,0) - COALESCE(player_stats.total_wins,0), 0) AS stat_total_losses,
+        (COALESCE(player_stats.total_wins,0) * 2 - COALESCE(player_stats.total_matches,0)) AS stat_win_diff,
+        CASE
+          WHEN COALESCE(player_stats.total_matches,0) >= #{Player::MIN_MATCHES}
+               AND player_stats.win_rate_cached IS NOT NULL
+          THEN ROUND(player_stats.win_rate_cached * 100.0, 1)
+          ELSE NULL
+        END AS stat_win_rate_pct
+      SQL
 
       joins("LEFT JOIN player_stats ON player_stats.player_id = players.id AND #{sid_sql}")
         .select(select_sql)
@@ -124,8 +200,8 @@ class Player < ApplicationRecord
     end
   end
 
-  def self.top_winners(limit = 3)
-    win_ranking.first(limit)
+  def self.top_winners(limit: 3, season: nil)
+    win_ranking(season: season).first(limit)
   end
 
   def self.mvp_ranking

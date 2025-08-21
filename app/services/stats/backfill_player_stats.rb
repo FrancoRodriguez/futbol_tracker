@@ -6,7 +6,8 @@ module Stats
     end
 
     def call
-      Player.find_each do |player|
+      Player.find_each.with_index do |player, i|
+        puts "Processing #{player.name} #{i}/#{Player.count}"
         attrs    = Calculator.new(player: player, season: @season).call
         scope_id = @season&.id
         existing = PlayerStat.find_by(player_id: player.id, season_id: scope_id)

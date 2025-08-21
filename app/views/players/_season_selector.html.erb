@@ -1,21 +1,31 @@
-<%= form_with url: request.path, method: :get, local: true, class: "d-inline" do %>
-  <%# preserva otros params de la página si existieran (paginado, filtros, etc.) %>
-  <% params.except(:controller, :action, :season_id).each do |k, v| %>
+<%# Mantiene otros parámetros de la URL y sólo cambia season_id %>
+<% current_params = request.query_parameters.symbolize_keys.except(:season_id) %>
+
+<%= form_with url: request.path, method: :get, local: true, class: "season-select d-flex align-items-center gap-2" do %>
+  <% current_params.each do |k, v| %>
     <%= hidden_field_tag k, v %>
   <% end %>
 
-  <div class="input-group" style="max-width: 360px;">
-    <span class="input-group-text"><i class="fas fa-trophy"></i></span>
+  <span class="text-muted small d-none d-md-inline">Temporada</span>
+
+  <div class="input-group input-group-sm" style="min-width: 230px;">
+    <span class="input-group-text bg-dark text-light border-secondary">
+      <i class="fa-solid fa-trophy text-warning"></i>
+    </span>
     <%= select_tag :season_id,
-                   options_from_collection_for_select(@seasons, :id, :name, @selected_season&.id),
-                   include_blank: false,
-                   class: "form-select",
-                   onchange: "this.form.requestSubmit()" %>
+                   options_for_select(
+                     [["Global (histórico)", nil]] +
+                     @seasons.map { |s| [s.name, s.id] },
+                     @selected_season&.id
+                   ),
+                   class: "form-select bg-dark text-light border-secondary",
+                   onchange: "this.form.requestSubmit()",
+                   data: { turbo_frame: "_top" } %>
   </div>
 
   <% if @selected_season&.active? %>
-    <span class="badge bg-success ms-2">Activa</span>
-  <% else %>
-    <span class="badge bg-secondary ms-2">Histórica</span>
+    <span class="badge bg-success text-dark">Activa</span>
+  <% elsif @selected_season.present? %>
+    <span class="badge bg-secondary">Histórica</span>
   <% end %>
 <% end %>

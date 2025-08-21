@@ -21,12 +21,12 @@
 <% if @top_last_month.present? %>
   <div class="row">
     <% @top_last_month.each do |result| %>
-      <% player      = result.player %>
-      <% position    = result.position %>
-      <% tie         = result.tie %>
-      <% wins        = result.victories %>
-      <% mvp_count   = result.mvp_count %>
-      <% total_games = result.total_matches %>
+      <% player       = result.player %>
+      <% position     = result.position %>
+      <% tie          = result.tie %>
+      <% wins         = result.wins.to_i %>
+      <% mvp_count    = result.mvp_count.to_i %>
+      <% total_games  = result.total_matches.to_i %>
       <% win_percentage = total_games.positive? ? (100.0 * wins / total_games).round : 0 %>
 
       <div class="col-md-4 mb-4">

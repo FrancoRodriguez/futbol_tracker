@@ -48,15 +48,17 @@ class PlayersController < ApplicationController
   end
 
   def win_ranking
-    @selected_season =
-      if params[:season_id].present?
-        Season.find_by(id: params[:season_id])
-      else
-        Season.active.first
-      end
+    @seasons = Season.order(starts_on: :desc)
+
+    if params.key?(:season_id)
+      # El usuario tocó el selector: usa la elegida o Global si viene vacío
+      @selected_season = params[:season_id].present? ? Season.find_by(id: params[:season_id]) : nil
+    else
+      # Por defecto: GLOBAL (todas las seasons)
+      @selected_season = Season.active.first
+    end
 
     @top_players = Player.win_ranking(season: @selected_season)
-    @seasons     = Season.order(starts_on: :desc) # para el dropdown
   end
 
 
