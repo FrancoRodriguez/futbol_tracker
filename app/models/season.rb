@@ -2,7 +2,7 @@ class Season < ApplicationRecord
   validates :name, :starts_on, :ends_on, presence: true
   validate  :dates_make_sense
 
-  scope :active, -> { where(active: true) }
+  scope :active, -> { where(active: true).limit(1) }
   scope :for_date, ->(date) { where("starts_on <= ? AND ends_on >= ?", date, date) }
 
   def self.for_date!(date)

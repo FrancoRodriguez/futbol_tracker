@@ -5,4 +5,6 @@ class Participation < ApplicationRecord
 
   validates :goals, numericality: { greater_than_or_equal_to: 0 }
   validates :assists, numericality: { greater_than_or_equal_to: 0 }
+
+  scope :won_only, -> { where(result: :won) }
 end

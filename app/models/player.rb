@@ -12,6 +12,7 @@ class Player < ApplicationRecord
   # ===== Value Objects =====
   # Para "Jugador del mes" (dashboard)
   ResultRow = Struct.new(:player, :wins, :total_matches, :mvp_count, :position, :tie, keyword_init: true)
+
   # Para show del jugador (temporada/global)
   StatsRow  = Struct.new(:total_matches, :total_wins, :total_losses, :total_draws,
                          :win_rate_pct, :streak_current, :mvp_count, keyword_init: true)
@@ -161,38 +162,34 @@ class Player < ApplicationRecord
   # "Jugador del mes" (dentro de la season dada)
   def self.top_last_month(positions: 3, season:)
     return [] unless season
-
-    from = [ 30.days.ago.to_date, season.starts_on ].max
-    to   = [ Date.current,        season.ends_on ].min
+    month = Date.current.prev_month
+    from  = [month.beginning_of_month, season.starts_on].max
+    to    = [month.end_of_month,       season.ends_on].min
     return [] if from > to
 
-    wins_by_player = Participation.joins(:match)
-                                  .where(matches: { date: from..to })
-                                  .where("participations.team_id = matches.win_id")
-                                  .group(:player_id)
-                                  .order(Arel.sql("COUNT(*) DESC"))
-                                  .limit(positions)
-                                  .count
+    base = Participation.joins(:match).where(matches: { date: from..to })
 
+    wins_by_player  = base.where("participations.team_id = matches.win_id").group(:player_id).count
+    games_by_player = base.group(:player_id).count
     return [] if wins_by_player.empty?
 
-    player_ids      = wins_by_player.keys
-    players_by_id   = Player.where(id: player_ids).index_by(&:id)
-    stats_by_player = PlayerStat.where(player_id: player_ids, season_id: season.id).index_by(&:player_id)
+    mvps_by_player  = Match.where(date: from..to).where.not(mvp_id: nil).group(:mvp_id).count
 
-    rows = wins_by_player.map do |pid, wins|
-      ps = stats_by_player[pid]
+    players_by_id = Player.where(id: wins_by_player.keys).index_by(&:id)
+
+    rows = wins_by_player.keys.map do |pid|
       ResultRow.new(
         player:        players_by_id[pid],
-        wins:          wins.to_i,
-        total_matches: ps&.total_matches.to_i,
-        mvp_count:     ps&.mvp_awards_count.to_i,
+        wins:          wins_by_player[pid].to_i,
+        total_matches: games_by_player[pid].to_i,
+        mvp_count:     mvps_by_player[pid].to_i,
         position:      nil,
         tie:           false
       )
     end
 
-    rows.sort_by! { |r| [ -r.wins, r.player.name.to_s ] }
+    rows.sort_by! { |r| [-r.wins, -r.total_matches, r.player.name.to_s] }
+    rows = rows.first(positions)
 
     last_wins = nil
     last_pos  = 0
@@ -205,13 +202,11 @@ class Player < ApplicationRecord
         last_wins  = r.wins
       end
     end
-
     rows.each_with_index do |r, idx|
       prev_same = idx > 0             && rows[idx - 1].wins == r.wins
       next_same = idx < rows.size - 1 && rows[idx + 1].wins == r.wins
       r.tie = prev_same || next_same
     end
-
     rows
   end
 
@@ -220,7 +215,8 @@ class Player < ApplicationRecord
   # Estos dos se usan en algunos parciales viejos;
   # si el objeto viene del ranking con SELECT de stat_*, devolvemos esos valores.
   def total_matches
-    return self[:total_matches].to_i if has_attribute?(:total_matches)
+    return self[:stat_total_matches].to_i if has_attribute?(:stat_total_matches)
+    return self[:total_matches].to_i       if has_attribute?(:total_matches)
     participations.count
   end
 
