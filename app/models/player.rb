@@ -168,8 +168,8 @@ class Player < ApplicationRecord
   def self.top_last_month(positions: 3, season:)
     return [] unless season
     month = Date.current.prev_month
-    from  = [month.beginning_of_month, season.starts_on].max
-    to    = [month.end_of_month,       season.ends_on].min
+    from  = [ month.beginning_of_month, season.starts_on ].max
+    to    = [ month.end_of_month,       season.ends_on ].min
     return [] if from > to
 
     base = Participation.joins(:match)
@@ -196,7 +196,7 @@ class Player < ApplicationRecord
       )
     end
 
-    rows.sort_by! { |r| [-r.wins, -r.total_matches, r.player.name.to_s] }
+    rows.sort_by! { |r| [ -r.wins, -r.total_matches, r.player.name.to_s ] }
     rows = rows.first(positions)
 
     last_wins = nil

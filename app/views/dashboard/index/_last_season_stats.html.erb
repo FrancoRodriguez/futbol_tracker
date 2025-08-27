@@ -1,0 +1,124 @@
+<% if @prev_season.present? %>
+  <% season_label = "#{l(@prev_season.starts_on, format: '%Y')}–#{l(@prev_season.ends_on, format: '%Y')}" %>
+
+  <div class="d-flex align-items-center justify-content-between mb-2 mt-4">
+    <h5 class="text-light mb-0 d-flex align-items-center">
+      <i class="fas fa-history text-warning me-2"></i> Top de la temporada pasada
+    </h5>
+    <span class="badge rounded-pill text-warning border border-warning bg-transparent">
+      <i class="far fa-calendar me-1"></i><%= season_label %>
+    </span>
+  </div>
+
+  <div class="note-muted mb-3">
+    <i class="far fa-info-circle me-2 text-warning"></i>
+    Datos acumulados de la <strong>temporada <%= season_label %></strong>.
+  </div>
+
+  <div class="row">
+    <%# === Top-3 Ganadores === %>
+    <div class="col-lg-6 mb-4">
+      <div class="card shadow-sm h-100 border border-warning bg-dark text-light rounded-4">
+        <div class="card-body">
+          <div class="text-center mb-3">
+            <i class="fas fa-trophy fa-2x text-warning"></i>
+          </div>
+          <h6 class="fw-bold text-warning text-center mb-4">Top Ganadores (Temporada)</h6>
+
+          <div class="d-flex flex-column gap-3">
+            <% @prev_top_winners.each_with_index do |player, i| %>
+              <%= link_to player_path(player), class: "text-decoration-none text-light" do %>
+                <div class="winner-card">
+                  <div class="medal"><%= ["🥇","🥈","🥉"][i] || "🏅" %></div>
+
+                  <% if player.profile_photo.attached? %>
+                    <%= image_tag player.profile_photo, class: "avatar" %>
+                  <% else %>
+                    <%= image_tag "default_avatar.png", class: "avatar" %>
+                  <% end %>
+
+                  <div class="winner-info">
+                    <div class="winner-name"><%= player.full_name %></div>
+                    <div class="winner-meta">
+                      +<%= player.stat_win_diff %> balance •
+                      <%= pluralize(player.stat_total_matches, "partido") %> •
+                      <%= (player.stat_win_rate_pct || 0).to_s %><%= player.stat_win_rate_pct ? "%" : "" %> WR
+                    </div>
+                  </div>
+                </div>
+              <% end %>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <%# === MVP de la temporada pasada === %>
+    <div class="col-lg-3 mb-4">
+      <div class="card shadow-sm h-100 border border-warning bg-dark text-light rounded-4 p-3 d-flex flex-column">
+        <div class="ribbon" style="position:absolute;top:12px;left:-10px;background:#ffc107;color:#1a1a1a;font-weight:700;padding:.3rem .75rem;border-radius:0 .5rem .5rem 0;">
+          <i class="fas fa-crown"></i> MVP
+        </div>
+        <div class="card-body d-flex flex-column align-items-center text-center flex-grow-1">
+          <i class="fas fa-star fa-2x text-warning mb-2"></i>
+          <h6 class="fw-bold text-warning mb-3">MVP de la temporada</h6>
+
+          <% if @prev_mvp %>
+            <div class="mb-3 d-flex justify-content-center">
+              <% if @prev_mvp.profile_photo.attached? %>
+                <%= image_tag @prev_mvp.profile_photo,
+                              class: "rounded-circle border border-3 border-warning",
+                              style: "width: 90px; height: 90px; object-fit: cover;" %>
+              <% else %>
+                <%= image_tag "default_avatar.png",
+                              class: "rounded-circle border border-3 border-warning",
+                              width: 90, height: 90 %>
+              <% end %>
+            </div>
+            <p class="fw-semibold mb-2"><%= @prev_mvp.full_name %></p>
+
+            <div class="d-flex gap-2 justify-content-center small">
+              <span class="badge bg-warning text-dark"><%= @prev_mvp_count %> MVPs</span>
+              <span class="badge bg-secondary"><%= @prev_mvp_stats&.total_matches.to_i %> partidos</span>
+              <% total = @prev_mvp_stats&.total_matches.to_i
+                 tasa  = total.positive? ? ((@prev_mvp_count.to_f / total) * 100).round : 0 %>
+              <span class="badge bg-dark border border-warning"><%= tasa %>% tasa</span>
+            </div>
+          <% else %>
+            <p class="text-muted mb-0">Sin datos.</p>
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <%# === Ironman (más participaciones) === %>
+    <div class="col-lg-3 mb-4">
+      <div class="card shadow-sm h-100 border border-warning bg-dark text-light rounded-4 p-3 d-flex flex-column">
+        <div class="card-body d-flex flex-column align-items-center text-center flex-grow-1">
+          <i class="fas fa-running fa-2x text-warning mb-2"></i>
+          <h6 class="fw-bold text-warning mb-3">Más participaciones</h6>
+
+          <% if @prev_ironman %>
+            <div class="mb-3 d-flex justify-content-center">
+              <% if @prev_ironman.profile_photo.attached? %>
+                <%= image_tag @prev_ironman.profile_photo,
+                              class: "rounded-circle border border-3 border-warning",
+                              style: "width: 90px; height: 90px; object-fit: cover;" %>
+              <% else %>
+                <%= image_tag "default_avatar.png",
+                              class: "rounded-circle border border-3 border-warning",
+                              width: 90, height: 90 %>
+              <% end %>
+            </div>
+            <p class="fw-semibold mb-2"><%= @prev_ironman.full_name %></p>
+            <div class="small text-muted">
+              <strong><%= @prev_ironman[:matches_count].to_i %></strong> partidos jugados
+            </div>
+          <% else %>
+            <p class="text-muted mb-0">Sin datos.</p>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+<% end %>
