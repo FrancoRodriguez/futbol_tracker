@@ -21,7 +21,7 @@
               <div class="winner-info">
                 <div class="winner-name"><%= player.full_name %></div>
                 <div class="winner-meta">
-                  +<%= player.stat_win_diff %> victoria<%= 's' unless player.stat_win_diff == 1 %> •
+                  <%= player.stat_win_diff %> victoria<%= 's' unless player.stat_win_diff == 1 %> •
                   <%= pluralize(player.stat_total_matches, "partido") %>
                 </div>
               </div>

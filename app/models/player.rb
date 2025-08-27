@@ -53,15 +53,20 @@ class Player < ApplicationRecord
 
   # Empates del jugador (filtrado por season si aplica)
   def draws_count_for(season: nil)
-    rel = Match.joins(:participations).where(participations: { player_id: id })
+    rel = Match.joins(:participations)
+               .where(participations: { player_id: id })
+               .where("matches.date <= ?", Time.zone.today)
+               .where.not(result: nil)                        # 👈 solo jugados
     rel = rel.where(date: season.starts_on..season.ends_on) if season
     rel.where("matches.result ~* ?", '^\\s*(\\d+)-\\1\\s*$').count
   end
 
   # Participaciones filtradas por season (para historial en el show)
+  # ⚠️ Deja UNA sola definición de este método (borra el duplicado del final).
   def participations_in(season: nil)
     rel = participations.joins(:match).includes(:match, :team)
-                        .where("matches.date <= ?", Date.today)
+                        .where("matches.date <= ?", Time.zone.today)
+                        .where.not(matches: { result: nil })  # 👈 solo jugados
     rel = rel.where(matches: { date: season.starts_on..season.ends_on }) if season
     rel.order("matches.date DESC")
   end
@@ -70,7 +75,8 @@ class Player < ApplicationRecord
   def chart_data_for(season: nil)
     rel = participations.joins(:match)
     rel = rel.where(matches: { date: season.starts_on..season.ends_on }) if season
-    rel = rel.where("matches.date <= ?", Date.today)
+    rel = rel.where("matches.date <= ?", Time.zone.today)
+             .where.not(matches: { result: nil })            # 👈 solo jugados
              .includes(:match)
              .order("matches.date ASC")
 
@@ -80,7 +86,6 @@ class Player < ApplicationRecord
 
     rel.each do |p|
       m = p.match
-      next if m.win_id.nil?
       if m.result&.match?(/^\s*(\d+)-\1\s*$/)
         # draw => sin cambio
       elsif m.win_id == p.team_id
@@ -167,13 +172,16 @@ class Player < ApplicationRecord
     to    = [month.end_of_month,       season.ends_on].min
     return [] if from > to
 
-    base = Participation.joins(:match).where(matches: { date: from..to })
+    base = Participation.joins(:match)
+                        .where(matches: { date: from..to })
+                        .where.not(matches: { result: nil })  # 👈 solo jugados
 
     wins_by_player  = base.where("participations.team_id = matches.win_id").group(:player_id).count
     games_by_player = base.group(:player_id).count
     return [] if wins_by_player.empty?
 
-    mvps_by_player  = Match.where(date: from..to).where.not(mvp_id: nil).group(:mvp_id).count
+    mvps_by_player  = Match.where(date: from..to).where.not(result: nil)
+                           .where.not(mvp_id: nil).group(:mvp_id).count
 
     players_by_id = Player.where(id: wins_by_player.keys).index_by(&:id)
 
@@ -217,12 +225,20 @@ class Player < ApplicationRecord
   def total_matches
     return self[:stat_total_matches].to_i if has_attribute?(:stat_total_matches)
     return self[:total_matches].to_i       if has_attribute?(:total_matches)
-    participations.count
+    # 👇 evita contar futuras (p. ej., próxima fecha ya agendada)
+    participations.joins(:match)
+                  .where("matches.date <= ?", Time.zone.today)
+                  .where.not(matches: { result: nil })
+                  .count
   end
 
   def total_wins
     return self[:total_wins].to_i if has_attribute?(:total_wins)
-    participations.joins(:match).where("participations.team_id = matches.win_id").count
+    participations.joins(:match)
+                  .where("matches.date <= ?", Time.zone.today)
+                  .where.not(matches: { result: nil })        # 👈 solo jugados
+                  .where("participations.team_id = matches.win_id")
+                  .count
   end
 
   # Racha “histórica” (global) por compat; el ranking ya trae stat_streak_current
