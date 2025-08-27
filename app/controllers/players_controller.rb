@@ -14,6 +14,8 @@ class PlayersController < ApplicationController
 
   def show
     authorize @player
+    next_thursday = Time.zone.today.next_occurring(:thursday).beginning_of_day
+    ttl_seconds   = [ (next_thursday - Time.zone.now).to_i, 5.minutes ].max
 
     @selected_season =
       if params.key?(:season_id)
@@ -28,6 +30,9 @@ class PlayersController < ApplicationController
     @results_count   = { victories: @stat.total_wins, defeats: @stat.total_losses, draws: @stat.total_draws }
     @chart_data      = @player.chart_data_for(season: @season)
     @participations  = @player.participations_in(season: @season).page(params[:page]).per(PAGINATION_NUMBER)
+    @synergy = Rails.cache.fetch([ "synergy-#{@player.id}", @selected_season.id ], expires_in: ttl_seconds) do
+      @player.synergy_for(season: @season, min_matches: 3)
+    end
   end
 
   def new

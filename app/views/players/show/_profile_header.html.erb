@@ -45,54 +45,79 @@
       <% min_pj   = Player::MIN_MATCHES %>
       <% jugados  = @stat.total_matches %>
       <% faltan   = [min_pj - jugados, 0].max %>
-      <% progreso = ((jugados.to_f / min_pj) * 100).clamp(0, 100).round %>
+      <% wr       = (@stat.win_rate_pct || 0).to_f %>
 
       <div class="text-center mt-4 mt-md-0" style="min-width:270px;">
+        <style>
+            /* --- Gauge circular (scoped al partial) --- */
+            .wr-gauge {
+                --val: 0;                   /* 0..100 */
+                --bg: #1f2227;              /* fondo del donut */
+                --track: #2c3137;           /* pista vacía */
+                --accent: #08A6FE;          /* color progreso */
+                width: 140px; height: 140px;
+                position: relative; display: grid; place-items: center;
+                margin: 0 auto 8px auto;
+            }
+            .wr-gauge::before {
+                content: "";
+                position: absolute; inset: 0;
+                border-radius: 50%;
+                background:
+                        conic-gradient(var(--accent) calc(var(--val) * 1%), var(--track) 0);
+                box-shadow: 0 0 0 1px rgba(13,110,253,.15) inset;
+            }
+            .wr-gauge::after {
+                content: "";
+                position: absolute;
+                width: 108px; height: 108px;
+                border-radius: 50%;
+                background: var(--bg);
+                box-shadow: 0 4px 12px rgba(0,0,0,.35) inset;
+            }
+            .wr-value {
+                position: relative; z-index: 1;
+                font-weight: 800; font-size: 1.6rem; letter-spacing: .5px;
+            }
+            .wr-label { color: #9aa3ad; font-size: .85rem; }
+            .wr-legend .badge { font-weight: 600; }
+            .wr-legend .badge + .badge { margin-left: .35rem; }
+            .wr-lock {
+                position: absolute; inset: 0; display: grid; place-items: center;
+                backdrop-filter: blur(1px);
+            }
+        </style>
+
         <% if jugados < min_pj %>
-          <!-- MODO PRETEMPORADA -->
-          <div class="bg-light text-secondary rounded-4 px-4 py-3 shadow-sm border border-warning text-start">
-            <div class="d-flex align-items-center justify-content-between mb-2">
-              <h6 class="fw-bold mb-0">
-                <span class="me-1">🏋️</span> Modo Pretemporada
-              </h6>
-              <span class="badge bg-warning text-dark">Requiere <%= min_pj %> PJ</span>
-            </div>
-
-            <p class="mb-2 small">
-              Sin <strong><%= min_pj %></strong> partidos, <em>no hay gloria</em> — pero vas <strong><%= jugados %>/<%= min_pj %></strong>.
-              <span class="d-none d-md-inline">Juega <strong><%= faltan %></strong> más para <u>desbloquear</u> tus estadísticas. 😉</span>
-            </p>
-
-            <div class="progress" style="height:8px;">
-              <div class="progress-bar progress-bar-striped progress-bar-animated"
-                   role="progressbar"
-                   style="width:<%= progreso %>%;" aria-valuenow="<%= progreso %>"
-                   aria-valuemin="0" aria-valuemax="100">
+          <!-- MODO PRETEMPORADA (mismo layout, bloqueado) -->
+          <div class="position-relative d-inline-block">
+            <div class="wr-gauge rounded-circle" style="--val: 0;"></div>
+            <div class="wr-lock">
+              <div class="bg-dark text-warning border border-warning rounded-4 px-3 py-2 small">
+                <i class="fas fa-lock me-1"></i>
+                Faltan <strong><%= faltan %></strong> PJ para stats
               </div>
             </div>
-
-            <div class="d-flex justify-content-between mt-1">
-              <small class="text-muted">0</small>
-              <small class="text-muted"><%= min_pj %> PJ</small>
-            </div>
-
-            <div class="mt-2">
-              <small class="text-secondary">
-                <i class="fas fa-lock me-1"></i>Las métricas se activan al alcanzar <%= min_pj %> partidos.
-              </small>
-            </div>
+          </div>
+          <div class="wr-label mt-2">Porcentaje de victorias</div>
+          <div class="wr-legend mt-2">
+            <span class="badge bg-secondary">W <%= @stat.total_wins %></span>
+            <span class="badge bg-secondary">D <%= @stat.total_draws %></span>
+            <span class="badge bg-secondary">L <%= @stat.total_losses %></span>
           </div>
         <% else %>
           <!-- WR DISPONIBLE -->
-          <div class="bg-dark text-light rounded-pill px-4 py-3 shadow-sm border border-primary text-start">
-            <h5 class="fw-bold mb-1 mb-0 d-flex align-items-center">
-              <i class="fas fa-trophy text-warning me-2"></i>
-              <%= (@stat.win_rate_pct || 0) %>%
-            </h5>
-            <small class="text-muted">Porcentaje de victorias</small>
+          <div class="wr-gauge rounded-circle" style="--val:<%= wr %>;">
+            <div class="wr-value">
+              <i class="fas fa-trophy text-warning me-1"></i>
+              <%= sprintf('%.1f', wr) %>%
+            </div>
           </div>
+          <div class="wr-label">Porcentaje de victorias</div>
         <% end %>
       </div>
+
+    </div>
     </div>
   </div>
 <% end %>
