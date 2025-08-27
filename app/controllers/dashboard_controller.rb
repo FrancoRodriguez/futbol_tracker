@@ -43,7 +43,7 @@ class DashboardController < ApplicationController
     end
 
     @top_winners = Rails.cache.fetch([ "top_winners", season_key ], expires_in: ttl_seconds) do
-      Player.top_winners(limit: 3, season: @active_season) # top 3 ranking por victorias de la season
+      Player.top_winners(limit: 5, season: @active_season) # top 3 ranking por victorias de la season
     end
 
     # Temporada pasada (la inmediatamente anterior a la activa)

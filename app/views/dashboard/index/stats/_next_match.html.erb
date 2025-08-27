@@ -9,41 +9,67 @@
         <i class="fas fa-calendar-check me-2"></i>Próximo Partido
       </h4>
 
-      <div class="bg-dark border border-secondary rounded-3 p-3 mb-3">
-        <div class="d-flex justify-content-between">
-          <div>
-            <small class="text-muted d-block">Ubicación</small>
-            <span class="fw-semibold"><%= @next_match.location.presence || 'No especificada' %></span>
+      <%# ===== BLOQUE CLIMA CENTRADO ===== %>
+      <% if @next_match_weather.present? %>
+        <% temp_i = @next_match_weather[:feels_like].to_i rescue nil %>
+        <% rain_i = @next_match_weather[:rain_chance].to_s.delete('%').to_i rescue 0 %>
+        <% wind_i = @next_match_weather[:wind_speed].to_i rescue 0 %>
+        <% advice, badge_class =
+             if rain_i >= 40
+               ['Probable lluvia', 'bg-primary']
+             elsif temp_i && temp_i >= 28
+               ['Mucho calor', 'bg-danger']
+             elsif wind_i >= 20
+               ['Viento notable', 'bg-warning text-dark']
+             else
+               ['Condiciones buenas', 'bg-success']
+             end %>
+
+        <div class="card bg-dark border border-secondary rounded-3 text-center mb-4 p-4">
+          <%= image_tag("https://openweathermap.org/img/wn/#{@next_match_weather[:icon]}@2x.png",
+                        alt: "Clima", width: 70, height: 70, class: "mx-auto mb-2") %>
+
+          <div class="fw-semibold text-warning mb-2"><%= @next_match_weather[:weather] %></div>
+
+          <div class="text-light mb-2">
+            Sensación <strong><%= @next_match_weather[:feels_like] %>°C</strong>
+            <span class="mx-1">•</span>
+            Temp real <strong><%= @next_match_weather[:temp] %>°C</strong>
           </div>
-          <div>
+
+          <div class="text-muted small mb-2">
+            Humedad: <strong><%= @next_match_weather[:humidity] %></strong>
+            • Nubes: <strong><%= @next_match_weather[:clouds] %></strong>
+            <% if @next_match_weather[:wind_speed].present? %>
+              • Viento: <strong><%= @next_match_weather[:wind_speed] %> km/h</strong>
+            <% end %>
+            • Lluvia: <strong><%= @next_match_weather[:rain_chance] %></strong>
+          </div>
+
+          <span class="badge <%= badge_class %> px-3 py-2"><%= advice %></span>
+        </div>
+      <% end %>
+      <%# ===== FIN CLIMA ===== %>
+
+      <%# ===== BLOQUE UBICACIÓN + FECHA ===== %>
+      <div class="card bg-dark border border-secondary rounded-3 p-3 mb-4">
+        <div class="row">
+          <div class="col-6">
+            <small class="text-muted d-block">Ubicación</small>
+            <span class="fw-semibold text-light"><%= @next_match.location.presence || 'No especificada' %></span>
+          </div>
+          <div class="col-6 text-end">
+            <% day_name = date_in_spanish(@next_match.date, :day) %>
+            <% same_year = @next_match.date.year == Time.zone.now.year %>
+            <% date_str  = same_year ? date_in_spanish(@next_match.date, :short) : date_in_spanish(@next_match.date, :short_with_year) %>
+
             <small class="text-muted d-block">Fecha</small>
-            <span class="fw-semibold"><%= date_in_spanish(@next_match.date) %></span>
+            <span class="fw-bold fs-5 d-block"><%= day_name %></span>
+            <small class="text-muted"><%= date_str %></small>
           </div>
         </div>
       </div>
-
-      <% if @next_match_weather.present? %>
-        <div class="card border-warning bg-dark text-light rounded-3 shadow-sm p-3 text-center mb-4">
-          <%= image_tag("https://openweathermap.org/img/wn/#{@next_match_weather[:icon]}@2x.png",
-                        alt: "Clima", width: 60, height: 60, class: "mx-auto mb-2") %>
-          <h6 class="fw-semibold text-warning mb-1"><%= @next_match_weather[:weather] %></h6>
-          <p class="mb-1">
-            <%= @next_match_weather[:temp] %>°C (sens. <%= @next_match_weather[:feels_like] %>°C)
-          </p>
-          <p class="mb-0 text-muted" style="font-size: 0.85rem;">
-            Humedad: <%= @next_match_weather[:humidity] %> •
-            Nubes: <%= @next_match_weather[:clouds] %> •
-            Lluvia: <%= @next_match_weather[:rain_chance] %>
-          </p>
-          <small class="text-muted d-block mt-2">
-            Pronóstico para las <%= @next_match_weather[:forecast_time] %> h
-          </small>
-        </div>
-      <% else %>
-        <p class="text-center fst-italic text-muted mb-4">
-          No se pudo obtener el pronóstico del clima.
-        </p>
-      <% end %>
+      <%# ===== FIN UBICACIÓN + FECHA ===== %>
 
       <%= link_to 'Ver detalles del partido',
                   match_path(@next_match),

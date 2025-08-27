@@ -9,13 +9,13 @@
     <i class="fas fa-trophy text-warning me-2"></i> Top del mes pasado
   </h5>
   <span class="badge rounded-pill text-warning border border-warning bg-transparent">
-    <i class="far fa-calendar me-1"></i><%= mes_anio_espanol(period_label.to_date) %>
+    <i class="far fa-calendar me-1"></i><%= month_year_spanish(period_label.to_date) %>
   </span>
 </div>
 
 <div class="note-muted mb-3">
   <i class="far fa-info-circle me-2 text-warning"></i>
-  Este ranking usa solo los partidos de <strong><%= mes_anio_espanol(period_label.to_date) %></strong>.
+  Este ranking usa solo los partidos de <strong><%= month_year_spanish(period_label.to_date) %></strong>.
 </div>
 
 <% if @top_last_month.present? %>
