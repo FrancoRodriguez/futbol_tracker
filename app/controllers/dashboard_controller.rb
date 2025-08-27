@@ -24,13 +24,24 @@ class DashboardController < ApplicationController
     next_thursday = Time.zone.today.next_occurring(:thursday).beginning_of_day
     ttl_seconds   = [ (next_thursday - Time.zone.now).to_i, 5.minutes ].max
 
-    season_key = @active_season&.id || "global"
-
-    @top_mvp = Rails.cache.fetch([ "top_mvp", season_key ], expires_in: ttl_seconds) do
+    @top_mvp = Rails.cache.fetch([ "top_mvp", @active_season ], expires_in: ttl_seconds) do
       Player.top_mvp(season: @active_season)  # 1 jugador con más MVPs en la season
     end
 
-    @top_winners = Rails.cache.fetch([ "top_winners", season_key ], expires_in: ttl_seconds) do
+    if @top_mvp
+      # Stats de la season activa para ese jugador
+      stats = @top_mvp.stats_for(season: @active_season)
+
+      @top_mvp_count      = @top_mvp.mvp_count.to_i
+      @top_mvp_games      = stats.total_matches
+      @top_mvp_rate       = @top_mvp_games.positive? ? ((100.0 * @top_mvp_count / @top_mvp_games).round) : 0
+      @top_mvp_last_date  = Match.where(mvp_id: @top_mvp.id, date: @active_season.starts_on..@active_season.ends_on)
+                                 .order(date: :desc)
+                                 .limit(1)
+                                 .pick(:date)
+    end
+
+    @top_winners = Rails.cache.fetch([ "top_winners", @active_season ], expires_in: ttl_seconds) do
       Player.top_winners(limit: 3, season: @active_season) # top 3 ranking por victorias de la season
     end
   end
