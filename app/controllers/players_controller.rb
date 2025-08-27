@@ -1,10 +1,20 @@
+# app/controllers/players_controller.rb
 class PlayersController < ApplicationController
-  before_action :set_player, only: [ :show, :edit, :update, :destroy ]
+  before_action :authenticate_user!, only: %i[new create edit update destroy]
+  before_action :set_player,         only: %i[show edit update destroy]
 
   include PlayersHelper
 
+  def index
+    @players = policy_scope(Player)
+                 .left_joins(:participations)
+                 .group("players.id")
+                 .order("COUNT(participations.id) DESC")
+  end
+
   def show
-    # Season seleccionada (Global si llega season_id vacío; si no llega el param, usa la activa)
+    authorize @player
+
     @selected_season =
       if params.key?(:season_id)
         params[:season_id].present? ? Season.find_by(id: params[:season_id]) : nil
@@ -12,26 +22,23 @@ class PlayersController < ApplicationController
         Season.active.first
       end
 
-    @seasons = Season.order(starts_on: :desc)
-
-    @season = @selected_season
-    @stat   = @player.stats_for(season: @season)
-    @results_count = { victories: @stat.total_wins, defeats: @stat.total_losses, draws: @stat.total_draws }
-    @chart_data    = @player.chart_data_for(season: @season)
-    @participations = @player.participations_in(season: @season).page(params[:page]).per(PAGINATION_NUMBER)
+    @seasons         = Season.order(starts_on: :desc)
+    @season          = @selected_season
+    @stat            = @player.stats_for(season: @season)
+    @results_count   = { victories: @stat.total_wins, defeats: @stat.total_losses, draws: @stat.total_draws }
+    @chart_data      = @player.chart_data_for(season: @season)
+    @participations  = @player.participations_in(season: @season).page(params[:page]).per(PAGINATION_NUMBER)
   end
-
 
   def new
     @player = Player.new
-  end
-
-  def index
-    @players = Player.left_joins(:participations).group("players.id").order("COUNT(participations.id) DESC")
+    authorize @player
   end
 
   def create
     @player = Player.new(player_params)
+    authorize @player
+
     if @player.save
       redirect_to @player, notice: "Jugador #{@player.full_name} creado exitosamente."
     else
@@ -40,9 +47,11 @@ class PlayersController < ApplicationController
   end
 
   def edit
+    authorize @player
   end
 
   def update
+    authorize @player
     if @player.update(player_params)
       redirect_to @player, notice: "Jugador #{@player.full_name} actualizado exitosamente."
     else
@@ -51,12 +60,17 @@ class PlayersController < ApplicationController
   end
 
   def destroy
+    authorize @player
     full_name = @player.full_name
     @player.destroy
     redirect_to players_path, notice: "Jugador #{full_name} eliminado exitosamente."
   end
 
+  # ===== RANKINGS PÚBLICOS =====
+  # Como no queremos exigir autorización aquí, indicamos a Pundit que omita la verificación.
   def mvp_ranking
+    skip_authorization
+
     @seasons = Season.order(starts_on: :desc)
     @selected_season =
       if params.key?(:season_id)
@@ -69,19 +83,18 @@ class PlayersController < ApplicationController
   end
 
   def win_ranking
-    @seasons = Season.order(starts_on: :desc)
+    skip_authorization
 
-    if params.key?(:season_id)
-      # El usuario tocó el selector: usa la elegida o Global si viene vacío
-      @selected_season = params[:season_id].present? ? Season.find_by(id: params[:season_id]) : nil
-    else
-      # Por defecto: GLOBAL (todas las seasons)
-      @selected_season = Season.active.first
-    end
+    @seasons = Season.order(starts_on: :desc)
+    @selected_season =
+      if params.key?(:season_id)
+        params[:season_id].present? ? Season.find_by(id: params[:season_id]) : nil
+      else
+        Season.active.first
+      end
 
     @top_players = Player.win_ranking(season: @selected_season)
   end
-
 
   private
 

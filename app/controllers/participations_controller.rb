@@ -1,15 +1,20 @@
 class ParticipationsController < ApplicationController
+  before_action :authenticate_user!, only: %i[new create edit update destroy bulk_create]
   before_action :set_match
-  before_action :set_participation, only: [ :edit, :update, :destroy ]
-  before_action :available_players, only: [ :new ]
+  before_action :set_participation, only: %i[edit update destroy]
+  before_action :available_players, only: %i[new]
 
   def new
-    @participation = Participation.new
+    @participation = @match.participations.build
+    authorize @participation
   end
 
-  def edit; end
+  def edit
+    authorize @participation
+  end
 
   def update
+    authorize @participation
     if @participation.update(participation_params)
       redirect_to match_path(@match), notice: "Participación actualizada con éxito."
     else
@@ -18,22 +23,27 @@ class ParticipationsController < ApplicationController
   end
 
   def create
-    @participation = Participation.new(participation_params)
-    player = Player.find(participation_params[:player_id])
+    @participation = @match.participations.build(participation_params)
+    authorize @participation
+
     if @participation.save
-      redirect_to @match, notice: "Jugador #{player.full_name} agregado al partido con éxito."
+      redirect_to @match, notice: "Jugador #{@participation.player.full_name} agregado al partido con éxito."
     else
+      available_players
       render :new
     end
   end
 
   def destroy
+    authorize @participation
     @participation.destroy
-    redirect_to @participation.match, notice: "Participación eliminada con éxito."
+    redirect_to match_path(@match), notice: "Participación eliminada con éxito."
   end
 
   def bulk_create
-    match = Match.find(params[:match_id])
+    authorize Participation, :bulk_create?
+
+    match = @match
 
     # Asegura equipos
     home = match.home_team || match.build_home_team(name: "Equipo Blanco")
@@ -43,7 +53,6 @@ class ParticipationsController < ApplicationController
     home_ids = Array(params[:home_player_ids]).reject(&:blank?).map!(&:to_i)
     away_ids = Array(params[:away_player_ids]).reject(&:blank?).map!(&:to_i)
 
-    # Evitar duplicados entre listas y existentes
     existing = match.participations.pluck(:player_id)
     overlap  = home_ids & away_ids
     home_ids -= overlap
@@ -72,16 +81,19 @@ class ParticipationsController < ApplicationController
     @match = Match.find(params[:match_id])
   end
 
+  # ⚠️ Importante: busca la participación dentro del match anidado
   def set_participation
-    @participation = Participation.find(params[:id])
+    @participation = @match.participations.find(params[:id])
   end
 
   def available_players
-    @available_players = Player.where.not(id: Participation.where(match_id: @match.id)
-                                                           .select(:player_id))
+    @available_players = Player.where.not(
+      id: Participation.where(match_id: @match.id).select(:player_id)
+    )
   end
 
+  # ⚠️ No permitimos :match_id para evitar que un usuario lo manipule por params
   def participation_params
-    params.require(:participation).permit(:match_id, :player_id, :team_id)
+    params.require(:participation).permit(:player_id, :team_id)
   end
 end

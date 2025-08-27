@@ -219,6 +219,8 @@ GEM
     public_suffix (6.0.1)
     puma (6.5.0)
       nio4r (~> 2.0)
+    pundit (2.3.1)
+      activesupport (>= 3.0.0)
     racc (1.8.1)
     rack (3.1.8)
     rack-session (2.0.0)
@@ -386,6 +388,7 @@ DEPENDENCIES
   kaminari
   pg (>= 1.2.3)
   puma (>= 5.0)
+  pundit
   rails (~> 7.2.2)
   redis
   rspec-rails

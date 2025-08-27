@@ -1,18 +1,20 @@
 class MatchesController < ApplicationController
-  before_action :set_match, only: [ :show, :edit, :update, :destroy, :autobalance ]
-  before_action :set_teams, only: [ :show ]
-  before_action :available_players, :available_players_mvp, only: [ :show ]
+  before_action :set_match, only: %i[show edit update destroy autobalance]
+  before_action :set_teams, only: %i[show]
+  before_action :available_players, :available_players_mvp, only: %i[show]
 
   include MatchesHelper
 
   def index
-    @next_match = Match
+    scope = policy_scope(Match)  # <- clave
+
+    @next_match = scope
                     .where("date >= ?", Time.zone.today)
                     .order(date: :asc)
                     .first
 
-    @past_matches = Match
-                      .includes(participations: [ :player, :team ])
+    @past_matches = scope
+                      .includes(participations: [:player, :team])
                       .where("date < ?", Time.zone.today)
                       .order(date: :desc)
                       .page(params[:page])
@@ -26,23 +28,23 @@ class MatchesController < ApplicationController
       }
     end
 
-    @top_mvp = Player.top_mvp
+    @top_mvp     = Player.top_mvp
     @top_winners = Player.top_winners
   end
 
-
-  # app/controllers/matches_controller.rb
   def show
+    skip_authorization
+
     @selected_season =
       if params[:season_id].present?
         Season.find_by(id: params[:season_id])
       else
-        Season.active.first   # por defecto, la temporada activa
+        Season.active.first
       end
 
     vm = Matches::ShowFacade.new(
       match: @match,
-      season: @selected_season,                       # <<< importante
+      season: @selected_season,
       preview_autobalance: params[:preview_autobalance].present?,
       voter_key: (respond_to?(:duel_voter_key) ? duel_voter_key : nil)
     )
@@ -63,20 +65,20 @@ class MatchesController < ApplicationController
     @win_rate_pct_by_player  = vm.win_rate_pct_by_player
     @team_a, @team_b         = vm.team_a, vm.team_b
     @match_weather           = vm.weather
-    @eligibles_by_team       = vm.eligibles_by_team   # <<< para la vista
-    @win_prob_source         = vm.win_prob_source     # :season, :global o :none
+    @eligibles_by_team       = vm.eligibles_by_team
+    @win_prob_source         = vm.win_prob_source
   end
 
   def autobalance
+    authorize @match
+
     parts   = @match.participations.includes(:player)
     team_a, team_b = TeamBalancer.new(parts.map(&:player)).call
 
-    # Asegura equipos home/away
     home = @match.home_team || @match.build_home_team(name: "Equipo Blanco")
     away = @match.away_team || @match.build_away_team(name: "Equipo Negro")
     @match.save! if @match.changed?
 
-    # Asignar team_id a las participaciones
     parts.each do |p|
       if team_a.include?(p.player)
         p.update!(team: home)
@@ -88,14 +90,16 @@ class MatchesController < ApplicationController
     redirect_to @match, notice: "Equipos balanceados automáticamente."
   end
 
-
   def new
     @match = Match.new
+    authorize @match
   end
 
   def create
     @match = Match.new(match_params)
-    if @match.save!
+    authorize @match
+
+    if @match.save
       redirect_to @match, notice: "El partido fue creado con éxito."
     else
       render :new
@@ -103,9 +107,12 @@ class MatchesController < ApplicationController
   end
 
   def edit
+    authorize @match
   end
 
   def update
+    authorize @match
+
     if @match.update(match_params)
       redirect_to @match, notice: "Partido actualizado exitosamente."
     else
@@ -114,6 +121,7 @@ class MatchesController < ApplicationController
   end
 
   def destroy
+    authorize @match
     @match.destroy
     redirect_to matches_path, notice: "Partido eliminado exitosamente."
   end

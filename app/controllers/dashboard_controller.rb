@@ -1,6 +1,9 @@
 class DashboardController < ApplicationController
   require "ostruct"
 
+  skip_after_action :verify_authorized
+  skip_after_action :verify_policy_scoped
+
   def index
     @active_season = Season.active.first
     season_key     = @active_season&.id || "global"
