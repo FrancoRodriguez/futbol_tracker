@@ -1,7 +1,92 @@
 <!-- Balance histórico -->
 <div class="card shadow-sm mb-4">
   <div class="card-body">
-    <h5 class="card-title mb-3"><i class="fas fa-chart-line me-2"></i>Balance histórico</h5>
-    <canvas id="balanceChart" width="600" height="300"></canvas>
+    <h5 class="card-title mb-3">
+      <i class="fas fa-chart-line me-2"></i>Balance histórico
+    </h5>
+    <canvas
+      id="balanceChart"
+      class="w-100"
+      style="max-height: 320px;"
+      data-balance='<%= raw @chart_data[:balance].to_json %>'
+      data-labels='<%= raw @chart_data[:dates].to_json %>'>
+    </canvas>
   </div>
 </div>
+
+<script>
+    // Se ejecuta en visitas Turbo y cuando Chart.js termina de cargar
+    document.addEventListener("turbo:load", ensureChartAndDraw);
+    window.addEventListener("chartjs:loaded", ensureChartAndDraw, { once: true });
+
+    function ensureChartAndDraw() {
+        // Si Chart.js aún no está, espera un poco (fallback si el onload no disparara)
+        if (!window.Chart) {
+            let tries = 0;
+            const id = setInterval(() => {
+                if (window.Chart || tries++ > 40) { // ~2s max
+                    clearInterval(id);
+                    if (window.Chart) drawBalanceChart();
+                }
+            }, 50);
+            return;
+        }
+        drawBalanceChart();
+    }
+
+    function drawBalanceChart() {
+        const el = document.getElementById('balanceChart');
+        if (!el) return;
+
+        const balanceData = JSON.parse(el.dataset.balance || '[]');
+        const labels      = JSON.parse(el.dataset.labels  || '[]');
+
+        // Evita re-crear si ya existe (navegación turbo entre tabs)
+        if (el._chartInstance) {
+            el._chartInstance.destroy();
+        }
+
+        // Bordes sugeridos seguros aunque haya un solo punto o vacío
+        const minY = balanceData.length ? Math.min(...balanceData) - 1 : -1;
+        const maxY = balanceData.length ? Math.max(...balanceData) + 1 :  1;
+
+        const ctx = el.getContext('2d');
+        el._chartInstance = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels,
+                datasets: [{
+                    label: 'Balance (Victorias - Derrotas)',
+                    data: balanceData,
+                    fill: {
+                        target: 'origin',
+                        above: 'rgba(75,192,192,0.2)',  // Verde claro
+                        below: 'rgba(255,99,132,0.2)'  // Rojo claro
+                    },
+                    tension: 0.1,
+                    borderWidth: 2,
+                    borderColor: 'rgba(0,0,0,0)', // invisible, lo pinta el segment
+                    segment: {
+                        borderColor: ctx =>
+                            (ctx.p0.parsed.y < 0 || ctx.p1.parsed.y < 0)
+                                ? 'rgba(255,99,132,1)'
+                                : 'rgba(75,192,192,1)'
+                    }
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false, // respeta max-height
+                animation: false, // carga inicial más rápida
+                scales: {
+                    x: { title: { display: true, text: 'Fecha' } },
+                    y: {
+                        title: { display: true, text: 'Balance acumulado' },
+                        suggestedMin: minY,
+                        suggestedMax: maxY
+                    }
+                }
+            }
+        });
+    }
+</script>
