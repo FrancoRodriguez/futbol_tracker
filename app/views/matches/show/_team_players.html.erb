@@ -21,7 +21,6 @@
                 <span class="fw-semibold <%= team_pct.to_f >= 50 ? 'text-success' : 'text-warning' %>">
                   <%= "#{team_pct}%" %>
                 </span>
-                <%# Badge si se usaron datos globales en el fallback %>
                 <% if @win_prob_source == :global %>
                   <span class="badge bg-info text-dark ms-2">Datos globales</span>
                 <% end %>
@@ -48,13 +47,26 @@
               <% wr_pct      = @win_rate_pct_by_player[player.id] %> <%# nil si < MIN_MATCHES %>
 
               <div class="list-group-item bg-dark text-light border-primary d-flex align-items-center gap-3 <%= is_featured ? 'featured-glow' : '' %>">
-                <% if player.profile_photo.attached? %>
-                  <%= image_tag player.profile_photo, class: "rounded-circle border border-warning flex-shrink-0",
-                                style: "width: 48px; height: 48px; object-fit: cover;" %>
-                <% else %>
-                  <%= image_tag "default_avatar.png", class: "rounded-circle border border-warning flex-shrink-0",
-                                width: 48, height: 48 %>
-                <% end %>
+
+                <!-- Avatar con badge de streak -->
+                <div class="avatar-wrapper-48">
+                  <% if player.profile_photo.attached? %>
+                    <%= image_tag player.profile_photo, class: "avatar-48 border border-warning flex-shrink-0", alt: player.name %>
+                  <% else %>
+                    <%= image_tag "default_avatar.png", class: "avatar-48 border border-warning flex-shrink-0", alt: player.name %>
+                  <% end %>
+
+                  <% if player.current_streak.to_i > 0 %>
+                    <span class="streak-badge streak--win" title="<%= "#{player.current_streak} victorias seguidas" %>">
+                      🔥<%= player.current_streak %>
+                    </span>
+                  <% elsif player.current_streak.to_i < 0 %>
+                    <span class="streak-badge streak--loss" title="<%= "#{player.current_streak} derrotas seguidas" %>">
+                      ❄️<%= player.current_streak %>
+                    </span>
+                  <% end %>
+                </div>
+                <!-- /Avatar con badge de streak -->
 
                 <div class="flex-grow-1">
                   <div class="d-flex justify-content-between align-items-center">
@@ -64,9 +76,7 @@
                       <% if is_featured %>
                         <span class="badge bg-warning text-dark fw-bold">Destacado</span>
                       <% end %>
-                      <%= render 'layouts/current_streak', player: player %>
                     </div>
-
 
                     <small class="text-muted">
                       <% if wr_pct.present? %>
