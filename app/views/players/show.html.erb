@@ -2,6 +2,13 @@
   <%= render "season_selector" %>
 </div>
 <div class="container my-5">
+  <% if defined?(policy) && user_signed_in? && policy(@player).update? %>
+    <div class="mb-2">
+      <%= link_to edit_player_path(@player), class: "btn btn-outline-info btn-sm" do %>
+        <i class="fas fa-pen me-1"></i> Editar
+      <% end %>
+    </div>
+  <% end %>
   <%= render 'players/show/profile_header', player: @player %>
   <%= render 'players/show/stats', player: @player %>
   <%= render 'players/show/best_and_nemesis', player: @player %>

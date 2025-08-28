@@ -1,9 +1,15 @@
 # db/seeds.rb
 
+# --- Limpieza (en orden para respetar FKs) ---
 DuelVote.delete_all        if defined?(DuelVote)
 Participation.delete_all   if defined?(Participation)
-PlayerStat.delete_all      if defined?(PlayerStat)
 Match.delete_all           if defined?(Match)
+PlayerStat.delete_all      if defined?(PlayerStat)
+
+# Si ya tienes las tablas de posiciones:
+PlayerPosition.delete_all  if defined?(PlayerPosition)
+Position.delete_all        if defined?(Position)
+
 Team.delete_all            if defined?(Team)
 Player.delete_all          if defined?(Player)
 Season.delete_all          if defined?(Season)
@@ -21,6 +27,22 @@ teams = %w[Tigres\ del\ Norte Águilas\ del\ Sur Lobos\ del\ Este Pumas\ del\ Oe
   Team.create!(name: n)
 end
 
+# --- Posiciones (Fútbol 7 simple) ---
+# Requiere tablas: positions, player_positions (con columnas: player_id, position_id, primary:boolean)
+pos_data = [
+  { key: "GK",  name: "Portero" },
+  { key: "DEF", name: "Defensa" },
+  { key: "MID", name: "Mediocampista" },
+  { key: "ATT", name: "Delantero" }
+]
+positions = pos_data.each_with_index.map do |attrs, i|
+  Position.find_or_create_by!(key: attrs[:key]) do |p|
+    p.name       = attrs[:name]
+    p.sort_order = i
+  end
+end
+POS = Position.all.index_by(&:key) # => {"GK"=>#<Position ...>, ...}
+
 # --- Jugadores ---
 players = %w[
   Juan\ Pérez Carlos\ Gómez Luis\ Martínez Diego\ Fernández Matías\ Ortega
@@ -28,6 +50,48 @@ players = %w[
   Pablo\ Casqueiro Miguel\ Díaz Fernando\ Medina Agustín\ Colaneri Lucas\ García
   Fede\ Simkin Rama Javi
 ].map { |n| Player.create!(name: n) }
+
+# --- Helper para asignar posiciones a jugadores ---
+def set_positions!(player, primary_key:, secondary_keys: [])
+  # Asegura existencia del vínculo con 'primary' en uno y secundarios en el resto
+  # Nota: usa constantes POS definidas arriba (hash por key)
+  primary_pos = POS.fetch(primary_key)
+  PlayerPosition.find_or_create_by!(player: player, position: primary_pos) do |pp|
+    pp.primary = true
+  end
+  # Marcar como primaria por si ya existía
+  pp_primary = PlayerPosition.find_by(player: player, position: primary_pos)
+  pp_primary.update!(primary: true)
+
+  # Quitar 'primary' de otras posiciones del jugador
+  PlayerPosition.where(player: player).where.not(position_id: primary_pos.id).update_all(primary: false)
+
+  # Secundarias
+  Array(secondary_keys).uniq.each do |k|
+    next if k == primary_key
+    pos = POS[k]
+    PlayerPosition.find_or_create_by!(player: player, position: pos) do |pp|
+      pp.primary = false
+    end
+  end
+end
+
+# --- Asignación de posiciones (distribución equilibrada) ---
+# 2 arqueros, resto repartido en DEF/MID/ATT
+gks, defs, mids, atts = [], [], [], []
+
+players.each_with_index do |p, i|
+  case i
+  when 0 then set_positions!(p, primary_key: "GK",  secondary_keys: ["DEF"]);  gks << p
+  when 1 then set_positions!(p, primary_key: "GK",  secondary_keys: ["MID"]);  gks << p
+  when 2,3,4,5 then set_positions!(p, primary_key: "DEF", secondary_keys: ["MID"]); defs << p
+  when 6,7,8,9 then set_positions!(p, primary_key: "MID", secondary_keys: ["DEF"]); mids << p
+  when 10,11,12 then set_positions!(p, primary_key: "ATT", secondary_keys: ["MID"]); atts << p
+  else
+    # Los últimos jugadores con perfiles mixtos que suelen ayudar a balancear
+    set_positions!(p, primary_key: %w[DEF MID ATT].sample, secondary_keys: (%w[DEF MID ATT] - [primary_key = nil]).sample(1))
+  end
+end
 
 # --- Helpers ---
 def sample_date_in(season)
@@ -42,10 +106,10 @@ def create_match_with_participations!(season:, teams:, players:)
 
   date = sample_date_in(season)
 
-  # arma equipos de 5vs5 (ajusta si quieres)
-  pool   = players.sample(10)
-  home_ps = pool.first(5)
-  away_ps = pool.last(5)
+  # Fútbol 7 -> 7 vs 7
+  pool    = players.sample(14)
+  home_ps = pool.first(7)
+  away_ps = pool.last(7)
 
   match = Match.create!(
     date: date,
@@ -62,8 +126,8 @@ def create_match_with_participations!(season:, teams:, players:)
   away_ps.each { |p| Participation.create!(match: match, team: away_team, player: p, goals: rand(0..3), assists: rand(0..2)) }
 
   # Resultado + ganador + MVP del equipo ganador
-  gh = rand(0..5)
-  ga = rand(0..5)
+  gh = rand(0..6)
+  ga = rand(0..6)
   if gh == ga
     match.update!(result: "#{gh}-#{ga}", win: nil, mvp: nil) # <-- usa win_id/mvp_id si aplica
   else
@@ -83,13 +147,13 @@ def recalc_player_stats_for!(season)
   season_range = (season.starts_on..[ season.ends_on, Date.current ].min)
 
   mvps_by_player = Match.where(date: season_range)
-                        .where.not(mvp_id: nil) # funciona aunque asocies por mvp; ActiveRecord usa *_id internamente
+                        .where.not(mvp_id: nil)
                         .group(:mvp_id).count
 
   Player.find_each do |player|
     rows = Participation.joins(:match)
                         .where(player_id: player.id, matches: { date: season_range })
-                        .select('matches.result, matches.win_id, participations.team_id') # win_id está aunque uses win
+                        .select('matches.result, matches.win_id, participations.team_id')
                         .order('matches.date ASC')
                         .to_a
 
@@ -99,10 +163,10 @@ def recalc_player_stats_for!(season)
     draws = rows.count { |r| r.result&.match?(/^\s*(\d+)-\1\s*$/) }
     wins  = rows.count { |r| r.win_id.present? && r.win_id == r.team_id }
 
-    # racha actual
+    # racha actual (positiva = victorias, negativa = derrotas)
     streak = 0
     rows.reverse_each do |r|
-      if r.result&.match?(/^\s*(\d+)-\1\s*$/)    # empate => no afecta
+      if r.result&.match?(/^\s*(\d+)-\1\s*$/)    # empate
         next
       elsif r.win_id == r.team_id
         streak = streak >= 0 ? streak + 1 : 1
@@ -145,7 +209,9 @@ puts "✅ Seed listo:
 - Usuarios: #{User.count}
 - Temporadas: #{Season.count}
 - Equipos: #{Team.count}
+- Posiciones: #{Position.count}
 - Jugadores: #{Player.count}
+- PlayerPositions: #{defined?(PlayerPosition) ? PlayerPosition.count : 0}
 - Partidos: #{Match.count}
 - Participaciones: #{Participation.count}
 - PlayerStats: #{PlayerStat.count}"

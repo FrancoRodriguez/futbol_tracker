@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_08_20_201038) do
+ActiveRecord::Schema[7.2].define(version: 2025_08_20_202010) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -94,6 +94,17 @@ ActiveRecord::Schema[7.2].define(version: 2025_08_20_201038) do
     t.index ["team_id"], name: "index_participations_on_team_id"
   end
 
+  create_table "player_positions", force: :cascade do |t|
+    t.bigint "player_id", null: false
+    t.bigint "position_id", null: false
+    t.boolean "primary", default: false, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["player_id", "position_id"], name: "index_player_positions_on_player_id_and_position_id", unique: true
+    t.index ["player_id"], name: "index_player_positions_on_player_id"
+    t.index ["position_id"], name: "index_player_positions_on_position_id"
+  end
+
   create_table "player_stats", force: :cascade do |t|
     t.bigint "player_id", null: false
     t.bigint "season_id"
@@ -123,6 +134,15 @@ ActiveRecord::Schema[7.2].define(version: 2025_08_20_201038) do
     t.integer "best_win_streak", default: 0, null: false
     t.integer "best_loss_streak", default: 0, null: false
     t.datetime "streaks_updated_at"
+  end
+
+  create_table "positions", force: :cascade do |t|
+    t.string "key", null: false
+    t.string "name", null: false
+    t.integer "sort_order", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["key"], name: "index_positions_on_key", unique: true
   end
 
   create_table "seasons", force: :cascade do |t|
@@ -164,6 +184,8 @@ ActiveRecord::Schema[7.2].define(version: 2025_08_20_201038) do
   add_foreign_key "matches", "teams", column: "win_id"
   add_foreign_key "participations", "matches"
   add_foreign_key "participations", "players"
+  add_foreign_key "player_positions", "players"
+  add_foreign_key "player_positions", "positions"
   add_foreign_key "player_stats", "players"
   add_foreign_key "player_stats", "seasons"
 end

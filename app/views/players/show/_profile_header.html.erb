@@ -13,23 +13,23 @@
         @media (min-width:768px){.phc-wrap{padding:1.5rem 1.75rem}}
 
         /* avatar */
-        .phc-avatar{--size:120px;width:var(--size);height:var(--size);border-radius:50%;padding:3px;
-            background:#0b1116}
-        .phc-avatar::after{content:"";position:absolute}
-        .phc-avatar>div{position:relative;width:100%;height:100%;border-radius:50%;
-            border:3px solid #08A6FE;overflow:hidden}
+        .phc-avatar{--size:120px;width:var(--size);height:var(--size);border-radius:50%;padding:3px;background:#0b1116}
+        .phc-avatar>div{position:relative;width:100%;height:100%;border-radius:50%;border:3px solid #08A6FE;overflow:hidden}
         .phc-avatar img{width:100%;height:100%;object-fit:cover;display:block}
 
         .phc-name{font-weight:800;letter-spacing:.2px}
         .phc-meta{color:#9aa3ad}
 
-        /* gauge (thin, no decoration) */
-        .wr-gauge{--val:0;--accent:#08A6FE;--track:#2c3137;--bg:#1b1f24;
-            width:122px;height:122px;position:relative;display:grid;place-items:center;margin:0 auto}
-        .wr-gauge::before{content:"";position:absolute;inset:0;border-radius:50%;
-            background:conic-gradient(var(--accent) calc(var(--val)*1%), var(--track) 0)}
-        .wr-gauge::after{content:"";position:absolute;width:94px;height:94px;border-radius:50%;
-            background:var(--bg);box-shadow:0 0 0 1px rgba(255,255,255,.05) inset}
+        /* positions badges */
+        .pos-badges{gap:.375rem}
+        .pos-badge{background:#22262b;color:#d5d8dc;border:1px solid #2f353b;border-radius:999px;padding:.18rem .55rem;font-size:.82rem;display:inline-flex;align-items:center;gap:.3rem}
+        .pos-badge.primary{border-color:#08A6FE;box-shadow:0 0 0 1px rgba(8,166,254,.15)}
+        .pos-badge .star{color:#08A6FE;font-size:.9rem;line-height:1}
+
+        /* gauge */
+        .wr-gauge{--val:0;--accent:#08A6FE;--track:#2c3137;--bg:#1b1f24;width:122px;height:122px;position:relative;display:grid;place-items:center;margin:0 auto}
+        .wr-gauge::before{content:"";position:absolute;inset:0;border-radius:50%;background:conic-gradient(var(--accent) calc(var(--val)*1%), var(--track) 0)}
+        .wr-gauge::after{content:"";position:absolute;width:94px;height:94px;border-radius:50%;background:var(--bg);box-shadow:0 0 0 1px rgba(255,255,255,.05) inset}
         .wr-value{position:relative;z-index:1;font-weight:800;font-size:1.25rem}
         .wr-caption{color:#9aa3ad;font-size:.82rem;margin-top:.2rem}
     </style>
@@ -49,10 +49,27 @@
 
         <div>
           <h2 class="mb-1 text-light phc-name"><%= @player.full_name %></h2>
+
+          <%# --- POSICIONES DEL JUGADOR --- %>
+          <% pps = @player.player_positions.includes(:position).order(primary: :desc).to_a %>
+          <div class="d-flex flex-wrap pos-badges mb-2">
+            <% if pps.any? %>
+              <% pps.each do |pp| %>
+                <span class="pos-badge <%= 'primary' if pp.primary %>">
+                  <%= pp.position.name %>
+                  <% if pp.primary %><span class="star">★</span><% end %>
+                </span>
+              <% end %>
+            <% else %>
+              <span class="pos-badge">Sin posición asignada</span>
+            <% end %>
+          </div>
+          <%# --- FIN POSICIONES --- %>
+
           <% if last_match %>
             <p class="phc-meta mb-0">
               <i class="fas fa-clock me-1"></i>
-              Last match: <%= date_in_spanish(last_match.date) %>
+              Último partido: <%= date_in_spanish(last_match.date) %>
             </p>
           <% end %>
         </div>
@@ -62,7 +79,7 @@
       <div class="text-center mt-4 mt-md-0" style="min-width:240px;">
         <% if played < min_matches %>
           <div class="wr-gauge rounded-circle" style="--val:0;"></div>
-          <div class="wr-caption">Stats locked — play <%= missing %> more</div>
+          <div class="wr-caption">Estadísticas bloqueadas — juega <%= missing %> más</div>
         <% else %>
           <div class="wr-gauge rounded-circle" style="--val:<%= win_rate %>;">
             <div class="wr-value">
@@ -70,7 +87,7 @@
               <%= sprintf('%.1f', win_rate) %>%
             </div>
           </div>
-          <div class="wr-caption">Win rate</div>
+          <div class="wr-caption">Porcentaje de victorias</div>
         <% end %>
       </div>
     </div>

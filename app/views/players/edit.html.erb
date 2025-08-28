@@ -1,23 +1,44 @@
 <%= form_for @player do |f| %>
   <div class="form-group">
-    <%= f.label :name %>
+    <%= f.label :name, "Nombre completo" %>
     <%= f.text_field :name, class: "form-control" %>
   </div>
 
   <div class="form-group">
-    <%= f.label :nickname %>
+    <%= f.label :nickname, "Apodo" %>
     <%= f.text_field :nickname, class: "form-control" %>
   </div>
 
   <div class="form-group">
-    <%= f.label :contact_info %>
+    <%= f.label :contact_info, "Teléfono" %>
     <%= f.text_field :contact_info, class: "form-control" %>
   </div>
 
   <div class="form-group">
-    <%= f.label :profile_photo %>
-    <%= f.file_field :profile_photo %>
+    <%= f.label :profile_photo, "Foto de perfil" %>
+    <%= f.file_field :profile_photo, class: "form-control" %>
   </div>
 
-  <%= f.submit 'Editar Jugador', class: "btn btn-primary" %>
+  <!-- === Posiciones === -->
+  <div class="form-group mt-3">
+    <%= f.label :positions, "Posiciones" %>
+    <div class="d-flex flex-wrap gap-4 mt-2">
+      <% Position.ordered.each do |pos| %>
+        <% pp = @player.player_positions.find { |x| x.position_id == pos.id } || @player.player_positions.build(position: pos) %>
+        <div class="border rounded p-2">
+          <div class="form-check">
+            <%= check_box_tag "player[position_ids][]", pos.id, @player.position_ids.include?(pos.id), id: "pos_#{pos.id}", class: "form-check-input" %>
+            <label class="form-check-label fw-semibold" for="pos_<%= pos.id %>"><%= pos.name %></label>
+          </div>
+          <div class="form-check mt-1">
+            <%= radio_button_tag "player[primary_position_id]", pos.id, pp.primary, class: "form-check-input" %>
+            <label class="form-check-label">Primaria</label>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+  <!-- === Fin posiciones === -->
+
+  <%= f.submit 'Editar Jugador', class: "btn btn-primary mt-3" %>
 <% end %>

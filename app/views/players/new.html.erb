@@ -2,7 +2,7 @@
   <div class="row justify-content-center">
     <div class="col-md-6 col-lg-4 mb-3">
       <%= f.label :name, "Nombre completo", class: "form-label" %>
-      <%= f.text_field :name, class: "form-control"%>
+      <%= f.text_field :name, class: "form-control" %>
       <% if @player.errors[:name].any? %>
         <div class="invalid-feedback">
           <%= @player.errors[:name].join(", ") %>
@@ -22,7 +22,7 @@
 
     <div class="col-md-6 col-lg-4 mb-3">
       <%= f.label :contact_info, "Teléfono", class: "form-label" %>
-      <%= f.text_field :contact_info, class: "form-control"%>
+      <%= f.text_field :contact_info, class: "form-control" %>
       <% if @player.errors[:contact_info].any? %>
         <div class="invalid-feedback">
           <%= @player.errors[:contact_info].join(", ") %>
@@ -31,8 +31,8 @@
     </div>
 
     <div class="col-md-6 col-lg-4 mb-3">
-      <%= f.label :profile_photo %>
-      <%= f.file_field :profile_photo %>
+      <%= f.label :profile_photo, "Foto de perfil" %>
+      <%= f.file_field :profile_photo, class: "form-control" %>
       <% if @player.errors[:profile_photo].any? %>
         <div class="invalid-feedback">
           <%= @player.errors[:profile_photo].join(", ") %>
@@ -40,6 +40,31 @@
       <% end %>
     </div>
 
+    <!-- === Posiciones === -->
+    <div class="col-md-12 mb-3">
+      <%= f.label :positions, "Posiciones", class: "form-label" %>
+      <div class="d-flex flex-wrap gap-4">
+        <% Position.ordered.each do |pos| %>
+          <% pp = @player.player_positions.find { |x| x.position_id == pos.id } || @player.player_positions.build(position: pos) %>
+          <div class="border rounded p-2">
+            <div class="form-check">
+              <%= check_box_tag "player[position_ids][]", pos.id, @player.position_ids.include?(pos.id), id: "pos_#{pos.id}", class: "form-check-input" %>
+              <label class="form-check-label fw-semibold" for="pos_<%= pos.id %>"><%= pos.name %></label>
+            </div>
+            <div class="form-check mt-1">
+              <%= radio_button_tag "player[primary_position_id]", pos.id, pp.primary, class: "form-check-input" %>
+              <label class="form-check-label">Primaria</label>
+            </div>
+          </div>
+        <% end %>
+      </div>
+      <% if @player.errors[:positions].any? %>
+        <div class="invalid-feedback d-block">
+          <%= @player.errors[:positions].join(", ") %>
+        </div>
+      <% end %>
+    </div>
+    <!-- === Fin posiciones === -->
 
     <div class="col-md-6 col-lg-4 d-grid gap-2">
       <%= f.submit 'Crear Jugador', class: "btn btn-primary btn-lg" %>

@@ -2,12 +2,17 @@
 class Player < ApplicationRecord
   MIN_MATCHES = 5
 
-  # Asociaciones
   has_many :player_stats, dependent: :destroy
   has_many :participations, dependent: :destroy
   has_many :matches, through: :participations
   has_many :mvp_matches, class_name: "Match", foreign_key: "mvp_id"
+  has_many :player_positions, dependent: :destroy
+  has_many :positions, through: :player_positions
   has_one_attached :profile_photo
+
+  attr_accessor :primary_position_id
+
+  after_save :sync_primary_position
 
   # ===== Value Objects =====
   ResultRow = Struct.new(:player, :wins, :total_matches, :mvp_count, :position, :tie, keyword_init: true)
@@ -23,6 +28,9 @@ class Player < ApplicationRecord
     "#{full_name} - #{(win_rate_pct_for&.round(1) || 0)}%"
   end
 
+  def primary_position
+    player_positions.find_by(primary: true)&.position
+  end
   # ======== SHOW DEL JUGADOR ========
 
   def stats_for(season: nil)
@@ -299,6 +307,12 @@ class Player < ApplicationRecord
 
   def worst_teammate_losses(season: nil, min_matches: 3)
     worst_teammate_stats(season: season, min_matches: min_matches)&.dig(:losses)
+  end
+
+  def sync_primary_position
+    return unless primary_position_id.present?
+    player_positions.update_all(primary: false)
+    player_positions.find_by(position_id: primary_position_id)&.update(primary: true)
   end
 
   private
