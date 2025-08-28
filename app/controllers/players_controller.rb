@@ -31,7 +31,7 @@ class PlayersController < ApplicationController
     @chart_data      = @player.chart_data_for(season: @season)
     @participations  = @player.participations_in(season: @season).page(params[:page]).per(PAGINATION_NUMBER)
     @synergy = Rails.cache.fetch([ "synergy-#{@player.id}", @selected_season.id ], expires_in: ttl_seconds) do
-      @player.synergy_for(season: @season, min_matches: 3)
+      @player.synergy_for(season: @season)
     end
   end
 

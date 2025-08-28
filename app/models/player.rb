@@ -265,7 +265,7 @@ class Player < ApplicationRecord
   # ===== Sinergias (Mejor compañero / Némesis) =====
 
   # API principal para la vista
-  def synergy_for(season: nil, min_matches: 3)
+  def synergy_for(season: nil, min_matches: 5)
     {
       best_teammate: best_teammate_stats(season: season, min_matches: min_matches),
       worst_teammate: worst_teammate_stats(season: season, min_matches: min_matches),
