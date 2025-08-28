@@ -268,6 +268,7 @@ class Player < ApplicationRecord
   def synergy_for(season: nil, min_matches: 3)
     {
       best_teammate: best_teammate_stats(season: season, min_matches: min_matches),
+      worst_teammate: worst_teammate_stats(season: season, min_matches: min_matches),
       nemesis:       nemesis_stats(season: season, min_matches: min_matches),
     }
   end
@@ -286,6 +287,18 @@ class Player < ApplicationRecord
 
   def nemesis_win_rate(season: nil, min_matches: 3)
     nemesis_stats(season: season, min_matches: min_matches)&.dig(:win_rate)
+  end
+
+  def worst_teammate(season: nil, min_matches: 3)
+    worst_teammate_stats(season: season, min_matches: min_matches)&.dig(:player)
+  end
+
+  def worst_teammate_loss_rate(season: nil, min_matches: 3)
+    worst_teammate_stats(season: season, min_matches: min_matches)&.dig(:loss_rate)
+  end
+
+  def worst_teammate_losses(season: nil, min_matches: 3)
+    worst_teammate_stats(season: season, min_matches: min_matches)&.dig(:losses)
   end
 
   private
@@ -390,5 +403,26 @@ class Player < ApplicationRecord
   def rate(wins, total)
     return 0.0 if total.to_i <= 0
     ((wins.to_f / total.to_f) * 100).round(1)
+  end
+
+  # Peor compañero (mismo equipo, más derrotas juntos) ---
+  def worst_teammate_stats(season:, min_matches:)
+    rows = teammate_matrix(season: season) # [{player_id:, total:, wins:, win_rate:}]
+    # Enriquecemos con pérdidas y loss_rate
+    rows = rows.map do |r|
+      losses    = r[:total] - r[:wins]
+      loss_rate = rate(losses, r[:total])
+      r.merge(losses:, loss_rate:)
+    end
+
+    row = rows
+            .select { _1[:total] >= min_matches }
+            .max_by { |r| [r[:losses], r[:total], -r[:win_rate]] } # +muestra, desempate por peor win_rate
+    return nil unless row
+
+    mate = Player.find_by(id: row[:player_id])
+    return nil unless mate
+    { player: mate, total: row[:total], wins: row[:wins], losses: row[:losses],
+      win_rate: row[:win_rate], loss_rate: row[:loss_rate] }
   end
 end

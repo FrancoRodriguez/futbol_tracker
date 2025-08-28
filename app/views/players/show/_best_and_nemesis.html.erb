@@ -1,20 +1,24 @@
-<% best   = @synergy[:best_teammate] %>
-<% nem    = @synergy[:nemesis] %>
-<% if best || nem %>
+<% best  = @synergy[:best_teammate] %>
+<% worst = @synergy[:worst_teammate] %>
+<% nem   = @synergy[:nemesis] %>
+
+<% if best || worst || nem %>
   <div class="card shadow-sm mb-5">
     <div class="card-body">
       <h5 class="card-title mb-4">
-        <i class="fas fa-users me-2"></i>Conexiones de Juego
+        <i class="fas fa-users me-2 text-primary"></i>Conexiones de Juego
       </h5>
 
-      <div class="row text-center">
-        <div class="col-md-6 mb-3 mb-md-0">
+      <div class="row text-center g-3">
+        <!-- 🤝 Mejor Compañero -->
+        <div class="col-md-4">
           <div class="p-3 rounded-4 bg-dark text-light shadow-sm h-100">
             <h6 class="fw-bold mb-2">🤝 Mejor Compañero</h6>
             <% if best %>
               <p class="mb-1 fs-5"><%= best[:player].full_name %></p>
               <small class="text-muted">
-                Juntos: <%= best[:wins] %>/<%= best[:total] %> • <%= best[:win_rate] %>% victorias
+                Juntos: <%= best[:wins] %>/<%= best[:total] %> •
+                <%= sprintf('%.1f', best[:win_rate]) %>% victorias
               </small>
             <% else %>
               <small class="text-muted">Aún no hay suficientes partidos.</small>
@@ -22,13 +26,31 @@
           </div>
         </div>
 
-        <div class="col-md-6">
+        <!-- 😬 Peor Compañero (más derrotas juntos) -->
+        <div class="col-md-4">
+          <div class="p-3 rounded-4 bg-dark text-light shadow-sm h-100">
+            <h6 class="fw-bold mb-2">😬 Peor Compañero</h6>
+            <% if worst %>
+              <p class="mb-1 fs-5"><%= worst[:player].full_name %></p>
+              <small class="text-muted">
+                Juntos perdieron <%= worst[:losses] %>/<%= worst[:total] %> •
+                <%= sprintf('%.1f', worst[:loss_rate]) %>% derrotas
+              </small>
+            <% else %>
+              <small class="text-muted">Aún no hay suficientes partidos.</small>
+            <% end %>
+          </div>
+        </div>
+
+        <!-- ⚔️ Némesis (rival) -->
+        <div class="col-md-4">
           <div class="p-3 rounded-4 bg-dark text-light shadow-sm h-100">
             <h6 class="fw-bold mb-2">⚔️ Némesis Personal</h6>
             <% if nem %>
               <p class="mb-1 fs-5"><%= nem[:player].full_name %></p>
               <small class="text-muted">
-                Contra él: <%= nem[:wins] %>/<%= nem[:total] %> • <%= nem[:win_rate] %>% victorias
+                Contra él: <%= nem[:wins] %>/<%= nem[:total] %> •
+                <%= sprintf('%.1f', nem[:win_rate]) %>% victorias
               </small>
             <% else %>
               <small class="text-muted">Aún no hay suficientes partidos.</small>

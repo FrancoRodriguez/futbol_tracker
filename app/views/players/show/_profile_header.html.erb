@@ -1,123 +1,78 @@
+<%# app/views/players/show/_profile_header.html.erb %>
 <% if @player %>
-  <div class="card mb-5 shadow-sm profile-header-card">
-    <div class="card-body d-flex flex-column flex-md-row justify-content-between align-items-center text-center text-md-start">
-      <!-- Foto + nombre + contacto -->
-      <div class="d-flex flex-column flex-md-row align-items-center text-center text-md-start">
-        <!-- Foto -->
-        <div class="me-md-4 mb-3 mb-md-0">
-          <% if @player.profile_photo.attached? %>
-            <%= image_tag @player.profile_photo, alt: @player.full_name,
-                          class: "rounded-circle border border-3 border-primary shadow",
-                          style: "object-fit: cover; width: 120px; height: 120px;" %>
-          <% else %>
-            <%= image_tag "default_avatar.png", class: "rounded-circle border border-3 border-secondary", width: 120, height: 120 %>
-          <% end %>
+  <% last_match = @player.participations.joins(:match).order('matches.date DESC').first&.match %>
+  <% min_matches = Player::MIN_MATCHES %>
+  <% played      = @stat.total_matches %>
+  <% missing     = [min_matches - played, 0].max %>
+  <% win_rate    = (@stat.win_rate_pct || 0).to_f %>
+
+  <div class="card mb-5 shadow-sm profile-header--clean">
+    <style>
+        .profile-header--clean{background:#15171b;border:1px solid #22262b;border-radius:16px}
+        .phc-wrap{padding:1.25rem}
+        @media (min-width:768px){.phc-wrap{padding:1.5rem 1.75rem}}
+
+        /* avatar */
+        .phc-avatar{--size:120px;width:var(--size);height:var(--size);border-radius:50%;padding:3px;
+            background:#0b1116}
+        .phc-avatar::after{content:"";position:absolute}
+        .phc-avatar>div{position:relative;width:100%;height:100%;border-radius:50%;
+            border:3px solid #08A6FE;overflow:hidden}
+        .phc-avatar img{width:100%;height:100%;object-fit:cover;display:block}
+
+        .phc-name{font-weight:800;letter-spacing:.2px}
+        .phc-meta{color:#9aa3ad}
+
+        /* gauge (thin, no decoration) */
+        .wr-gauge{--val:0;--accent:#08A6FE;--track:#2c3137;--bg:#1b1f24;
+            width:122px;height:122px;position:relative;display:grid;place-items:center;margin:0 auto}
+        .wr-gauge::before{content:"";position:absolute;inset:0;border-radius:50%;
+            background:conic-gradient(var(--accent) calc(var(--val)*1%), var(--track) 0)}
+        .wr-gauge::after{content:"";position:absolute;width:94px;height:94px;border-radius:50%;
+            background:var(--bg);box-shadow:0 0 0 1px rgba(255,255,255,.05) inset}
+        .wr-value{position:relative;z-index:1;font-weight:800;font-size:1.25rem}
+        .wr-caption{color:#9aa3ad;font-size:.82rem;margin-top:.2rem}
+    </style>
+
+    <div class="phc-wrap d-flex flex-column flex-md-row align-items-center justify-content-between">
+      <!-- left -->
+      <div class="d-flex align-items-center text-center text-md-start">
+        <div class="me-md-4 mb-3 mb-md-0 position-relative phc-avatar">
+          <div>
+            <% if @player.profile_photo.attached? %>
+              <%= image_tag @player.profile_photo, alt: @player.full_name %>
+            <% else %>
+              <%= image_tag "default_avatar.png", alt: @player.full_name %>
+            <% end %>
+          </div>
         </div>
 
-        <!-- Nombre y contacto -->
         <div>
-          <h2 class="mb-1 text-light fw-bold"><%= @player.full_name %></h2>
-          <% if @player.contact_info.present? %>
-            <div class="d-flex flex-column flex-md-row align-items-center gap-2 mb-2">
-              <div class="text-muted">
-                <i class="fas fa-phone-alt text-success me-2"></i>
-                <%= @player.contact_info %>
-              </div>
-
-              <%= link_to "https://wa.me/#{@player.contact_info.gsub(/\D/, '')}", target: "_blank", rel: "noopener", class: "btn btn-outline-success btn-sm d-flex align-items-center" do %>
-                <i class="fab fa-whatsapp me-2"></i> WhatsApp
-              <% end %>
-            </div>
-          <% end %>
-
-          <% last_match = @player.participations.joins(:match).order('matches.date DESC').first&.match %>
+          <h2 class="mb-1 text-light phc-name"><%= @player.full_name %></h2>
           <% if last_match %>
-            <p class="text-muted mb-0">
+            <p class="phc-meta mb-0">
               <i class="fas fa-clock me-1"></i>
-              Último partido: <%= date_in_spanish(last_match.date) %>
+              Last match: <%= date_in_spanish(last_match.date) %>
             </p>
           <% end %>
-
         </div>
       </div>
 
-      <!-- Panel de porcentaje / pretemporada -->
-      <% min_pj   = Player::MIN_MATCHES %>
-      <% jugados  = @stat.total_matches %>
-      <% faltan   = [min_pj - jugados, 0].max %>
-      <% wr       = (@stat.win_rate_pct || 0).to_f %>
-
-      <div class="text-center mt-4 mt-md-0" style="min-width:270px;">
-        <style>
-            /* --- Gauge circular (scoped al partial) --- */
-            .wr-gauge {
-                --val: 0;                   /* 0..100 */
-                --bg: #1f2227;              /* fondo del donut */
-                --track: #2c3137;           /* pista vacía */
-                --accent: #08A6FE;          /* color progreso */
-                width: 140px; height: 140px;
-                position: relative; display: grid; place-items: center;
-                margin: 0 auto 8px auto;
-            }
-            .wr-gauge::before {
-                content: "";
-                position: absolute; inset: 0;
-                border-radius: 50%;
-                background:
-                        conic-gradient(var(--accent) calc(var(--val) * 1%), var(--track) 0);
-                box-shadow: 0 0 0 1px rgba(13,110,253,.15) inset;
-            }
-            .wr-gauge::after {
-                content: "";
-                position: absolute;
-                width: 108px; height: 108px;
-                border-radius: 50%;
-                background: var(--bg);
-                box-shadow: 0 4px 12px rgba(0,0,0,.35) inset;
-            }
-            .wr-value {
-                position: relative; z-index: 1;
-                font-weight: 800; font-size: 1.6rem; letter-spacing: .5px;
-            }
-            .wr-label { color: #9aa3ad; font-size: .85rem; }
-            .wr-legend .badge { font-weight: 600; }
-            .wr-legend .badge + .badge { margin-left: .35rem; }
-            .wr-lock {
-                position: absolute; inset: 0; display: grid; place-items: center;
-                backdrop-filter: blur(1px);
-            }
-        </style>
-
-        <% if jugados < min_pj %>
-          <!-- MODO PRETEMPORADA (mismo layout, bloqueado) -->
-          <div class="position-relative d-inline-block">
-            <div class="wr-gauge rounded-circle" style="--val: 0;"></div>
-            <div class="wr-lock">
-              <div class="bg-dark text-warning border border-warning rounded-4 px-3 py-2 small">
-                <i class="fas fa-lock me-1"></i>
-                Faltan <strong><%= faltan %></strong> PJ para stats
-              </div>
-            </div>
-          </div>
-          <div class="wr-label mt-2">Porcentaje de victorias</div>
-          <div class="wr-legend mt-2">
-            <span class="badge bg-secondary">W <%= @stat.total_wins %></span>
-            <span class="badge bg-secondary">D <%= @stat.total_draws %></span>
-            <span class="badge bg-secondary">L <%= @stat.total_losses %></span>
-          </div>
+      <!-- right -->
+      <div class="text-center mt-4 mt-md-0" style="min-width:240px;">
+        <% if played < min_matches %>
+          <div class="wr-gauge rounded-circle" style="--val:0;"></div>
+          <div class="wr-caption">Stats locked — play <%= missing %> more</div>
         <% else %>
-          <!-- WR DISPONIBLE -->
-          <div class="wr-gauge rounded-circle" style="--val:<%= wr %>;">
+          <div class="wr-gauge rounded-circle" style="--val:<%= win_rate %>;">
             <div class="wr-value">
               <i class="fas fa-trophy text-warning me-1"></i>
-              <%= sprintf('%.1f', wr) %>%
+              <%= sprintf('%.1f', win_rate) %>%
             </div>
           </div>
-          <div class="wr-label">Porcentaje de victorias</div>
+          <div class="wr-caption">Win rate</div>
         <% end %>
       </div>
-
-    </div>
     </div>
   </div>
 <% end %>
