@@ -64,7 +64,9 @@
                       <% if is_featured %>
                         <span class="badge bg-warning text-dark fw-bold">Destacado</span>
                       <% end %>
+                      <%= render 'layouts/current_streak', player: player %>
                     </div>
+
 
                     <small class="text-muted">
                       <% if wr_pct.present? %>

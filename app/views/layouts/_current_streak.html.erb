@@ -1,0 +1,9 @@
+<td class="text-center racha-mobile">
+  <% if player.current_streak.positive? %>
+    <span class="badge bg-warning text-dark">🔥 <%= player.current_streak %>W</span>
+  <% elsif player.current_streak.negative? %>
+    <span class="badge bg-secondary">❄️ <%= player.current_streak.abs %>L</span>
+  <% else %>
+    <span class="badge bg-light text-dark">—</span>
+  <% end %>
+</td>
