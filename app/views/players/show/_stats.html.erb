@@ -1,27 +1,93 @@
-<div class="card shadow-sm mb-4">
-  <div class="card-body">
-    <h5 class="card-title mb-3"><i class="fas fa-chart-bar me-2"></i>Estadísticas del Jugador</h5>
-    <div class="table-responsive">
-      <table class="table table-bordered text-center align-middle">
-        <thead class="table-dark">
-        <tr>
-          <th><i class="fas fa-signal"></i> Partidos Jugados</th>
-          <th><i class="fas fa-trophy"></i> Victorias</th>
-          <th><i class="fas fa-frown"></i> Derrotas</th>
-          <th><i class="fas fa-meh"></i> Empates</th>
-          <th><i class="fas fa-star"></i> Veces MVP</th>
-        </tr>
-        </thead>
-        <tbody class="table-dark">
-        <tr>
-          <td><%= @stat.total_matches %></td>
-          <td><%= @stat.total_wins %></td>
-          <td><%= @stat.total_losses %></td>
-          <td><%= @stat.total_draws %></td>
-          <td><%= @stat.mvp_count %></td>
-        </tr>
-        </tbody>
-      </table>
+<%# app/views/players/show/_stats.html.erb %>
+<div class="card shadow-sm mb-4 stats-card">
+  <style>
+      .stats-card{background:#16191d;border:1px solid #22262b;border-radius:16px}
+      .stats-wrap{padding:1rem 1rem 1.2rem}
+      @media (min-width:768px){.stats-wrap{padding:1.25rem 1.5rem 1.5rem}}
+
+      .stats-title{display:flex;align-items:center;gap:.6rem;margin-bottom:1rem}
+      .stats-title i{color:#08A6FE}
+
+      /* distribution bar (stacked W/D/L) */
+      .dist{display:flex;height:14px;border-radius:999px;overflow:hidden;border:1px solid #22262b;background:#0f1216}
+      .seg{height:100%}
+      .seg-win {background:#1fbf75}
+      .seg-draw{background:#58a6ff}
+      .seg-loss{background:#ff6b81}
+      .dist-legend{display:flex;gap:.75rem;margin-top:.5rem}
+      .dist-legend .dot{width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:.35rem}
+      .dot.win{background:#1fbf75}.dot.draw{background:#58a6ff}.dot.loss{background:#ff6b81}
+
+      /* stat tiles */
+      .stat-tile{background:#1a1e23;border:1px solid #22262b;border-radius:12px;padding:.9rem; text-align:center;
+          transition:transform .15s ease, box-shadow .15s ease; min-height:7em;}
+      .stat-tile:hover{transform:translateY(-2px);box-shadow:0 8px 18px rgba(0,0,0,.35)}
+      .stat-icon{font-size:1rem;opacity:.9;margin-right:.35rem}
+      .stat-label{color:#9aa3ad;font-size:.85rem;margin:0 0 .35rem}
+      .stat-value{font-weight:800;font-size:1.25rem;margin:0}
+      .stat-sub{color:#9aa3ad;font-size:.78rem;margin-top:.15rem}
+  </style>
+
+  <% total = @stat.total_matches.to_i %>
+  <% wins  = @stat.total_wins.to_i %>
+  <% draws = @stat.total_draws.to_i %>
+  <% losses= @stat.total_losses.to_i %>
+  <% wr    = (@stat.win_rate_pct || (total>0 ? (wins.to_f/total*100) : 0)).to_f.round(1) %>
+  <% dr    = (total>0 ? (draws.to_f/total*100) : 0).round(1) %>
+  <% lr    = (total>0 ? (losses.to_f/total*100) : 0).round(1) %>
+
+  <div class="stats-wrap">
+    <div class="stats-title">
+      <h5 class="card-title mb-0"><i class="fas fa-chart-bar me-2"></i>Estadísticas del Jugador</h5>
+    </div>
+
+    <!-- Distribution bar -->
+    <div class="dist" title="Distribución de resultados">
+      <div class="seg seg-win"  style="width:<%= total.zero? ? 0 : (wins.to_f/total*100) %>%"></div>
+      <div class="seg seg-draw" style="width:<%= total.zero? ? 0 : (draws.to_f/total*100) %>%"></div>
+      <div class="seg seg-loss" style="width:<%= total.zero? ? 0 : (losses.to_f/total*100) %>%"></div>
+    </div>
+    <div class="dist-legend">
+      <span><span class="dot win"></span>Victorias <%= wins %> (<%= wr %>%)</span>
+      <span><span class="dot draw"></span>Empates <%= draws %> (<%= dr %>%)</span>
+      <span><span class="dot loss"></span>Derrotas <%= losses %> (<%= lr %>%)</span>
+    </div>
+
+    <!-- Tiles -->
+    <div class="row g-2 g-md-3 mt-3">
+      <div class="col-6 col-md">
+        <div class="stat-tile">
+          <div class="stat-label"><i class="fas fa-signal stat-icon"></i>Partidos Jugados</div>
+          <p class="stat-value"><%= total %></p>
+        </div>
+      </div>
+      <div class="col-6 col-md">
+        <div class="stat-tile">
+          <div class="stat-label"><i class="fas fa-trophy stat-icon"></i>Victorias</div>
+          <p class="stat-value"><%= wins %></p>
+          <div class="stat-sub"><%= wr %>% WR</div>
+        </div>
+      </div>
+      <div class="col-6 col-md">
+        <div class="stat-tile">
+          <div class="stat-label"><i class="fas fa-frown stat-icon"></i>Derrotas</div>
+          <p class="stat-value"><%= losses %></p>
+          <div class="stat-sub"><%= lr %>%</div>
+        </div>
+      </div>
+      <div class="col-6 col-md">
+        <div class="stat-tile">
+          <div class="stat-label"><i class="fas fa-meh stat-icon"></i>Empates</div>
+          <p class="stat-value"><%= draws %></p>
+          <div class="stat-sub"><%= dr %>%</div>
+        </div>
+      </div>
+      <div class="col-6 col-md">
+        <div class="stat-tile">
+          <div class="stat-label"><i class="fas fa-star stat-icon"></i>Veces MVP</div>
+          <p class="stat-value"><%= @stat.mvp_count %></p>
+        </div>
+      </div>
     </div>
   </div>
 </div>
