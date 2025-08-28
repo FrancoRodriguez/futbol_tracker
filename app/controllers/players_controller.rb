@@ -24,13 +24,15 @@ class PlayersController < ApplicationController
         Season.active.first
       end
 
+    season_cache_key = @selected_season&.id || 'global'
+
     @seasons         = Season.order(starts_on: :desc)
     @season          = @selected_season
     @stat            = @player.stats_for(season: @season)
     @results_count   = { victories: @stat.total_wins, defeats: @stat.total_losses, draws: @stat.total_draws }
     @chart_data      = @player.chart_data_for(season: @season)
     @participations  = @player.participations_in(season: @season).page(params[:page]).per(PAGINATION_NUMBER)
-    @synergy = Rails.cache.fetch([ "synergy-#{@player.id}", @selected_season.id ], expires_in: ttl_seconds) do
+    @synergy = Rails.cache.fetch([ "synergy-#{@player.id}", season_cache_key ], expires_in: ttl_seconds) do
       @player.synergy_for(season: @season)
     end
   end
