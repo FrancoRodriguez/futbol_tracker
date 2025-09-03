@@ -33,7 +33,7 @@ class Player < ApplicationRecord
   end
   # ======== SHOW DEL JUGADOR ========
 
-  def stats_for(season: nil)
+  def stats_for(season: Season.first_one)
     ps = season ? player_stats.find_by(season_id: season.id) : player_stats.find_by(season_id: nil)
     return StatsRow.new(total_matches: 0, total_wins: 0, total_losses: 0, total_draws: 0,
                         win_rate_pct: nil, streak_current: 0, mvp_count: 0) unless ps
@@ -249,8 +249,7 @@ class Player < ApplicationRecord
     series.first == 1 ? run : -run
   end
 
-  def win_rate(season: nil)
-    season ||= Season.active.first
+  def win_rate(season: Season.first_one)
     stats_for(season: season).win_rate_pct || 0
   end
 

@@ -17,7 +17,7 @@ class DashboardController < ApplicationController
     end
 
     # ——— TOP del último mes (recortado a la ventana de la temporada activa) ———
-    @top_last_month = Player.top_last_month(positions: 3, season: Season.first)
+    @top_last_month = Player.top_last_month(positions: 3, season: Season.first_one)
     players_last_month = @top_last_month.map(&:player)
     ActiveRecord::Associations::Preloader.new(
       records: players_last_month,
@@ -30,7 +30,7 @@ class DashboardController < ApplicationController
     ttl_seconds   = [ (next_thursday - Time.zone.now).to_i, 5.minutes ].max
 
     @top_mvp = Rails.cache.fetch([ "top_mvp", season_key ], expires_in: ttl_seconds) do
-      Player.top_mvp(season: @active_season) # 1 jugador con más MVPs en la season
+      Player.top_mvp(season: Season.first)
     end
 
     if @top_mvp
@@ -46,7 +46,6 @@ class DashboardController < ApplicationController
       Player.top_winners(limit: 5, season: @active_season) # top 3 ranking por victorias de la season
     end
 
-    # Temporada pasada (la inmediatamente anterior a la activa)
     @prev_season = if @active_season
                      Season.where("ends_on < ?", @active_season.starts_on).order(ends_on: :desc).first
     end

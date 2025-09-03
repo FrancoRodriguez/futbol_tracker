@@ -13,6 +13,10 @@ class Season < ApplicationRecord
     (starts_on..ends_on)
   end
 
+  def self.first_one
+    Season.order(:created_at).first
+  end
+
   private
 
   def dates_make_sense

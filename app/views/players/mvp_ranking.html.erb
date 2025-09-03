@@ -49,7 +49,6 @@
                         class: "text-decoration-none text-light fw-semibold" %>
           </td>
 
-          <!-- ✅ Usar la columna proyectada desde la query -->
           <td class="text-center text-success fw-bold">
             <%= player.respond_to?(:mvp_count) ? player.mvp_count : player[:mvp_count] || 0 %>
           </td>
