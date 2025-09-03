@@ -91,28 +91,37 @@
       </div>
     </div>
 
-    <%# === Ironman (más participaciones) === %>
+    <%# === Ironman (más participaciones, con empates) === %>
     <div class="col-lg-3 mb-4">
       <div class="card shadow-sm h-100 border border-warning bg-dark text-light rounded-4 p-3 d-flex flex-column">
         <div class="card-body d-flex flex-column align-items-center text-center flex-grow-1">
           <i class="fas fa-running fa-2x text-warning mb-2"></i>
-          <h6 class="fw-bold text-warning mb-3">Más participaciones</h6>
+          <h6 class="fw-bold text-warning mb-1">Más participaciones</h6>
 
-          <% if @prev_ironman %>
-            <div class="mb-3 d-flex justify-content-center">
-              <% if @prev_ironman.profile_photo.attached? %>
-                <%= image_tag @prev_ironman.profile_photo,
-                              class: "rounded-circle border border-3 border-warning",
-                              style: "width: 90px; height: 90px; object-fit: cover;" %>
-              <% else %>
-                <%= image_tag "default_avatar.png",
-                              class: "rounded-circle border border-3 border-warning",
-                              width: 90, height: 90 %>
+          <% if @prev_ironmen.present? %>
+            <% if @prev_ironmen.size > 1 %>
+              <span class="badge bg-dark border border-warning mb-2">Empate</span>
+            <% end %>
+
+            <div class="d-flex justify-content-center flex-wrap gap-2 my-2">
+              <% @prev_ironmen.each do |p| %>
+                <div class="d-flex flex-column align-items-center" style="width: 90px;">
+                  <% if p.profile_photo.attached? %>
+                    <%= image_tag p.profile_photo,
+                                  class: "rounded-circle border border-3 border-warning mb-2",
+                                  style: "width: 64px; height: 64px; object-fit: cover;" %>
+                  <% else %>
+                    <%= image_tag "default_avatar.png",
+                                  class: "rounded-circle border border-3 border-warning mb-2",
+                                  width: 64, height: 64 %>
+                  <% end %>
+                  <div class="small text-truncate" title="<%= p.full_name %>"><%= p.full_name %></div>
+                </div>
               <% end %>
             </div>
-            <p class="fw-semibold mb-2"><%= @prev_ironman.full_name %></p>
+
             <div class="small text-muted">
-              <strong><%= @prev_ironman[:matches_count].to_i %></strong> partidos jugados
+              <strong><%= @prev_ironman_count %></strong> <%= "partido".pluralize(@prev_ironman_count) %> jugados
             </div>
           <% else %>
             <p class="text-muted mb-0">Sin datos.</p>

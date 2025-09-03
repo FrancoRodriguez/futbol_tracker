@@ -63,13 +63,19 @@ class DashboardController < ApplicationController
       @prev_mvp_stats = @prev_mvp&.stats_for(season: @prev_season)
       @prev_mvp_count = @prev_mvp&.mvp_count.to_i
 
-      @prev_ironman = Rails.cache.fetch([ "prev_most_matches", prev_key ], expires_in: 12.hours) do
-        Player.joins(:player_stats)
-              .where(player_stats: { season_id: @prev_season.id })
-              .select("players.*, player_stats.total_matches AS matches_count")
-              .order("matches_count DESC, players.name ASC")
-              .first
+      @prev_ironmen = Rails.cache.fetch(["prev_most_matches", prev_key], expires_in: 12.hours) do
+        rel = Player.joins(:player_stats)
+                    .where(player_stats: { season_id: @prev_season.id })
+                    .select("players.*, player_stats.total_matches AS matches_count")
+
+        top = rel.maximum("player_stats.total_matches")
+        next Player.none if top.nil?
+
+        rel.where("player_stats.total_matches = ?", top)
+           .order("players.name ASC")
       end
+
+      @prev_ironman_count = @prev_ironmen.first&.matches_count.to_i
 
       ActiveRecord::Associations::Preloader.new(
         records: [ *@prev_top_winners, @prev_mvp, @prev_ironman ].compact,
