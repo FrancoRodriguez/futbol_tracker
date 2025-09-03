@@ -42,7 +42,7 @@ class Player < ApplicationRecord
     losses = [ ps.total_matches.to_i - ps.total_wins.to_i - draws, 0 ].max
     wr_pct = if ps.total_matches.to_i >= MIN_MATCHES && ps.win_rate_cached.present?
                (ps.win_rate_cached.to_f * 100).round(1)
-             end
+    end
 
     StatsRow.new(
       total_matches:  ps.total_matches.to_i,
@@ -276,7 +276,7 @@ class Player < ApplicationRecord
     {
       best_teammate: best_teammate_stats(season: season, min_matches: min_matches),
       worst_teammate: worst_teammate_stats(season: season, min_matches: min_matches),
-      nemesis:       nemesis_stats(season: season, min_matches: min_matches),
+      nemesis:       nemesis_stats(season: season, min_matches: min_matches)
     }
   end
 
@@ -333,13 +333,13 @@ class Player < ApplicationRecord
 
   def pick_best(rows, min_matches)
     row = rows.select { _1[:total] >= min_matches }
-              .max_by { |r| [r[:win_rate], r[:total]] }
+              .max_by { |r| [ r[:win_rate], r[:total] ] }
     hydrate_row(row)
   end
 
   def pick_worst(rows, min_matches)
     row = rows.select { _1[:total] >= min_matches }
-              .min_by { |r| [r[:win_rate], -r[:total]] }
+              .min_by { |r| [ r[:win_rate], -r[:total] ] }
     hydrate_row(row)
   end
 
@@ -404,13 +404,13 @@ class Player < ApplicationRecord
       GROUP BY p2.player_id
     SQL
 
-    params = [id, Time.zone.today, *season_params]
-    ActiveRecord::Base.send(:sanitize_sql_array, [raw_sql, *params])
+    params = [ id, Time.zone.today, *season_params ]
+    ActiveRecord::Base.send(:sanitize_sql_array, [ raw_sql, *params ])
   end
 
   def season_sql_filter(season)
-    return ["", []] unless season
-    ["AND m.date BETWEEN ? AND ?", [season.starts_on, season.ends_on]]
+    return [ "", [] ] unless season
+    [ "AND m.date BETWEEN ? AND ?", [ season.starts_on, season.ends_on ] ]
   end
 
   def rate(wins, total)
@@ -430,7 +430,7 @@ class Player < ApplicationRecord
 
     row = rows
             .select { _1[:total] >= min_matches }
-            .max_by { |r| [r[:losses], r[:total], -r[:win_rate]] } # +muestra, desempate por peor win_rate
+            .max_by { |r| [ r[:losses], r[:total], -r[:win_rate] ] } # +muestra, desempate por peor win_rate
     return nil unless row
 
     mate = Player.find_by(id: row[:player_id])

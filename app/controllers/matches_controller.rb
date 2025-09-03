@@ -14,7 +14,7 @@ class MatchesController < ApplicationController
                     .first
 
     @past_matches = scope
-                      .includes(participations: [:player, :team])
+                      .includes(participations: [ :player, :team ])
                       .where("date < ?", Time.zone.today)
                       .order(date: :desc)
                       .page(params[:page])

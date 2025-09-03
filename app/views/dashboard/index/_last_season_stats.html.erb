@@ -103,7 +103,7 @@
               <span class="badge bg-dark border border-warning mb-2">Empate</span>
             <% end %>
 
-            <div class="d-flex justify-content-center flex-wrap gap-2 my-2">
+            <div class="d-flex justify-content-center flex-wrap gap-4 my-2">
               <% @prev_ironmen.each do |p| %>
                 <div class="d-flex flex-column align-items-center" style="width: 90px;">
                   <% if p.profile_photo.attached? %>
@@ -115,13 +115,14 @@
                                   class: "rounded-circle border border-3 border-warning mb-2",
                                   width: 64, height: 64 %>
                   <% end %>
-                  <div class="small text-truncate" title="<%= p.full_name %>"><%= p.full_name %></div>
+                  <div class="small fw-semibold text-truncate text-center"
+                       title="<%= p.full_name %>"><%= p.full_name %></div>
                 </div>
               <% end %>
             </div>
 
-            <div class="small text-muted">
-              <strong><%= @prev_ironman_count %></strong> <%= "partido".pluralize(@prev_ironman_count) %> jugados
+            <div class="small text-muted mt-2">
+              <strong><%= @prev_ironman_count %></strong> partidos jugados (récord)
             </div>
           <% else %>
             <p class="text-muted mb-0">Sin datos.</p>

@@ -82,14 +82,14 @@ gks, defs, mids, atts = [], [], [], []
 
 players.each_with_index do |p, i|
   case i
-  when 0 then set_positions!(p, primary_key: "GK",  secondary_keys: ["DEF"]);  gks << p
-  when 1 then set_positions!(p, primary_key: "GK",  secondary_keys: ["MID"]);  gks << p
-  when 2,3,4,5 then set_positions!(p, primary_key: "DEF", secondary_keys: ["MID"]); defs << p
-  when 6,7,8,9 then set_positions!(p, primary_key: "MID", secondary_keys: ["DEF"]); mids << p
-  when 10,11,12 then set_positions!(p, primary_key: "ATT", secondary_keys: ["MID"]); atts << p
+  when 0 then set_positions!(p, primary_key: "GK",  secondary_keys: [ "DEF" ]);  gks << p
+  when 1 then set_positions!(p, primary_key: "GK",  secondary_keys: [ "MID" ]);  gks << p
+  when 2, 3, 4, 5 then set_positions!(p, primary_key: "DEF", secondary_keys: [ "MID" ]); defs << p
+  when 6, 7, 8, 9 then set_positions!(p, primary_key: "MID", secondary_keys: [ "DEF" ]); mids << p
+  when 10, 11, 12 then set_positions!(p, primary_key: "ATT", secondary_keys: [ "MID" ]); atts << p
   else
     # Los últimos jugadores con perfiles mixtos que suelen ayudar a balancear
-    set_positions!(p, primary_key: %w[DEF MID ATT].sample, secondary_keys: (%w[DEF MID ATT] - [primary_key = nil]).sample(1))
+    set_positions!(p, primary_key: %w[DEF MID ATT].sample, secondary_keys: (%w[DEF MID ATT] - [ primary_key = nil ]).sample(1))
   end
 end
 

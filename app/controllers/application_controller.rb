@@ -12,21 +12,21 @@ class ApplicationController < ActionController::Base
   PAGINATION_NUMBER = 5
 
   rescue_from Pundit::NotAuthorizedError do
-    redirect_back fallback_location: root_path, alert: 'No estás autorizado para realizar esta acción.'
+    redirect_back fallback_location: root_path, alert: "No estás autorizado para realizar esta acción."
   end
 
   private
 
   def pundit_skip?
-    devise_controller? || params[:controller].start_with?('active_storage/', 'rails/mailers')
+    devise_controller? || params[:controller].start_with?("active_storage/", "rails/mailers")
   end
 
   def pundit_skip_or_index?
-    pundit_skip? || action_name == 'index'
+    pundit_skip? || action_name == "index"
   end
 
   def pundit_scope_check?
-    !pundit_skip? && action_name == 'index'
+    !pundit_skip? && action_name == "index"
   end
 
   def ensure_voter_cookie!

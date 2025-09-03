@@ -24,7 +24,7 @@ class PlayersController < ApplicationController
         Season.active.first
       end
 
-    season_cache_key = @selected_season&.id || 'global'
+    season_cache_key = @selected_season&.id || "global"
 
     @seasons         = Season.order(starts_on: :desc)
     @season          = @selected_season

@@ -63,7 +63,7 @@ class DashboardController < ApplicationController
       @prev_mvp_stats = @prev_mvp&.stats_for(season: @prev_season)
       @prev_mvp_count = @prev_mvp&.mvp_count.to_i
 
-      @prev_ironmen = Rails.cache.fetch(["prev_most_matches", prev_key], expires_in: 12.hours) do
+      @prev_ironmen = Rails.cache.fetch([ "prev_most_matches", prev_key ], expires_in: 12.hours) do
         rel = Player.joins(:player_stats)
                     .where(player_stats: { season_id: @prev_season.id })
                     .select("players.*, player_stats.total_matches AS matches_count")

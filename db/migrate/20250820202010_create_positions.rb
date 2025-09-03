@@ -15,6 +15,6 @@ class CreatePositions < ActiveRecord::Migration[7.2]
       t.timestamps
     end
 
-    add_index :player_positions, [:player_id, :position_id], unique: true
+    add_index :player_positions, [ :player_id, :position_id ], unique: true
   end
 end

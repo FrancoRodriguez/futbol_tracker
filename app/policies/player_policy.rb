@@ -1,5 +1,4 @@
 class PlayerPolicy < ApplicationPolicy
-
   def show? = true
   def edit?    = update?
   def update?  = owner_or_admin?
