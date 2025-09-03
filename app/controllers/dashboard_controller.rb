@@ -17,7 +17,7 @@ class DashboardController < ApplicationController
     end
 
     # ——— TOP del último mes (recortado a la ventana de la temporada activa) ———
-    @top_last_month = Player.top_last_month(positions: 3, season: @active_season)
+    @top_last_month = Player.top_last_month(positions: 3, season: Season.first)
     players_last_month = @top_last_month.map(&:player)
     ActiveRecord::Associations::Preloader.new(
       records: players_last_month,
