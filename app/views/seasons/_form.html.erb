@@ -1,0 +1,42 @@
+<div class="card shadow-lg rounded bg-dark text-light">
+  <div class="card-body">
+    <%= form_with(model: season, local: true, class: "row g-3") do |f| %>
+      <% if season.errors.any? %>
+        <div class="alert alert-danger">
+          <strong>Corrige los siguientes errores:</strong>
+          <ul class="mb-0">
+            <% season.errors.full_messages.each do |msg| %>
+              <li><%= msg %></li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+
+      <div class="col-12">
+        <%= f.label :name, "Nombre", class: "form-label" %>
+        <%= f.text_field :name, class: "form-control", placeholder: "Temporada 2025/2026" %>
+      </div>
+
+      <div class="col-md-6">
+        <%= f.label :starts_on, "Inicio", class: "form-label" %>
+        <%= f.date_field :starts_on, class: "form-control" %>
+      </div>
+
+      <div class="col-md-6">
+        <%= f.label :ends_on, "Fin", class: "form-label" %>
+        <%= f.date_field :ends_on, class: "form-control" %>
+      </div>
+
+      <div class="col-12 form-check mt-2">
+        <%= f.check_box :active, class: "form-check-input", id: "season_active" %>
+        <%= f.label :active, "Activar esta temporada", class: "form-check-label" %>
+        <div class="form-text text-muted">Si activas, el resto quedará desactivada automáticamente.</div>
+      </div>
+
+      <div class="col-12 mt-3">
+        <%= f.submit class: "btn btn-primary me-2" %>
+        <%= link_to "Cancelar", seasons_path, class: "btn btn-outline-secondary" %>
+      </div>
+    <% end %>
+  </div>
+</div>

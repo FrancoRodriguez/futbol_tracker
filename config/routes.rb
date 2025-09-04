@@ -20,6 +20,12 @@ Rails.application.routes.draw do
 
   resources :teams, only: [ :index ]
 
+  resources :seasons do
+    member do
+      patch :activate
+      patch :deactivate
+    end
+  end
 
   resources :dashboard, only: [ :index ]
   root "dashboard#index"

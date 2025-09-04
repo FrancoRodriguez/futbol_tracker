@@ -1,0 +1,61 @@
+<section>
+  <h3 class="mb-4 fw-bold text-center text-light">
+    <i class="fas fa-calendar-alt"></i> Temporadas
+  </h3>
+
+  <div class="mb-3 text-end">
+    <%= link_to "Nueva temporada", new_season_path, class: "btn btn-success" %>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-dark table-bordered align-middle text-center">
+      <thead class="table-secondary text-dark">
+      <tr>
+        <th>Nombre</th>
+        <th>Inicio</th>
+        <th>Fin</th>
+        <th>Estado</th>
+        <th style="width: 260px;">Acciones</th>
+      </tr>
+      </thead>
+      <tbody>
+      <% @seasons.each do |season| %>
+        <tr>
+          <td class="text-start"><%= link_to season.name, season_path(season), class: "link-light" %></td>
+          <td><%= l(season.starts_on) %></td>
+          <td><%= l(season.ends_on) %></td>
+          <td>
+            <% if season.active? %>
+              <span class="badge bg-success"><i class="fas fa-check-circle"></i> Activa</span>
+            <% else %>
+              <span class="badge bg-secondary">Inactiva</span>
+            <% end %>
+          </td>
+          <td>
+            <div class="d-flex gap-2 justify-content-center flex-wrap">
+              <% if season.active? %>
+                <%= button_to "Desactivar", deactivate_season_path(season),
+                              method: :patch,
+                              class: "btn btn-outline-warning btn-sm",
+                              data: { turbo_confirm: "¿Desactivar esta temporada?" } %>
+              <% else %>
+                <%= button_to "Activar", activate_season_path(season),
+                              method: :patch,
+                              class: "btn btn-success btn-sm",
+                              data: { turbo_confirm: "Al activar, las demás quedarán inactivas. ¿Continuar?" } %>
+              <% end %>
+
+              <%= link_to "Editar", edit_season_path(season), class: "btn btn-primary btn-sm" %>
+
+              <%= button_to "Eliminar", season_path(season),
+                            method: :delete,
+                            class: "btn btn-danger btn-sm",
+                            data: { turbo_confirm: "¿Eliminar definitivamente la temporada #{season.name}?" } %>
+            </div>
+          </td>
+        </tr>
+      <% end %>
+      </tbody>
+    </table>
+  </div>
+</section>

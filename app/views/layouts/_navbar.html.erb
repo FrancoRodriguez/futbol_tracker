@@ -16,6 +16,13 @@
             <i class="fas fa-chart-line"></i> Dashboard
           </a>
         </li>
+        <% if user_signed_in? %>
+          <li class="nav-item">
+            <a class="nav-link text-white" aria-current="page" href="<%= seasons_path %>">
+              <i class="fas fa-chart-line"></i> Temporadas
+            </a>
+          </li>
+        <% end %>
         <li class="nav-item">
           <a class="nav-link text-white" aria-current="page" href="<%= matches_path %>">
             <i class="fas fa-calendar-alt"></i> Partidos

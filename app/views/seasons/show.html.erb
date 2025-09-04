@@ -1,0 +1,23 @@
+<div class="card bg-dark text-light shadow-sm">
+  <div class="card-body">
+    <h5 class="card-title mb-3">
+      <i class="fas fa-calendar"></i> <%= @season.name %>
+      <% if @season.active? %>
+        <span class="badge bg-success ms-2">Activa</span>
+      <% end %>
+    </h5>
+
+    <p class="mb-1"><strong>Inicio:</strong> <%= l(@season.starts_on) %></p>
+    <p class="mb-3"><strong>Fin:</strong> <%= l(@season.ends_on) %></p>
+
+    <div class="d-flex gap-2">
+      <% if @season.active? %>
+        <%= button_to "Desactivar", deactivate_season_path(@season), method: :patch, class: "btn btn-outline-warning" %>
+      <% else %>
+        <%= button_to "Activar", activate_season_path(@season), method: :patch, class: "btn btn-success" %>
+      <% end %>
+      <%= link_to "Editar", edit_season_path(@season), class: "btn btn-primary" %>
+      <%= link_to "Volver", seasons_path, class: "btn btn-secondary" %>
+    </div>
+  </div>
+</div>

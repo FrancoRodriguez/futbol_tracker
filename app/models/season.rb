@@ -17,6 +17,13 @@ class Season < ApplicationRecord
     Season.order(:created_at).first
   end
 
+  def activate_exclusively!
+    transaction do
+      Season.where.not(id: id).update_all(active: false, updated_at: Time.current)
+      update!(active: true)
+    end
+  end
+
   private
 
   def dates_make_sense
