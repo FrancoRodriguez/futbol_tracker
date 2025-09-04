@@ -1,23 +1,305 @@
-<div class="card bg-dark text-light shadow-sm">
-  <div class="card-body">
-    <h5 class="card-title mb-3">
-      <i class="fas fa-calendar"></i> <%= @season.name %>
-      <% if @season.active? %>
-        <span class="badge bg-success ms-2">Activa</span>
-      <% end %>
-    </h5>
-
-    <p class="mb-1"><strong>Inicio:</strong> <%= l(@season.starts_on) %></p>
-    <p class="mb-3"><strong>Fin:</strong> <%= l(@season.ends_on) %></p>
-
+<section class="container-xxl py-3">
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <h3 class="text-light mb-0">
+      <i class="fas fa-calendar-alt me-2"></i><%= @season.name %>
+      <% if @season.active? %><span class="badge bg-success ms-2">Activa</span><% end %>
+    </h3>
     <div class="d-flex gap-2">
       <% if @season.active? %>
-        <%= button_to "Desactivar", deactivate_season_path(@season), method: :patch, class: "btn btn-outline-warning" %>
+        <%= button_to "Desactivar", deactivate_season_path(@season), method: :patch, class: "btn btn-outline-warning btn-sm" %>
       <% else %>
-        <%= button_to "Activar", activate_season_path(@season), method: :patch, class: "btn btn-success" %>
+        <%= button_to "Activar", activate_season_path(@season), method: :patch, class: "btn btn-success btn-sm" %>
       <% end %>
-      <%= link_to "Editar", edit_season_path(@season), class: "btn btn-primary" %>
-      <%= link_to "Volver", seasons_path, class: "btn btn-secondary" %>
+      <%= link_to "Editar", edit_season_path(@season), class: "btn btn-primary btn-sm" %>
+      <%= link_to "Volver", seasons_path, class: "btn btn-secondary btn-sm" %>
     </div>
   </div>
-</div>
+
+  <%# ---------- KPI CARDS ---------- %>
+  <% total_matches = @stats[:summary][:matches] %>
+  <% draws         = @stats[:summary][:draws] %>
+  <% teams_count   = (@stats[:teams][:teams] || []).size %>
+
+  <% eq = @stats[:equilibrium] || {} %>
+  <% rating_scale = (eq[:rating_scale] || 10).to_f %>
+  <% avg_gap = (eq[:avg_rating_gap] || 0).to_f %>
+  <% pct = (eq[:pct_of_scale] || (rating_scale.positive? ? (avg_gap / rating_scale) * 100.0 : 0)).to_f.round(1) %>
+  <% label, tone = case pct
+                   when 0..2   then ["Muy parejo", "success"]
+                   when 2..5   then ["Parejo", "info"]
+                   when 5..10  then ["Desbalance leve", "warning"]
+                   else              ["Desbalanceado", "danger"]
+                   end %>
+
+  <div class="row g-3">
+    <div class="col-6 col-md-3">
+      <div class="stat-card glass">
+        <div class="stat-title">Partidos</div>
+        <div class="stat-value"><%= total_matches %></div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="stat-card glass">
+        <div class="stat-title">Empates</div>
+        <div class="stat-value"><%= draws %></div>
+      </div>
+    </div>
+    <div class="col-12 col-md-6">
+      <div class="stat-card glass">
+        <div class="d-flex align-items-center justify-content-between">
+          <div>
+            <div class="stat-title">Índice de equilibrio</div>
+            <div class="d-flex align-items-center gap-2">
+              <div class="stat-value"><%= number_to_percentage(pct, precision: 1) %></div>
+              <span class="badge bg-<%= tone %> badge-soft"><%= label %></span>
+            </div>
+            <div class="text-muted small">Más bajo = más parejo · Dif. media sin normalizar: <%= avg_gap.round(3) %></div>
+          </div>
+          <div class="ms-3" style="min-width:200px;width:40%;">
+            <div class="progress" role="progressbar" aria-label="Índice de equilibrio">
+              <div class="progress-bar bg-<%= tone %>" style="width:<%= [pct,100].min %>%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <%# ---------- TABS ---------- %>
+  <ul class="nav nav-pills pretty-tabs mt-4" id="seasonTabs" role="tablist">
+    <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-resumen" type="button"><i class="fas fa-clipboard-list me-1"></i>Resumen</button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-equipos"  type="button"><i class="fas fa-users me-1"></i>Equipos</button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-jugadores" type="button"><i class="fas fa-user me-1"></i>Jugadores</button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-sinergias" type="button"><i class="fas fa-handshake me-1"></i>Sinergias</button></li>
+  </ul>
+
+  <div class="tab-content mt-3">
+    <%# ---------------- RESUMEN ---------------- %>
+    <div class="tab-pane fade show active" id="tab-resumen">
+      <% wins_hash = @stats[:summary][:wins_by_team_id] || {} %>
+      <% label_by_id = (@stats[:teams][:teams] || []).index_by { |t| t[:team_id] } %>
+      <% wins_labels = wins_hash.keys.map { |id| (label_by_id[id] && label_by_id[id][:team_name]) || "Equipo ##{id}" } %>
+      <% wins_values = wins_hash.values %>
+
+      <div class="card bg-dark text-light shadow-sm mb-3 rounded-3 border-0 glass">
+        <div class="card-body">
+          <h6 class="card-title mb-3"><i class="fas fa-trophy me-2"></i>Victorias por equipo</h6>
+          <canvas id="winsByTeam"
+                  data-labels='<%= raw wins_labels.to_json %>'
+                  data-values='<%= raw wins_values.to_json %>'
+                  class="w-100" style="max-height: 280px;"></canvas>
+        </div>
+      </div>
+
+      <div class="card bg-dark text-light shadow-sm rounded-3 border-0 glass">
+        <div class="card-body">
+          <h6 class="card-title mb-3"><i class="fas fa-shield-alt me-2"></i>Balance por equipo</h6>
+          <div class="table-responsive">
+            <table class="table table-dark table-hover align-middle mb-0 nice-table">
+              <thead class="table-secondary text-dark">
+              <tr><th>Equipo</th><th class="text-center">PJ</th><th class="text-center">W</th><th class="text-center">D</th><th class="text-center">L</th></tr>
+              </thead>
+              <tbody>
+              <% (@stats[:teams][:teams] || []).each do |t| %>
+                <tr>
+                  <td><%= t[:team_name] %></td>
+                  <td class="text-center"><%= t[:played] %></td>
+                  <td class="text-center"><span class="badge bg-success-soft"><%= t[:wins] %></span></td>
+                  <td class="text-center"><span class="badge bg-secondary-soft"><%= t[:draws] %></span></td>
+                  <td class="text-center"><span class="badge bg-danger-soft"><%= t[:losses] %></span></td>
+                </tr>
+              <% end %>
+              <% if (@stats[:teams][:teams] || []).empty? %>
+                <tr><td colspan="5" class="text-center text-muted">Sin datos</td></tr>
+              <% end %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <%# ---------------- EQUIPOS ---------------- %>
+    <div class="tab-pane fade" id="tab-equipos">
+      <div class="accordion" id="teamsAccordion">
+        <% (@stats[:teams][:top_players_by_team] || {}).each_with_index do |(team_id, players), idx| %>
+          <div class="accordion-item bg-dark text-light border-0 mb-2 glass">
+            <h2 class="accordion-header">
+              <button class="accordion-button collapsed bg-dark text-light" type="button"
+                      data-bs-toggle="collapse" data-bs-target="#t<%= idx %>">
+                <i class="fas fa-users me-2"></i><%= (label_by_id[team_id] && label_by_id[team_id][:team_name]) || "Equipo ##{team_id}" %>
+              </button>
+            </h2>
+            <div id="t<%= idx %>" class="accordion-collapse collapse" data-bs-parent="#teamsAccordion">
+              <div class="accordion-body">
+                <% if players.blank? %>
+                  <div class="text-muted">Sin datos</div>
+                <% else %>
+                  <ol class="mb-0">
+                    <% players.each do |p| %>
+                      <li><%= p[:player_name] %> — <%= p[:appearances] %> apariciones</li>
+                    <% end %>
+                  </ol>
+                <% end %>
+              </div>
+            </div>
+          </div>
+        <% end %>
+        <% if (@stats[:teams][:top_players_by_team] || {}).empty? %>
+          <div class="text-muted">Sin datos</div>
+        <% end %>
+      </div>
+    </div>
+
+    <%# ---------------- JUGADORES ---------------- %>
+    <div class="tab-pane fade" id="tab-jugadores">
+      <div class="row g-3">
+        <div class="col-lg-4">
+          <div class="card bg-dark text-light shadow-sm h-100 glass">
+            <div class="card-body">
+              <h6 class="card-title"><i class="fas fa-star me-2"></i>MVPs</h6>
+              <ol class="mb-0">
+                <% (@stats[:player_rankings][:mvps] || []).each do |r| %>
+                  <li><%= r[:player_name] %> — <%= r[:mvps] %> MVP</li>
+                <% end %>
+              </ol>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-4">
+          <div class="card bg-dark text-light shadow-sm h-100 glass">
+            <div class="card-body">
+              <h6 class="card-title"><i class="fas fa-percentage me-2"></i>Mayor win rate</h6>
+              <ol class="mb-0">
+                <% (@stats[:player_rankings][:best_win_rate] || []).each do |r| %>
+                  <li><%= r[:player_name] %> — <%= number_to_percentage((r[:win_rate].to_f * 100), precision: 1) %></li>
+                <% end %>
+              </ol>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-4">
+          <div class="card bg-dark text-light shadow-sm h-100 glass">
+            <div class="card-body">
+              <h6 class="card-title"><i class="fas fa-list-ol me-2"></i>Más partidos jugados</h6>
+              <ol class="mb-0">
+                <% (@stats[:player_rankings][:most_matches] || []).each do |r| %>
+                  <li><%= r[:player_name] %> — <%= r[:total_matches] %> PJ</li>
+                <% end %>
+              </ol>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <h6 class="text-light mt-4 mb-2">Rachas</h6>
+      <div class="row g-3">
+        <div class="col-md-4">
+          <div class="card bg-dark text-light shadow-sm h-100 glass">
+            <div class="card-body">
+              <strong>Mejor racha de victorias</strong>
+              <ol class="mb-0">
+                <% (@stats[:player_rankings][:streaks][:best_win] || []).each do |r| %>
+                  <li><%= r[:player_name] %> — <%= r[:best_win] %></li>
+                <% end %>
+              </ol>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card bg-dark text-light shadow-sm h-100 glass">
+            <div class="card-body">
+              <strong>Peor racha de derrotas</strong>
+              <ol class="mb-0">
+                <% (@stats[:player_rankings][:streaks][:best_loss] || []).each do |r| %>
+                  <li><%= r[:player_name] %> — <%= r[:best_loss] %></li>
+                <% end %>
+              </ol>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card bg-dark text-light shadow-sm h-100 glass">
+            <div class="card-body">
+              <strong>Racha actual</strong>
+              <ol class="mb-0">
+                <% (@stats[:player_rankings][:streaks][:current] || []).each do |r| %>
+                  <li><%= r[:player_name] %> — <%= r[:current] %></li>
+                <% end %>
+              </ol>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <%# ---------------- SINERGIAS ---------------- %>
+    <div class="tab-pane fade" id="tab-sinergias">
+      <div class="row g-3">
+        <div class="col-lg-6">
+          <div class="card bg-dark text-light shadow-sm h-100 glass">
+            <div class="card-body">
+              <h6 class="card-title"><i class="fas fa-handshake me-2"></i>Mejores duplas</h6>
+              <ol class="mb-0">
+                <% (@stats[:synergies][:best_duos] || []).each do |d| %>
+                  <li><%= d[:a_name] %> + <%= d[:b_name] %> — <%= number_to_percentage(d[:win_rate] * 100, precision: 1) %> (<%= d[:games] %> PJ)</li>
+                <% end %>
+              </ol>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-6">
+          <div class="card bg-dark text-light shadow-sm h-100 glass">
+            <div class="card-body">
+              <h6 class="card-title"><i class="fas fa-bolt me-2"></i>Némesis</h6>
+              <ol class="mb-0">
+                <% (@stats[:synergies][:nemeses] || []).each do |n| %>
+                  <li><%= n[:a_name] %> vs <%= n[:b_name] %> — <%= number_to_percentage(n[:win_rate_for_a] * 100, precision: 1) %> (<%= n[:games] %> PJ)</li>
+                <% end %>
+              </ol>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<%# ---------- JS: Chart victorias por equipo ---------- %>
+<script>
+    document.addEventListener("turbo:load", drawCharts);
+    window.addEventListener("chartjs:loaded", drawCharts, { once: true });
+
+    function drawCharts() {
+        const el = document.getElementById("winsByTeam");
+        if (!el || !window.Chart) return;
+        const labels = JSON.parse(el.dataset.labels || "[]");
+        const values = JSON.parse(el.dataset.values || "[]");
+        new Chart(el, {
+            type: "bar",
+            data: { labels, datasets: [{ label: "Victorias", data: values }] },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+            }
+        });
+    }
+</script>
+
+<style>
+    /* Glass / dark aesthetic */
+    .glass { background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02)); border:1px solid rgba(255,255,255,0.08); }
+    .stat-card{ border-radius:16px; padding:14px; height:100%; box-shadow: 0 6px 18px rgba(0,0,0,.25); }
+    .stat-title{ font-size:.78rem; color:#a4a8ad; text-transform:uppercase; letter-spacing:.04em; margin-bottom:4px }
+    .stat-value{ font-weight:800; font-size:1.45rem; line-height:1 }
+    .card{ border-radius:16px }
+    .accordion-button{ box-shadow:none }
+    .pretty-tabs .nav-link{ border-radius:999px; padding:.4rem .9rem; color:#cfd3d8; }
+    .pretty-tabs .nav-link.active{ background:#0d6efd; color:#fff; box-shadow:0 8px 24px rgba(13,110,253,.25); }
+    .nice-table tbody tr:hover{ background: rgba(255,255,255,0.04); }
+    .badge-soft{ filter: saturate(1.2); }
+    .bg-success-soft{ background:rgba(25,135,84,.18); color:#6ad19d; }
+    .bg-secondary-soft{ background:rgba(108,117,125,.18); color:#c9cdd1; }
+    .bg-danger-soft{ background:rgba(220,53,69,.18); color:#ff8a98; }
+</style>

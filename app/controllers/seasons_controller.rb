@@ -9,6 +9,12 @@ class SeasonsController < ApplicationController
 
   def show
     authorize @season
+    @stats = ::Seasons::StatsService.call(season: @season, top_n: 5, min_matches: 3, rating_scale: 10)
+
+    respond_to do |format|
+      format.html
+      format.json { render json: @stats }
+    end
   end
 
   def new
