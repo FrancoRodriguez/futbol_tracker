@@ -27,6 +27,12 @@ Rails.application.routes.draw do
     end
   end
 
+  namespace :admin do
+    resource :cache, only: [] do
+      delete :clear, on: :collection
+    end
+  end
+
   resources :dashboard, only: [ :index ]
   root "dashboard#index"
 end

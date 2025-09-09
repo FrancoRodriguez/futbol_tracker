@@ -6,7 +6,7 @@ class MatchesController < ApplicationController
   include MatchesHelper
 
   def index
-    scope = policy_scope(Match)  # <- clave
+    scope = policy_scope(Match)
 
     @next_match = scope
                     .where("date >= ?", Time.zone.today)

@@ -43,6 +43,13 @@
             <i class="fas fa-trophy"></i> Ranking Victorias
           </a>
         </li>
+        <li class="nav-item">
+          <%= button_to "Borrar caché",
+                        clear_admin_cache_path,
+                        method: :delete,
+                        data: { turbo_confirm: "¿Seguro que quieres limpiar todo el caché?" },
+                        class: "btn btn-outline-danger btn-sm" %>
+        </li>
       </ul>
 
       <ul class="navbar-nav ms-auto">
