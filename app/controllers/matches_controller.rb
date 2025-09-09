@@ -114,6 +114,7 @@ class MatchesController < ApplicationController
     authorize @match
 
     if @match.update(match_params)
+      reset_tops_cache(@match.season_id)
       redirect_to @match, notice: "Partido actualizado exitosamente."
     else
       render :edit

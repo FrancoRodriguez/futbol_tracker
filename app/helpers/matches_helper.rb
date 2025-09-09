@@ -13,4 +13,9 @@ module MatchesHelper
       team_goals.map { |tg| "#{tg[:name]}: #{tg[:goals]}" }.join(" vs ")
     end
   end
+
+  def reset_tops_cache(season_key)
+    Rails.cache.delete([ "top_winners", season_key ])
+    Rails.cache.delete([ "top_mvp", season_key ])
+  end
 end

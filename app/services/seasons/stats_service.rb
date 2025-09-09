@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 # Calcula métricas por temporada sin tocar la BD (solo lectura).
 # Uso:
 #   stats = Seasons::StatsService.call(season: @season, top_n: 5, min_matches: 3)
@@ -85,7 +86,7 @@ module Seasons
         streaks: {
           best_win:  stats.order(streak_best_win: :desc, total_matches: :desc).limit(top_n).map { |s| expose_player_stat(s).merge(best_win: s.streak_best_win) },
           best_loss: stats.order(streak_best_loss: :desc, total_matches: :desc).limit(top_n).map { |s| expose_player_stat(s).merge(best_loss: s.streak_best_loss) },
-          current:   stats.order(streak_current: :desc, total_matches: :desc).limit(top_n).map { |s| expose_player_stat(s).merge(current: s.streak_current) },
+          current:   stats.order(streak_current: :desc, total_matches: :desc).limit(top_n).map { |s| expose_player_stat(s).merge(current: s.streak_current) }
         }
       }
     end
@@ -109,7 +110,7 @@ module Seasons
     def team_stats
       matches = matches_scope
 
-      team_ids = matches.flat_map { |m| [m.home_team_id, m.away_team_id] }.compact.uniq
+      team_ids = matches.flat_map { |m| [ m.home_team_id, m.away_team_id ] }.compact.uniq
       return { teams: [], wins_by_team_id: {}, top_players_by_team: {} } if team_ids.empty?
 
       wins_by_team_id = matches.reject { |m| draw_match?(m) }
@@ -118,7 +119,7 @@ module Seasons
                                .tap { |h| h.delete(nil) }
 
       balance = team_ids.map do |team_id|
-        played = matches.select { |m| [m.home_team_id, m.away_team_id].include?(team_id) }
+        played = matches.select { |m| [ m.home_team_id, m.away_team_id ].include?(team_id) }
         wins   = played.count { |m| !draw_match?(m) && m.win_id == team_id }
         losses = played.count { |m| !draw_match?(m) && m.win_id && m.win_id != team_id }
         draws  = played.count { |m| draw_match?(m) }
@@ -131,7 +132,7 @@ module Seasons
           draws: draws,
           losses: losses
         }
-      end.sort_by { |h| [-h[:wins], h[:losses]] }
+      end.sort_by { |h| [ -h[:wins], h[:losses] ] }
 
       top_players_by_team = top_players_for_teams(team_ids)
 
@@ -211,7 +212,7 @@ module Seasons
         win_team_by_match[m.id] = m.win_id
         m.participations.each do |p|
           next if p.team_id.blank?
-          by_match_team[[m.id, p.team_id]] << p.player_id
+          by_match_team[[ m.id, p.team_id ]] << p.player_id
         end
       end
 
@@ -219,7 +220,7 @@ module Seasons
       duo_stats = Hash.new { |h, k| h[k] = { games: 0, wins: 0 } } # { [a,b] => {games:, wins:} } con a<b
       by_match_team.each do |(match_id, team_id), players|
         players.uniq.combination(2).each do |a, b|
-          key = a < b ? [a, b] : [b, a]
+          key = a < b ? [ a, b ] : [ b, a ]
           duo_stats[key][:games] += 1
           duo_stats[key][:wins]  += 1 if win_team_by_match[match_id] == team_id
         end
@@ -234,7 +235,7 @@ module Seasons
           wins:  h[:wins],
           win_rate: (h[:wins].to_f / h[:games]).round(3)
         }
-      end.compact.sort_by { |h| [-h[:win_rate], -h[:games]] }.first(top_n)
+      end.compact.sort_by { |h| [ -h[:win_rate], -h[:games] ] }.first(top_n)
 
       # Némesis (rivales: camisetas opuestas)
       nemesis_stats = Hash.new { |h, k| h[k] = { games: 0, wins_a: 0 } } # { [a,b] => {games:, wins_a:} } jugador a vs b
@@ -253,7 +254,7 @@ module Seasons
           p1s.each do |a|
             p2s.each do |b|
               next if a == b
-              key = [a, b]
+              key = [ a, b ]
               nemesis_stats[key][:games] += 1
               nemesis_stats[key][:wins_a] += 1 if m.win_id == t1
             end
@@ -262,7 +263,7 @@ module Seasons
           p2s.each do |a|
             p1s.each do |b|
               next if a == b
-              key = [a, b]
+              key = [ a, b ]
               nemesis_stats[key][:games] += 1
               nemesis_stats[key][:wins_a] += 1 if m.win_id == t2
             end
@@ -279,7 +280,7 @@ module Seasons
           wins_for_a: h[:wins_a],
           win_rate_for_a: (h[:wins_a].to_f / h[:games]).round(3)
         }
-      end.compact.sort_by { |h| [h[:win_rate_for_a], -h[:games]] }.first(top_n) # peores (más bajas) primero => ordenar asc por win_rate
+      end.compact.sort_by { |h| [ h[:win_rate_for_a], -h[:games] ] }.first(top_n) # peores (más bajas) primero => ordenar asc por win_rate
 
       {
         best_duos: duos,

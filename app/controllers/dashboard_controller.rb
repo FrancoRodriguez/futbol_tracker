@@ -30,7 +30,7 @@ class DashboardController < ApplicationController
     ttl_seconds   = [ (next_thursday - Time.zone.now).to_i, 5.minutes ].max
 
     @top_mvp = Rails.cache.fetch([ "top_mvp", season_key ], expires_in: ttl_seconds) do
-      Player.top_mvp(season: Season.first)
+      Player.top_mvp(season: @active_season)
     end
 
     if @top_mvp
@@ -43,7 +43,7 @@ class DashboardController < ApplicationController
     end
 
     @top_winners = Rails.cache.fetch([ "top_winners", season_key ], expires_in: ttl_seconds) do
-      Player.top_winners(limit: 5, season: @active_season) # top 3 ranking por victorias de la season
+      Player.top_winners(limit: 5, season: @active_season)
     end
 
     @prev_season = if @active_season
