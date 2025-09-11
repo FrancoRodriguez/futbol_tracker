@@ -39,6 +39,20 @@
               </p>
             <% end %>
           </div>
+          <div class="d-flex flex-wrap gap-3 justify-content-center mb-2 small text-muted">
+            <div class="d-flex align-items-center">
+              <%= position_icon_tag(Position.find_by(key: "GK"), extra_classes: 'me-1') %> Portero
+            </div>
+            <div class="d-flex align-items-center">
+              <%= position_icon_tag(Position.find_by(key: "DEF"), extra_classes: 'me-1') %> Defensa
+            </div>
+            <div class="d-flex align-items-center">
+              <%= position_icon_tag(Position.find_by(key: "MID"), extra_classes: 'me-1') %> Mediocampista
+            </div>
+            <div class="d-flex align-items-center">
+              <%= position_icon_tag(Position.find_by(key: "ATT"), extra_classes: 'me-1') %> Delantero
+            </div>
+          </div>
 
           <div class="list-group list-group-flush team-list">
             <% team_players.order('players.rating DESC').each do |participation| %>
@@ -92,21 +106,16 @@
                       <small class="text-muted d-flex align-items-center justify-content-end mt-1">
                         <% if (pp = player.primary_position) %>
                           <%= position_icon_tag(pp, extra_classes: 'me-1') %>
-                          <span><%= pp.name %></span>
                         <% end %>
 
                         <% if (sp = player.secondary_positions.first) %>
-                          <span class="ms-3 d-flex align-items-center">
-                            <%= position_icon_tag(sp, extra_classes: 'me-1 opacity-75') %>
-                            <span><%= sp.name %></span>
-                          </span>
+                          <%= position_icon_tag(sp, extra_classes: 'opacity-50') %>
                         <% end %>
 
                         <% if player.primary_position.blank? && player.secondary_positions.first.blank? %>
-                          <span class="text-muted">Sin posición</span>
+                          <span class="text-muted">—</span>
                         <% end %>
                       </small>
-
                     </div>
                   </div>
 
