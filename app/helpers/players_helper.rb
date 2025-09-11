@@ -57,7 +57,7 @@ module PlayersHelper
     abbr  = ABBR_BY_KEY[key] || pos.name.first(3).upcase
     klass = COLOR_BY_KEY[key] || "bg-secondary"
 
-    text = primary ? "#{pos.name} · P" : pos.name
+    text = primary ? "#{pos.name}" : pos.name
 
     content_tag :span,
                 class: "badge #{klass} rounded-pill me-1",
