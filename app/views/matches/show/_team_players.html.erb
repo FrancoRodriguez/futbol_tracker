@@ -93,10 +93,20 @@
                         <% if (pp = player.primary_position) %>
                           <%= position_icon_tag(pp, extra_classes: 'me-1') %>
                           <span><%= pp.name %></span>
-                        <% else %>
+                        <% end %>
+
+                        <% if (sp = player.secondary_positions.first) %>
+                          <span class="ms-3 d-flex align-items-center">
+                            <%= position_icon_tag(sp, extra_classes: 'me-1 opacity-75') %>
+                            <span><%= sp.name %></span>
+                          </span>
+                        <% end %>
+
+                        <% if player.primary_position.blank? && player.secondary_positions.first.blank? %>
                           <span class="text-muted">Sin posición</span>
                         <% end %>
                       </small>
+
                     </div>
                   </div>
 
