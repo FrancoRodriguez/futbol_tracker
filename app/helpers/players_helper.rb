@@ -1,30 +1,30 @@
 module PlayersHelper
   ICON_BY_KEY = {
-    'GK'  => 'fa-hand-paper',   # Portero
-    'DEF' => 'fa-shield-alt',   # Defensa
-    'MID' => 'fa-compass',      # Mediocampista
-    'ATT' => 'fa-bullseye'      # Delantero
+    "GK"  => "fa-hand-paper",   # Portero
+    "DEF" => "fa-shield-alt",   # Defensa
+    "MID" => "fa-compass",      # Mediocampista
+    "ATT" => "fa-bullseye"      # Delantero
   }.freeze
 
   COLOR_BY_KEY = {
-    'GK'  => 'bg-purple',
-    'DEF' => 'bg-primary',
-    'MID' => 'bg-success',
-    'ATT' => 'bg-danger'
+    "GK"  => "bg-purple",
+    "DEF" => "bg-primary",
+    "MID" => "bg-success",
+    "ATT" => "bg-danger"
   }.freeze
 
   COLOR_BY_KEY_TEXT = {
-    'GK'  => 'text-info',
-    'DEF' => 'text-primary',
-    'MID' => 'text-success',
-    'ATT' => 'text-danger'
+    "GK"  => "text-info",
+    "DEF" => "text-primary",
+    "MID" => "text-success",
+    "ATT" => "text-danger"
   }.freeze
 
   ABBR_BY_KEY = {
-    'GK'  => 'GK',
-    'DEF' => 'DEF',
-    'MID' => 'MID',
-    'ATT' => 'ATT'
+    "GK"  => "GK",
+    "DEF" => "DEF",
+    "MID" => "MID",
+    "ATT" => "ATT"
   }.freeze
 
   def build_chart_data(participations)
@@ -53,9 +53,9 @@ module PlayersHelper
 
   def chip_for_position(pos, primary: false)
     key   = pos.key
-    icon  = ICON_BY_KEY[key] || 'fa-tag'
+    icon  = ICON_BY_KEY[key] || "fa-tag"
     abbr  = ABBR_BY_KEY[key] || pos.name.first(3).upcase
-    klass = COLOR_BY_KEY[key] || 'bg-secondary'
+    klass = COLOR_BY_KEY[key] || "bg-secondary"
 
     text = primary ? "#{pos.name} · P" : pos.name
 
@@ -100,10 +100,12 @@ module PlayersHelper
     safe_join(chips)
   end
 
-  def position_icon_tag(position, extra_classes: '')
+  def position_icon_tag(position, extra_classes: "")
+    return "".html_safe unless position
+
     key   = position.key
-    icon  = ICON_BY_KEY[key] || 'fa-tag'
-    color = COLOR_BY_KEY_TEXT[key] || 'text-secondary'
-    content_tag(:i, '', class: "fas #{icon} #{color} #{extra_classes}")
+    icon  = ICON_BY_KEY[key] || "fa-tag"
+    color = COLOR_BY_KEY_TEXT[key] || "text-secondary"
+    content_tag(:i, "", class: "fas #{icon} #{color} #{extra_classes}")
   end
 end

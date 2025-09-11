@@ -8,16 +8,21 @@ class PlayersController < ApplicationController
   def index
     scope = policy_scope(Player)
 
-    scope = scope.joins(:player_positions => :position) if params[:position_id].present?
-    scope = scope.where(player_positions: { position_id: params[:position_id] }) if params[:position_id].present?
-    scope = scope.where("players.name ILIKE :q OR players.nickname ILIKE :q", q: "%#{params[:q]}%") if params[:q].present?
+    if (pid = params[:position_id].presence)
+      scope = scope.joins(player_positions: :position)
+                   .where(player_positions: { position_id: pid })
+    end
+
+    if (q = params[:q].presence)
+      scope = scope.where("players.name ILIKE :q OR players.nickname ILIKE :q", q: "%#{q}%")
+    end
 
     @players = scope
                  .left_joins(:participations)
-                 .select("players.*, COUNT(participations.id) AS participations_count")
+                 .select("players.*, COUNT(DISTINCT participations.id) AS participations_count")
                  .group("players.id")
-                 .order("COUNT(participations.id) DESC, players.name ASC")
-                 .preload(:positions, :player_positions, profile_photo_attachment: :blob)
+                 .order(Arel.sql("COUNT(DISTINCT participations.id) DESC, players.name ASC"))
+                 .preload(player_positions: :position, profile_photo_attachment: :blob)
   end
 
   def show

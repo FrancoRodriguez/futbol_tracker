@@ -96,30 +96,32 @@ class Player < ApplicationRecord
   end
 
   def primary_position
-    if player_positions.loaded?
-      pp = player_positions.find { |pp| pp.primary? }
-      pp&.association(:position).loaded? ? pp.position : pp&.position
-    else
-      player_positions.includes(:position).find_by(primary: true)&.position
+    if association(:player_positions).loaded?
+      pp = player_positions.find { |x| x.primary? }
+      return nil unless pp
+      return pp.position
     end
+
+    player_positions.includes(:position).find_by(primary: true)&.position
   end
 
   def secondary_positions
-    if positions.loaded? && player_positions.loaded?
+    if association(:positions).loaded? && association(:player_positions).loaded?
       primary_ids = player_positions.select(&:primary?).map(&:position_id)
-      positions.reject { |pos| primary_ids.include?(pos.id) }.sort_by { |p| [p.sort_order.to_i, p.name.to_s] }
-    else
-      positions.joins(:player_positions)
-               .where(player_positions: { primary: [false, nil] })
-               .distinct
-               .order(:sort_order, :name)
+      return positions.reject { |pos| primary_ids.include?(pos.id) }
+                      .sort_by { |p| [ p.sort_order.to_i, p.name.to_s ] }
     end
+
+    positions.joins(:player_positions)
+             .where(player_positions: { primary: [ false, nil ] })
+             .distinct
+             .order(:sort_order, :name)
   end
 
   def positions_ordered
     prim = primary_position
     secs = secondary_positions.to_a
-    prim ? [prim, *secs] : secs
+    prim ? [ prim, *secs ] : secs
   end
 
   # ======== RANKING (usa player_stats) ========

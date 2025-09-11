@@ -30,7 +30,7 @@ class Match < ApplicationRecord
   end
 
   def rebuild_player_stats_if_outcome_changed
-    Rails.logger.info("[Stats] RebuildForMatchJob enqueued for match=#{id} (changes: #{previous_changes.slice('win_id','mvp_id','result')})")
+    Rails.logger.info("[Stats] RebuildForMatchJob enqueued for match=#{id} (changes: #{previous_changes.slice('win_id', 'mvp_id', 'result')})")
     Stats::RebuildForMatchJob.perform_later(id)
   end
 end
