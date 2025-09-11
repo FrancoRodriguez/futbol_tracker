@@ -6,10 +6,18 @@ class PlayersController < ApplicationController
   include PlayersHelper
 
   def index
-    @players = policy_scope(Player)
+    scope = policy_scope(Player)
+
+    scope = scope.joins(:player_positions => :position) if params[:position_id].present?
+    scope = scope.where(player_positions: { position_id: params[:position_id] }) if params[:position_id].present?
+    scope = scope.where("players.name ILIKE :q OR players.nickname ILIKE :q", q: "%#{params[:q]}%") if params[:q].present?
+
+    @players = scope
                  .left_joins(:participations)
+                 .select("players.*, COUNT(participations.id) AS participations_count")
                  .group("players.id")
-                 .order("COUNT(participations.id) DESC")
+                 .order("COUNT(participations.id) DESC, players.name ASC")
+                 .preload(:positions, :player_positions, profile_photo_attachment: :blob)
   end
 
   def show

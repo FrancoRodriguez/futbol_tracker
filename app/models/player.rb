@@ -28,9 +28,6 @@ class Player < ApplicationRecord
     "#{full_name} - #{(win_rate_pct_for&.round(1) || 0)}%"
   end
 
-  def primary_position
-    player_positions.find_by(primary: true)&.position
-  end
   # ======== SHOW DEL JUGADOR ========
 
   def stats_for(season: Season.first_one)
@@ -96,6 +93,33 @@ class Player < ApplicationRecord
     end
 
     { dates: dates, balance: serie }
+  end
+
+  def primary_position
+    if player_positions.loaded?
+      pp = player_positions.find { |pp| pp.primary? }
+      pp&.association(:position).loaded? ? pp.position : pp&.position
+    else
+      player_positions.includes(:position).find_by(primary: true)&.position
+    end
+  end
+
+  def secondary_positions
+    if positions.loaded? && player_positions.loaded?
+      primary_ids = player_positions.select(&:primary?).map(&:position_id)
+      positions.reject { |pos| primary_ids.include?(pos.id) }.sort_by { |p| [p.sort_order.to_i, p.name.to_s] }
+    else
+      positions.joins(:player_positions)
+               .where(player_positions: { primary: [false, nil] })
+               .distinct
+               .order(:sort_order, :name)
+    end
+  end
+
+  def positions_ordered
+    prim = primary_position
+    secs = secondary_positions.to_a
+    prim ? [prim, *secs] : secs
   end
 
   # ======== RANKING (usa player_stats) ========

@@ -1,96 +1,142 @@
-<h1 class="text-center mb-4">
-  <i class="fas fa-users me-2"></i>Jugadores <i class="fas fa-users me-2"></i>
-</h1>
-
-<div class="d-flex justify-content-end mb-3">
-  <%= link_to new_player_path, class: "btn btn-outline-primary shadow-sm" do %>
-    <i class="fas fa-user-plus me-2"></i> Nuevo Jugador
-  <% end %>
-</div>
-
-<div class="table-responsive shadow rounded bg-white">
-  <table class="table table-hover table-dark align-middle mb-0">
-    <thead class="table-primary text-center">
-    <tr>
-      <th class="text-start ps-4">Jugador</th>
-      <th>Apodo</th>
-      <th>Contacto</th>
-      <th>Win rate</th>
-      <th>Partidos</th>
-      <% if user_signed_in? %>
-        <th>Acciones</th>
+<div class="card shadow border-0">
+  <div class="card-header bg-dark text-white d-flex flex-wrap justify-content-between align-items-center">
+    <h5 class="mb-2 mb-sm-0 d-flex align-items-center">
+      <i class="fas fa-users me-2"></i> Jugadores
+    </h5>
+    <div class="d-flex gap-2">
+      <%= form_with url: players_path, method: :get, local: true, class: "d-flex gap-2" do |f| %>
+        <div class="input-group input-group-sm">
+          <span class="input-group-text bg-secondary text-white border-0"><i class="fas fa-search"></i></span>
+          <%= f.text_field :q, value: params[:q], placeholder: "Buscar nombre o apodo...", class: "form-control bg-dark text-white border-0" %>
+        </div>
+        <%= f.collection_select :position_id, Position.ordered, :id, :name,
+                                { include_blank: "Todas las posiciones" },
+                                class: "form-select form-select-sm bg-dark text-white border-0" %>
+        <%= f.submit "Filtrar", class: "btn btn-primary btn-sm" %>
       <% end %>
-    </tr>
-    </thead>
-    <tbody>
-    <% @players.each do |player| %>
+
+      <%= link_to new_player_path, class: "btn btn-outline-primary btn-sm" do %>
+        <i class="fas fa-user-plus me-2"></i> Nuevo
+      <% end %>
+    </div>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-dark align-middle mb-0">
+      <thead class="table-secondary text-dark position-sticky top-0" style="z-index:1">
       <tr>
-        <td class="ps-4">
-          <div class="d-flex align-items-center">
-            <%= image_tag(player.profile_photo.attached? ? player.profile_photo : "default_avatar.png",
-                          class: "rounded-circle border me-3",
-                          width: 40, height: 40,
-                          style: "object-fit: cover;") %>
-            <%= link_to player.name, player_path(player),
-                        class: "text-decoration-none fw-semibold text-dark" %>
-          </div>
-        </td>
-
-        <td class="text-center"><%= player.nickname.presence || "—" %></td>
-
-        <td class="text-center">
-          <% if player.contact_info.present? %>
-            <%= link_to "WhatsApp", "https://wa.me/#{player.contact_info.gsub(/\D/, '')}",
-                        target: "_blank",
-                        class: "btn btn-sm btn-success",
-                        data: { bs_toggle: "tooltip" },
-                        title: "Enviar WhatsApp a #{player.name}" %>
-          <% else %>
-            <span class="text-muted fst-italic">No disponible</span>
-          <% end %>
-        </td>
-
-        <td class="text-center">
-          <% if player.total_matches >= Player::MIN_MATCHES %>
-            <div class="small fw-semibold"><%= player.win_rate %>%</div>
-            <div class="progress" style="height:8px">
-              <div class="progress-bar bg-success" style="width:<%= player.win_rate %>%"></div>>
-              <div class="progress-bar bg-danger" style="width:<%= 100 - player.win_rate %>%"></div>
-            </div>
-          <% else %>
-            <span class="text-muted fst-italic">En evaluación</span>
-          <% end %>
-        </td>
-
-        <td class="text-center"><%= player.participations.count %></td>
-
-        <% if user_signed_in? %>
-          <td class="text-center">
-            <div class="d-flex justify-content-center gap-2">
-              <%= link_to edit_player_path(player),
-                          class: "btn btn-warning btn-sm",
-                          data: { bs_toggle: "tooltip" },
-                          title: "Editar" do %>
-                <i class="fas fa-edit"></i>
-              <% end %>
-
-              <%= button_to player_path(player), method: :delete,
-                            class: "btn btn-danger btn-sm",
-                            data: { confirm: "¿Estás seguro?", bs_toggle: "tooltip", title: "Eliminar" } do %>
-                <i class="fas fa-trash-alt"></i>
-              <% end %>
-            </div>
-          </td>
-        <% end %>
+        <th class="text-start ps-4">Jugador</th>
+        <th class="text-center">Apodo</th>
+        <th class="text-center">Contacto</th>
+        <th class="text-center">Posiciones</th>
+        <th class="text-center">Win rate</th>
+        <th class="text-center">Partidos</th>
+        <% if user_signed_in? %><th class="text-center">Acciones</th><% end %>
       </tr>
-    <% end %>
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+      <% if @players.any? %>
+        <% @players.each do |player| %>
+          <tr class="border-dark-subtle">
+            <!-- Jugador -->
+            <td class="ps-4">
+              <div class="d-flex align-items-center">
+                <%= image_tag(player.profile_photo.attached? ? player.profile_photo : "default_avatar.png",
+                              class: "rounded-circle border me-3", width: 40, height: 40, style: "object-fit:cover") %>
+                <div class="d-flex flex-column">
+                  <%= link_to player.name, player_path(player), class: "text-decoration-none fw-semibold text-white" %>
+                  <small class="text-muted d-flex align-items-center">
+                    <% if (pp = player.primary_position) %>
+                      <%= position_icon_tag(pp, extra_classes: 'me-1') %>
+                      <span><%= pp.name %></span>
+                    <% else %>
+                      <span class="text-muted">Sin posición</span>
+                    <% end %>
+                  </small>
+                </div>
+              </div>
+            </td>
+
+            <!-- Apodo -->
+            <td class="text-center"><%= player.nickname.presence || "—" %></td>
+
+            <!-- Contacto -->
+            <td class="text-center">
+              <% if player.contact_info.present? %>
+                <%= link_to "WhatsApp", "https://wa.me/#{player.contact_info.gsub(/\D/, '')}",
+                            target: "_blank", class: "btn btn-success btn-sm",
+                            data: { bs_toggle: "tooltip" }, title: "Enviar WhatsApp a #{player.name}" %>
+              <% else %>
+                <span class="text-muted fst-italic">No disponible</span>
+              <% end %>
+            </td>
+
+            <!-- Posiciones -->
+            <td class="text-center">
+              <%= positions_chips_for(player) %>
+            </td>
+
+            <!-- Win rate -->
+            <td class="text-center" style="min-width: 180px;">
+              <% if player.total_matches >= Player::MIN_MATCHES %>
+                <div class="small fw-semibold mb-1"><%= player.win_rate %>%</div>
+                <div class="progress bg-transparent" style="height:8px">
+                  <div class="progress-bar bg-success" role="progressbar"
+                       style="width:<%= player.win_rate %>%"
+                       aria-valuenow="<%= player.win_rate %>"
+                       aria-valuemin="0" aria-valuemax="100"></div>
+                  <div class="progress-bar bg-danger"
+                       style="width:<%= 100 - player.win_rate %>%"></div>
+                </div>
+              <% else %>
+                <span class="text-muted fst-italic">En evaluación</span>
+              <% end %>
+            </td>
+
+            <!-- Partidos -->
+            <td class="text-center">
+              <%= (player.respond_to?(:participations_count) ? player.participations_count : player.participations.count) %>
+            </td>
+
+            <!-- Acciones -->
+            <% if user_signed_in? %>
+              <td class="text-center">
+                <div class="d-flex justify-content-center gap-2">
+                  <%= link_to edit_player_path(player),
+                              class: "btn btn-warning btn-sm", data: { bs_toggle: "tooltip" }, title: "Editar" do %>
+                    <i class="fas fa-edit"></i>
+                  <% end %>
+                  <%= button_to player_path(player), method: :delete,
+                                class: "btn btn-danger btn-sm",
+                                data: { confirm: "¿Estás seguro?", bs_toggle: "tooltip", title: "Eliminar" } do %>
+                    <i class="fas fa-trash-alt"></i>
+                  <% end %>
+                </div>
+              </td>
+            <% end %>
+          </tr>
+        <% end %>
+      <% else %>
+        <tr>
+          <td colspan="7" class="text-center py-5">
+            <div class="text-muted">No hay jugadores que coincidan con el filtro.</div>
+          </td>
+        </tr>
+      <% end %>
+      </tbody>
+    </table>
+  </div>
 </div>
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-        tooltipTriggerList.map(el => new bootstrap.Tooltip(el));
+        const list = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        list.map(el => new bootstrap.Tooltip(el));
+
+        [...document.querySelectorAll('[data-bs-toggle="tooltip"]')]
+            .forEach(el => new bootstrap.Tooltip(el));
+
+        [...document.querySelectorAll('[data-bs-toggle="popover"]')]
+            .forEach(el => new bootstrap.Popover(el));
     });
 </script>
