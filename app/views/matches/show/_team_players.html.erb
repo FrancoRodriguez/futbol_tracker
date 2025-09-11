@@ -4,8 +4,8 @@
   </h3>
 
   <div class="row g-4">
-    <% @teams.each do |team| %> <!-- <<< usa @teams -->
-      <% team_players = @participations.where(team: team).includes(:player) %> <!-- <<< usa @participations -->
+    <% @teams.each do |team| %>
+      <% team_players = @participations.where(team: team).includes(:player) %>
       <% team_pct     = @team_win_percentages[team.id] %>
       <% featured     = @featured_by_team[team.id] %>
       <% eligibles_ct = (@eligibles_by_team && @eligibles_by_team[team.id]) || 0 %>
@@ -44,7 +44,7 @@
             <% team_players.order('players.rating DESC').each do |participation| %>
               <% player      = participation.player %>
               <% is_featured = (featured && featured.id == player.id) %>
-              <% wr_pct      = @win_rate_pct_by_player[player.id] %> <%# nil si < MIN_MATCHES %>
+              <% wr_pct      = @win_rate_pct_by_player[player.id] %>
 
               <div class="list-group-item bg-dark text-light border-primary d-flex align-items-center gap-3 <%= is_featured ? 'featured-glow' : '' %>">
 
@@ -70,6 +70,7 @@
 
                 <div class="flex-grow-1">
                   <div class="d-flex justify-content-between align-items-center">
+                    <!-- Izquierda: nombre -->
                     <div class="d-flex align-items-center gap-2">
                       <%= link_to (player.respond_to?(:full_name) ? player.full_name : player.name), player_path(player),
                                   class: "fw-semibold text-decoration-none text-light" %>
@@ -78,13 +79,25 @@
                       <% end %>
                     </div>
 
-                    <small class="text-muted">
-                      <% if wr_pct.present? %>
-                        Victorias <span class="text-light fw-semibold"><%= wr_pct %>%</span>
-                      <% else %>
-                        <small class="text-muted"><%= Player::MIN_MATCHES %> PJ y hablamos</small>
-                      <% end %>
-                    </small>
+                    <!-- Derecha: winrate + posición -->
+                    <div class="d-flex flex-column text-end">
+                      <small class="text-muted">
+                        <% if wr_pct.present? %>
+                          Victorias <span class="text-light fw-semibold"><%= wr_pct %>%</span>
+                        <% else %>
+                          <small class="text-muted"><%= Player::MIN_MATCHES %> PJ y hablamos</small>
+                        <% end %>
+                      </small>
+
+                      <small class="text-muted d-flex align-items-center justify-content-end mt-1">
+                        <% if (pp = player.primary_position) %>
+                          <%= position_icon_tag(pp, extra_classes: 'me-1') %>
+                          <span><%= pp.name %></span>
+                        <% else %>
+                          <span class="text-muted">Sin posición</span>
+                        <% end %>
+                      </small>
+                    </div>
                   </div>
 
                   <% if wr_pct.present? %>
@@ -95,6 +108,7 @@
                     </div>
                   <% end %>
                 </div>
+
 
                 <div class="ms-2 d-none d-sm-flex">
                   <% if user_signed_in? %>
