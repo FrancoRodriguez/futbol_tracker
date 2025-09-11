@@ -72,7 +72,9 @@ class MatchesController < ApplicationController
   def autobalance
     authorize @match
 
-    parts   = @match.participations.includes(:player)
+    parts = @match.participations
+                  .includes(player: { player_positions: :position }) 
+
     team_a, team_b = TeamBalancer.new(parts.map(&:player)).call
 
     home = @match.home_team || @match.build_home_team(name: "Equipo Blanco")
